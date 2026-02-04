@@ -1,0 +1,178 @@
+@import 'tailwindcss';
+
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+:root {
+    --sidebar-width: 16rem;
+    --sidebar-mobile-width: 16rem;
+    --sidebar-collapsed-width: 4rem;
+}
+
+@theme inline {
+    /* =========================
+   NEUTRAL – Porcelain
+   ========================= */
+    --color-neutral-50: #fffcf9;
+    --color-neutral-100: #fbf7f2;
+    --color-neutral-200: #efe8df;
+    --color-neutral-300: #e1d6ca;
+    --color-neutral-400: #c2b6a9;
+    --color-neutral-500: #9c9084;
+    --color-neutral-600: #746a61;
+    --color-neutral-700: #504944;
+    --color-neutral-800: #2b2724;
+
+    /* =========================
+       MAIN – Carbon Black
+       anchor: #222823
+       ========================= */
+    --color-main-100: #e7e9e8;
+    --color-main-200: #c2c7c4;
+    --color-main-300: #9aa19d;
+    --color-main-400: #5b625e;
+    --color-main-500: #222823;
+    --color-main-600: #1c211d;
+    --color-main-700: #151915;
+    --color-main-800: #0d100e;
+
+    /* =========================
+       SECONDARY – Vivid Tangerine
+       ========================= */
+    --color-secondary-100: #fff1e3;
+    --color-secondary-200: #ffd4ad;
+    --color-secondary-300: #ffb777;
+    --color-secondary-400: #ff962f;
+    --color-secondary-500: #ff7d00;
+    --color-secondary-600: #e66f00;
+    --color-secondary-700: #b85700;
+    --color-secondary-800: #7a3a00;
+
+    /* =========================
+   ACCENT – Deep Crimson
+   anchor: #A62639
+   ========================= */
+    --color-accent-100: #f8e8eb;
+    --color-accent-200: #edbcc4;
+    --color-accent-300: #e18f9d;
+    --color-accent-400: #c64f63;
+    --color-accent-500: #a62639;
+    --color-accent-600: #8f2031;
+    --color-accent-700: #6b1825;
+    --color-accent-800: #420f17;
+
+    /* =========================
+       SUCCESS – Sage Green
+       ========================= */
+    --color-success-100: #edf6e8;
+    --color-success-200: #cfe8c1;
+    --color-success-300: #aed89a;
+    --color-success-400: #79b45a;
+    --color-success-500: #60993e;
+    --color-success-600: #4f8033;
+    --color-success-700: #3b6026;
+    --color-success-800: #243c17;
+
+    /* =========================
+       INFO – Muted Blue Gray (added)
+       ========================= */
+    --color-info-100: #e9f0f4;
+    --color-info-200: #c6d6df;
+    --color-info-300: #9cbac9;
+    --color-info-400: #5f8498;
+    --color-info-500: #3e5f73;
+    --color-info-600: #344f60;
+    --color-info-700: #263b48;
+    --color-info-800: #18262f;
+
+    /* =========================
+       WARNING – Soft Amber (added)
+       ========================= */
+    --color-warning-100: #fdf4e3;
+    --color-warning-200: #f7e1b5;
+    --color-warning-300: #f0cc86;
+    --color-warning-400: #e8b55b;
+    --color-warning-500: #d99a2b;
+    --color-warning-600: #b57f22;
+    --color-warning-700: #8a611a;
+    --color-warning-800: #5a3f11;
+
+    --breakpoint-s320: 320px;
+    --breakpoint-s375: 375px;
+    --breakpoint-s425: 425px;
+    --breakpoint-s768: 768px;
+    --breakpoint-s992: 992px;
+    --breakpoint-s1200: 1200px;
+    --breakpoint-s1600: 1600px;
+}
+
+@layer base {
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    [tabindex]:not([tabindex="-1"]) {
+        position: relative;
+    }
+
+    /* Focus ring for elements that shouldn't use absolute ::after (like inputs) */
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+        outline: none !important;
+        box-shadow: 0 0 0 4px transparent,
+        0 0 0 5px white,
+        0 0 0 7px var(--color-main-500) !important;
+        border-radius: inherit;
+    }
+
+    /* Remove ::after for input-like elements as they can't have them or it's broken */
+    input::after,
+    select::after,
+    textarea::after {
+        display: none;
+    }
+
+    button:focus-visible::after,
+    a:focus-visible::after,
+    [tabindex]:not([tabindex="-1"]):focus-visible::after {
+        opacity: 1;
+        box-shadow: 0 0 0 1px white,
+        0 0 0 3px var(--color-main-500) !important;
+    }
+
+    button::after,
+    a::after,
+    [tabindex]:not([tabindex="-1"])::after {
+        content: '';
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        bottom: -4px;
+        left: -4px;
+        pointer-events: none;
+        border-radius: inherit;
+        box-shadow: 0 0 0 0 white,
+        0 0 0 0 var(--color-main-500);
+        z-index: 10;
+        opacity: 0;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:not([tabindex="-1"]):focus-visible {
+        outline: none !important;
+    }
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+}

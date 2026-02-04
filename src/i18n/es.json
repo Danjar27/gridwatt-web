@@ -1,0 +1,23 @@
+{
+    "brand": "Grid Watt",
+    "auth": {
+        "label": "Inicia sesión para continuar",
+        "email": {
+            "label": "Correo electrónico",
+            "placeholder": "correo@ejemplo.com"
+        },
+        "password": {
+            "label": "Contraseña",
+            "placeholder": "••••••••"
+        },
+        "submit": {
+            "label": "Iniciar sesión",
+            "loading": "Iniciando sesión..."
+        }
+    },
+    "connection": {
+        "offline": "Estás desconectado. Tus cambios se sincronizarán cuando vuelvas a tener acceso a internet.",
+        "pending": "Se están sincronizando tus cambios. Por favor, espera..."
+    },
+    "rights": "© Grid Watt {year}. Desarrollado por Daniel Villalobos. Todos los derechos reservados."
+}
