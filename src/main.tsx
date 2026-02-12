@@ -6,10 +6,10 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { RouterProvider } from 'react-router-dom';
 import { queryClient } from '@lib/query-client';
-import { router } from './router';
 import { IntlProvider } from 'use-intl';
 
 import AuthProvider from '@context/auth/provider';
+import Router from '@components/Router/Router.tsx';
 import spanish from '@i18n/es.json';
 
 if ('serviceWorker' in navigator) {
@@ -25,7 +25,7 @@ createRoot(document.getElementById('root')!).render(
         <IntlProvider messages={spanish} locale="es">
             <QueryClientProvider client={queryClient}>
                 <AuthProvider>
-                    <RouterProvider router={router} />
+                    <RouterProvider router={Router} />
                 </AuthProvider>
                 <ReactQueryDevtools initialIsOpen={false} />
             </QueryClientProvider>

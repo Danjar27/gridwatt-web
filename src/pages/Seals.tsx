@@ -1,25 +1,31 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, type Activity } from '@/lib/api-client';
+import { apiClient, type Seal } from '@/lib/api-client';
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, X, AlertCircle, Loader2, Activity as ActivityIcon, Clock } from 'lucide-react';
+import { Plus, X, AlertCircle, Loader2, Tag, Clock } from 'lucide-react';
 import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
+import Page from '@layouts/Page.tsx';
+import { useTranslations } from 'use-intl';
+import Summary from '@components/Summary/Summary.tsx';
+import Table from '@components/Table/Table.tsx';
+import Row from '@components/Table/blocks/Row.tsx';
 
-export function ActivitiesPage() {
+const SealsPage = () => {
+    const i18n = useTranslations();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
+    const [editingSeal, setEditingSeal] = useState<Seal | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [pendingMutations, setPendingMutations] = useState<Array<OfflineMutation>>([]);
 
-    const { data: serverActivities = [], isLoading } = useQuery({
-        queryKey: ['activities'],
-        queryFn: () => apiClient.getActivities(),
+    const { data: serverSeals = [], isLoading } = useQuery({
+        queryKey: ['seals'],
+        queryFn: () => apiClient.getSeals(),
     });
 
     // Fetch pending mutations periodically
     useEffect(() => {
         const fetchPending = async () => {
-            const pending = await getPendingMutationsByType('activity');
+            const pending = await getPendingMutationsByType('seal');
             setPendingMutations(pending);
         };
         fetchPending();
@@ -29,63 +35,65 @@ export function ActivitiesPage() {
     }, []);
 
     // Merge server data with pending mutations for optimistic UI
-    const activities = useMemo(() => {
-        const result = [...serverActivities];
-        const serverIds = new Set(serverActivities.map((a) => a.id));
+    const seals = useMemo(() => {
+        const result = [...serverSeals];
+        const serverIds = new Set(serverSeals.map((s) => s.id));
 
         for (const mutation of pendingMutations) {
             if (mutation.action === 'create' && mutation.optimisticData) {
-                const optimistic = mutation.optimisticData as Activity & { _pending?: boolean };
+                const optimistic = mutation.optimisticData as Seal & { _pending?: boolean };
                 if (!serverIds.has(optimistic.id)) {
-                    result.push({ ...optimistic, _pending: true } as Activity & { _pending?: boolean });
+                    result.push({ ...optimistic, _pending: true } as Seal & { _pending?: boolean });
                 }
             } else if (mutation.action === 'update' && mutation.optimisticData) {
-                const optimistic = mutation.optimisticData as Activity;
-                const index = result.findIndex((a) => a.id === optimistic.id);
+                const optimistic = mutation.optimisticData as Seal;
+                const index = result.findIndex((s) => s.id === optimistic.id);
                 if (index !== -1) {
-                    result[index] = { ...result[index], ...optimistic, _pending: true } as Activity & { _pending?: boolean };
+                    result[index] = { ...result[index], ...optimistic, _pending: true } as Seal & {
+                        _pending?: boolean;
+                    };
                 }
             }
         }
 
         return result;
-    }, [serverActivities, pendingMutations]);
+    }, [serverSeals, pendingMutations]);
 
     const closeModal = () => {
         setIsModalOpen(false);
-        setEditingActivity(null);
+        setEditingSeal(null);
         setError(null);
     };
 
     const createMutation = useMutation({
-        mutationFn: (data: Partial<Activity>) => apiClient.createActivity(data),
+        mutationFn: (data: Partial<Seal>) => apiClient.createSeal(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['activities'] });
+            queryClient.invalidateQueries({ queryKey: ['seals'] });
             closeModal();
         },
         onError: (err: any) => {
-            setError(err.message || 'Failed to create activity');
+            setError(err.message || 'Failed to create seal');
         },
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: Partial<Activity> }) => apiClient.updateActivity(id, data),
+        mutationFn: ({ id, data }: { id: string; data: Partial<Seal> }) => apiClient.updateSeal(id, data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['activities'] });
+            queryClient.invalidateQueries({ queryKey: ['seals'] });
             closeModal();
         },
         onError: (err: any) => {
-            setError(err.message || 'Failed to update activity');
+            setError(err.message || 'Failed to update seal');
         },
     });
 
     const toggleActiveMutation = useMutation({
-        mutationFn: (id: string) => apiClient.toggleActivityActive(id),
+        mutationFn: (id: string) => apiClient.toggleSealActive(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['activities'] });
+            queryClient.invalidateQueries({ queryKey: ['seals'] });
         },
         onError: (err: any) => {
-            setError(err.message || 'Failed to toggle activity status');
+            setError(err.message || 'Failed to toggle seal status');
         },
     });
 
@@ -95,14 +103,28 @@ export function ActivitiesPage() {
         const data = {
             id: formData.get('id') as string,
             name: formData.get('name') as string,
+            type: formData.get('type') as string,
             description: formData.get('description') as string,
             isActive: formData.get('isActive') === 'true',
         };
 
-        if (editingActivity) {
-            updateMutation.mutate({ id: editingActivity.id, data });
+        if (editingSeal) {
+            updateMutation.mutate({ id: editingSeal.id, data });
         } else {
             createMutation.mutate(data);
+        }
+    };
+
+    const getTypeColor = (type: string) => {
+        switch (type?.toLowerCase()) {
+            case 'security':
+                return 'bg-red-100 text-red-600 border border-red-200';
+            case 'meter':
+                return 'bg-blue-100 text-blue-600 border border-blue-200';
+            case 'cable':
+                return 'bg-green-100 text-green-600 border border-green-200';
+            default:
+                return 'bg-gray-100 text-gray-600 border border-gray-200';
         }
     };
 
@@ -115,113 +137,89 @@ export function ActivitiesPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">Activity Management</h1>
-                    <p className="text-muted-foreground">Manage job activities and tasks</p>
+        <Page id="seals" title={i18n('pages.seals.title')} subtitle={i18n('pages.seals.subtitle')}>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add Seal
+                    </button>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+
+                <Summary
+                    icon={Tag}
+                    title={i18n('pages.seals.summary.title')}
+                    subtitle={i18n('pages.seals.summary.subtitle')}
+                    legend={i18n('pages.seals.summary.total', { count: seals.length })}
                 >
-                    <Plus className="h-4 w-4" />
-                    Add Activity
-                </button>
-            </div>
+                    <Table columns={['Id', 'Name', 'Type', 'Description', 'Status', 'Actions']}>
+                        {seals.map((seal) => {
+                            const isPending = (seal as Seal & { _pending?: boolean })._pending;
 
-            <div className="rounded-lg border bg-card shadow-sm">
-                <div className="flex items-center gap-2 border-b px-6 py-4">
-                    <ActivityIcon className="h-5 w-5 text-primary" />
-                    <span className="font-medium">All Activities</span>
-                    <span className="ml-auto text-sm text-muted-foreground">{activities.length} activities</span>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="border-b bg-muted/30">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    ID
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Description
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {activities.map((activity) => {
-                                const isPending = (activity as Activity & { _pending?: boolean })._pending;
-
-                                return (
-                                <tr key={activity.id} className={`hover:bg-muted/50 ${isPending ? 'bg-yellow-50' : ''}`}>
-                                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm">
-                                        <div className="flex items-center gap-2">
-                                            {activity.id}
-                                            {isPending && (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 border border-yellow-200">
-                                                    <Clock className="h-3 w-3" />
-                                                    Pending
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 font-medium">{activity.name}</td>
-                                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                                        {activity.description || '-'}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                            return (
+                                <Row key={seal.id}>
+                                    <div className="flex items-center gap-2">
+                                        {seal.id}
+                                        {isPending && (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 border border-yellow-200">
+                                                <Clock className="h-3 w-3" />
+                                                Pending
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="whitespace-nowrap px-6 py-4 font-medium">{seal.name}</div>
+                                    <div className="whitespace-nowrap px-6 py-4">
+                                        <span
+                                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getTypeColor(seal.type)}`}
+                                        >
+                                            {seal.type}
+                                        </span>
+                                    </div>
+                                    <div className="px-6 py-4 text-sm text-muted-foreground">
+                                        {seal.description || '-'}
+                                    </div>
+                                    <div className="whitespace-nowrap px-6 py-4">
                                         <span
                                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                                activity.isActive
+                                                seal.isActive
                                                     ? 'bg-green-100 text-green-700 border border-green-200'
                                                     : 'bg-gray-100 text-gray-600 border border-gray-200'
                                             }`}
                                         >
-                                            {activity.isActive ? 'Active' : 'Inactive'}
+                                            {seal.isActive ? 'Active' : 'Inactive'}
                                         </span>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                                    </div>
+                                    <div className="whitespace-nowrap px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <button
-                                                onClick={() => setEditingActivity(activity)}
+                                                onClick={() => setEditingSeal(seal)}
                                                 className="text-sm font-medium text-blue-600 hover:text-blue-800"
                                             >
                                                 Edit
                                             </button>
                                             <button
-                                                onClick={() => toggleActiveMutation.mutate(activity.id)}
+                                                onClick={() => toggleActiveMutation.mutate(seal.id)}
                                                 className="text-sm font-medium text-orange-600 hover:text-orange-800"
                                             >
-                                                {activity.isActive ? 'Deactivate' : 'Activate'}
+                                                {seal.isActive ? 'Deactivate' : 'Activate'}
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </div>
+                                </Row>
+                            );
+                        })}
+                    </Table>
+                </Summary>
 
-            {/* Activity Modal (Add/Edit) */}
-            {(isModalOpen || editingActivity) && (
+            {/* Seal Modal (Add/Edit) */}
+            {(isModalOpen || editingSeal) && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
                     <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
                         <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-lg font-semibold">
-                                {editingActivity ? 'Edit Activity' : 'Add Activity'}
-                            </h2>
+                            <h2 className="text-lg font-semibold">{editingSeal ? 'Edit Seal' : 'Add Seal'}</h2>
                             <button onClick={closeModal}>
                                 <X className="h-5 w-5" />
                             </button>
@@ -234,8 +232,8 @@ export function ActivitiesPage() {
                             </div>
                         )}
 
-                        <form key={editingActivity?.id || 'new'} onSubmit={handleSubmit} className="space-y-4">
-                            {!editingActivity && (
+                        <form key={editingSeal?.id || 'new'} onSubmit={handleSubmit} className="space-y-4">
+                            {!editingSeal && (
                                 <div>
                                     <label className="block text-sm font-medium">ID</label>
                                     <input
@@ -249,7 +247,16 @@ export function ActivitiesPage() {
                                 <label className="block text-sm font-medium">Name</label>
                                 <input
                                     name="name"
-                                    defaultValue={editingActivity?.name}
+                                    defaultValue={editingSeal?.name}
+                                    required
+                                    className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium">Type</label>
+                                <input
+                                    name="type"
+                                    defaultValue={editingSeal?.type}
                                     required
                                     className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
                                 />
@@ -258,7 +265,7 @@ export function ActivitiesPage() {
                                 <label className="block text-sm font-medium">Description</label>
                                 <textarea
                                     name="description"
-                                    defaultValue={editingActivity?.description}
+                                    defaultValue={editingSeal?.description}
                                     rows={3}
                                     className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
                                 />
@@ -267,7 +274,7 @@ export function ActivitiesPage() {
                                 <label className="block text-sm font-medium">Status</label>
                                 <select
                                     name="isActive"
-                                    defaultValue={editingActivity ? String(editingActivity.isActive) : 'true'}
+                                    defaultValue={editingSeal ? String(editingSeal.isActive) : 'true'}
                                     className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
                                 >
                                     <option value="true">Active</option>
@@ -290,13 +297,17 @@ export function ActivitiesPage() {
                                     {(createMutation.isPending || updateMutation.isPending) && (
                                         <Loader2 className="h-4 w-4 animate-spin" />
                                     )}
-                                    {editingActivity ? 'Update' : 'Create'}
+                                    {editingSeal ? 'Update' : 'Create'}
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
-        </div>
+            </div>
+        </Page>
     );
-}
+};
+
+
+export default SealsPage;

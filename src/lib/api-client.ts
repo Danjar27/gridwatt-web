@@ -1,4 +1,5 @@
 import { addOfflineMutation, isOnline, type MutationType } from './offline-store';
+import type { Role } from '@interfaces/user.interface.ts';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -551,6 +552,34 @@ class ApiClient {
 
         return response.json();
     }
+
+    // Orders import
+    async previewOrdersImport(files: Array<File>) {
+        const formData = new FormData();
+        files.forEach((file) => formData.append('files', file));
+
+        const response = await fetch(`${API_URL}/orders/import/preview`, {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${this.accessToken}`,
+            },
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Preview import failed');
+        }
+
+        return response.json();
+    }
+
+    async commitOrdersImport(orders: Array<OrderImportData>) {
+        return this.request<OrdersImportCommitResponse>('/orders/import/commit', {
+            method: 'POST',
+            body: JSON.stringify({ orders }),
+        });
+    }
 }
 
 export const apiClient = new ApiClient();
@@ -562,10 +591,8 @@ export interface User {
     lastName: string;
     email: string;
     phone?: string;
-    roleId: number;
-    roleName?: string;
     isActive?: boolean;
-    role?: { id: number; name: string };
+    role: { id: number; name: Role };
 }
 
 export interface Order {
@@ -588,6 +615,55 @@ export interface Order {
     observations?: string;
     technician?: User;
     jobs?: Array<Job>;
+}
+
+export interface OrderImportData {
+    serviceType: string;
+    meterNumber: string;
+    orderStatus: string;
+    issueDate: string;
+    issueTime: string;
+    accountNumber: string;
+    lastName: string;
+    firstName: string;
+    idNumber: string;
+    email: string;
+    phone: string;
+    orderLocation: string;
+    panelTowerBlock?: string;
+    coordinateX?: number;
+    coordinateY?: number;
+    latitude?: number;
+    longitude?: number;
+    appliedTariff?: string;
+    transformerNumber?: string;
+    distributionNetwork?: string;
+    transformerOwnership?: string;
+    sharedSubstation?: string;
+    normalLoad?: string;
+    fluctuatingLoad?: string;
+    plannerGroup?: string;
+    workPosition?: string;
+    lockerSequence?: string;
+    observations?: string;
+    technicianId?: number;
+}
+
+export interface OrderImportPreviewItem {
+    data: OrderImportData;
+    fileName: string;
+    rowNumber?: number;
+    errors?: Array<string>;
+    warnings?: Array<string>;
+}
+
+export interface OrdersImportPreviewResponse {
+    orders: Array<OrderImportPreviewItem>;
+    fileErrors: Array<{ fileName: string; message: string }>;
+}
+
+export interface OrdersImportCommitResponse {
+    createdCount: number;
 }
 
 export interface Job {

@@ -3,8 +3,12 @@ import { apiClient } from '@/lib/api-client';
 import { useState } from 'react';
 import { User, Save } from 'lucide-react';
 import { useAuthContext } from '@context/auth/context.ts';
+import { useTranslations } from 'use-intl';
+import Page from '@layouts/Page.tsx';
+import Summary from '@components/Summary/Summary';
 
-export function ProfilePage() {
+const ProfilePage = () => {
+    const i18n = useTranslations();
     const { user } = useAuthContext();
     const queryClient = useQueryClient();
 
@@ -60,13 +64,8 @@ export function ProfilePage() {
     };
 
     return (
-        <div className="mx-auto max-w-2xl space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold">Profile</h1>
-                <p className="text-muted-foreground">Manage your account settings</p>
-            </div>
-
-            <div className="rounded-lg border bg-card p-6">
+        <Page id="profile" title={i18n('pages.profile.title')} subtitle={i18n('pages.profile.subtitle')}>
+            <Summary title={i18n('pages.profile.title')} subtitle={i18n('pages.profile.subtitle')} icon={User}>
                 <div className="mb-6 flex items-center gap-4">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
                         <User className="h-8 w-8 text-primary" />
@@ -77,7 +76,7 @@ export function ProfilePage() {
                         </h2>
                         <p className="text-muted-foreground">{user?.email}</p>
                         <span className="mt-1 inline-block rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
-                            {user?.role?.name || user?.roleName}
+                            {user?.role?.name}
                         </span>
                     </div>
                 </div>
@@ -156,7 +155,9 @@ export function ProfilePage() {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </Summary>
+        </Page>
     );
-}
+};
+
+export default ProfilePage;

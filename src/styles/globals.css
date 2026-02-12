@@ -1,108 +1,79 @@
 @import 'tailwindcss';
 
-@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
     --sidebar-width: 16rem;
     --sidebar-mobile-width: 16rem;
     --sidebar-collapsed-width: 4rem;
+
+    --neutral-500: #F7F6F5;
+    --neutral-600: #EAE9EE;
+    --neutral-700: #D4D2D7;
+    --neutral-800: #A8A6B2;
+    --neutral-900: #4A4852;
+
+    --primary-500: #28422e;
+    --primary-600: #263327;
+    --primary-700: #202920;
+
+    --secondary-500: #FF6F43;
+    --secondary-600: #9D391B;
+
+    --sucesss-400: #74FFAE;
+    --success-500: #41B06F;
+
+    --error-400: #FF93B5;
+    --error-500: #EB5E8B;
+}
+
+
+.dark {
+    --neutral-500: #1E1D21;
+    --neutral-600: #28272C;
+    --neutral-700: #3A3840;
+    --neutral-800: #6E6C78;
+    --neutral-900: #D1CFD9;
+
+    --primary-500: #37A152;
+    --primary-600: #2D7A42;
+    --primary-700: #245E34;
+
+    --secondary-500: #FF8560;
+    --secondary-600: #C4553A;
+
+    --sucesss-400: #5EEEA0;
+    --success-500: #38C76E;
+
+    --error-400: #FF8AAE;
+    --error-500: #E04F7A;
 }
 
 @theme inline {
     /* =========================
    NEUTRAL – Porcelain
    ========================= */
-    --color-neutral-50: #fffcf9;
-    --color-neutral-100: #fbf7f2;
-    --color-neutral-200: #efe8df;
-    --color-neutral-300: #e1d6ca;
-    --color-neutral-400: #c2b6a9;
-    --color-neutral-500: #9c9084;
-    --color-neutral-600: #746a61;
-    --color-neutral-700: #504944;
-    --color-neutral-800: #2b2724;
+    --color-neutral-500: var(--neutral-500);
+    --color-neutral-600: var(--neutral-600);
+    --color-neutral-700: var(--neutral-700);
+    --color-neutral-800: var(--neutral-800);
+    --color-neutral-900: var(--neutral-900);
 
-    /* =========================
-       MAIN – Carbon Black
-       anchor: #222823
-       ========================= */
-    --color-main-100: #e7e9e8;
-    --color-main-200: #c2c7c4;
-    --color-main-300: #9aa19d;
-    --color-main-400: #5b625e;
-    --color-main-500: #222823;
-    --color-main-600: #1c211d;
-    --color-main-700: #151915;
-    --color-main-800: #0d100e;
+    --color-primary-500: var(--primary-500);
+    --color-primary-600: var(--primary-600);
+    --color-primary-700: var(--primary-700);
 
-    /* =========================
-       SECONDARY – Vivid Tangerine
-       ========================= */
-    --color-secondary-100: #fff1e3;
-    --color-secondary-200: #ffd4ad;
-    --color-secondary-300: #ffb777;
-    --color-secondary-400: #ff962f;
-    --color-secondary-500: #ff7d00;
-    --color-secondary-600: #e66f00;
-    --color-secondary-700: #b85700;
-    --color-secondary-800: #7a3a00;
+    --color-secondary-500: var(--secondary-500);
+    --color-secondary-600: var(--secondary-600);
 
-    /* =========================
-   ACCENT – Deep Crimson
-   anchor: #A62639
-   ========================= */
-    --color-accent-100: #f8e8eb;
-    --color-accent-200: #edbcc4;
-    --color-accent-300: #e18f9d;
-    --color-accent-400: #c64f63;
-    --color-accent-500: #a62639;
-    --color-accent-600: #8f2031;
-    --color-accent-700: #6b1825;
-    --color-accent-800: #420f17;
+    --color-success-400: var(--sucesss-400);
+    --color-success-500: var(--success-500);
 
-    /* =========================
-       SUCCESS – Sage Green
-       ========================= */
-    --color-success-100: #edf6e8;
-    --color-success-200: #cfe8c1;
-    --color-success-300: #aed89a;
-    --color-success-400: #79b45a;
-    --color-success-500: #60993e;
-    --color-success-600: #4f8033;
-    --color-success-700: #3b6026;
-    --color-success-800: #243c17;
+    --color-error-400: var(--error-400);
+    --color-error-500: var(--error-500);
 
-    /* =========================
-       INFO – Muted Blue Gray (added)
-       ========================= */
-    --color-info-100: #e9f0f4;
-    --color-info-200: #c6d6df;
-    --color-info-300: #9cbac9;
-    --color-info-400: #5f8498;
-    --color-info-500: #3e5f73;
-    --color-info-600: #344f60;
-    --color-info-700: #263b48;
-    --color-info-800: #18262f;
 
-    /* =========================
-       WARNING – Soft Amber (added)
-       ========================= */
-    --color-warning-100: #fdf4e3;
-    --color-warning-200: #f7e1b5;
-    --color-warning-300: #f0cc86;
-    --color-warning-400: #e8b55b;
-    --color-warning-500: #d99a2b;
-    --color-warning-600: #b57f22;
-    --color-warning-700: #8a611a;
-    --color-warning-800: #5a3f11;
-
-    --breakpoint-s320: 320px;
-    --breakpoint-s375: 375px;
-    --breakpoint-s425: 425px;
-    --breakpoint-s768: 768px;
-    --breakpoint-s992: 992px;
-    --breakpoint-s1200: 1200px;
-    --breakpoint-s1600: 1600px;
+    --radius-20: 0.5rem;
 }
 
 @layer base {
@@ -111,7 +82,7 @@
     input,
     select,
     textarea,
-    [tabindex]:not([tabindex="-1"]) {
+    [tabindex]:not([tabindex='-1']) {
         position: relative;
     }
 
@@ -122,7 +93,7 @@
         outline: none !important;
         box-shadow: 0 0 0 4px transparent,
         0 0 0 5px white,
-        0 0 0 7px var(--color-main-500) !important;
+        0 0 0 7px var(--color-primary-500) !important;
         border-radius: inherit;
     }
 
@@ -135,15 +106,15 @@
 
     button:focus-visible::after,
     a:focus-visible::after,
-    [tabindex]:not([tabindex="-1"]):focus-visible::after {
+    [tabindex]:not([tabindex='-1']):focus-visible::after {
         opacity: 1;
         box-shadow: 0 0 0 1px white,
-        0 0 0 3px var(--color-main-500) !important;
+        0 0 0 3px var(--color-primary-500) !important;
     }
 
     button::after,
     a::after,
-    [tabindex]:not([tabindex="-1"])::after {
+    [tabindex]:not([tabindex='-1'])::after {
         content: '';
         position: absolute;
         top: -4px;
@@ -153,7 +124,7 @@
         pointer-events: none;
         border-radius: inherit;
         box-shadow: 0 0 0 0 white,
-        0 0 0 0 var(--color-main-500);
+        0 0 0 0 var(--color-primary-500);
         z-index: 10;
         opacity: 0;
     }
@@ -163,7 +134,7 @@
     input:focus-visible,
     select:focus-visible,
     textarea:focus-visible,
-    [tabindex]:not([tabindex="-1"]):focus-visible {
+    [tabindex]:not([tabindex='-1']):focus-visible {
         outline: none !important;
     }
 }

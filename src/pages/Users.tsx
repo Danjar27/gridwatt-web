@@ -1,19 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, type User } from '@/lib/api-client';
-import {
-    Users as UsersIcon,
-    Plus,
-    X,
-    AlertCircle,
-    Loader2,
-    Clock,
-} from 'lucide-react';
+import { Users as UsersIcon, Plus, X, AlertCircle, Loader2, Clock } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import { useAuthContext } from '@context/auth/context';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
+import Page from '@layouts/Page.tsx';
+import { useTranslations } from 'use-intl';
+import Summary from '@components/Summary/Summary.tsx';
+import Table from '@components/Table/Table.tsx';
+import Row from '@components/Table/blocks/Row.tsx';
 
-export function UsersPage() {
+const UsersPage = () => {
+    const i18n = useTranslations();
     const queryClient = useQueryClient();
     const { user: currentUser } = useAuthContext();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -28,7 +27,7 @@ export function UsersPage() {
     const [error, setError] = useState<string | null>(null);
     const [pendingMutations, setPendingMutations] = useState<Array<OfflineMutation>>([]);
 
-    const userRole = currentUser?.role?.name || currentUser?.roleName;
+    const userRole = currentUser?.role?.name;
     const isAuthorized = userRole === 'admin' || userRole === 'manager';
 
     useEffect(() => {
@@ -71,7 +70,9 @@ export function UsersPage() {
                 const optimistic = mutation.optimisticData as User;
                 const index = result.findIndex((u) => u.id === optimistic.id);
                 if (index !== -1) {
-                    result[index] = { ...result[index], ...optimistic, _pending: true } as User & { _pending?: boolean };
+                    result[index] = { ...result[index], ...optimistic, _pending: true } as User & {
+                        _pending?: boolean;
+                    };
                 }
             }
         }
@@ -211,7 +212,9 @@ export function UsersPage() {
     };
 
     const formatDate = (dateString?: string) => {
-        if (!dateString) {return 'Never';}
+        if (!dateString) {
+            return 'Never';
+        }
         const date = new Date(dateString);
 
         return date.toLocaleDateString('en-US', {
@@ -233,83 +236,53 @@ export function UsersPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">User Management</h1>
-                    <p className="text-muted-foreground">Manage user accounts and permissions</p>
+        <Page id="users" title={i18n('pages.users.title')} subtitle={i18n('pages.users.subtitle')}>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add User
+                    </button>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+
+                <Summary
+                    icon={UsersIcon}
+                    title={i18n('pages.users.summary.title')}
+                    subtitle={i18n('pages.users.summary.subtitle')}
+                    legend={i18n('pages.users.summary.total', { count: users.length })}
                 >
-                    <Plus className="h-4 w-4" />
-                    Add User
-                </button>
-            </div>
+                    <Table columns={['Name', 'Email', 'Role', 'Status', 'Last Login', 'Actions']}>
+                        {users.map((user) => {
+                            const isPending = (user as User & { _pending?: boolean })._pending;
 
-            <div className="rounded-lg border bg-card shadow-sm">
-                <div className="flex items-center gap-2 border-b px-6 py-4">
-                    <UsersIcon className="h-5 w-5 text-primary" />
-                    <span className="font-medium">All Users</span>
-                    <span className="ml-auto text-sm text-muted-foreground">{users.length} users</span>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="border-b bg-muted/30">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Email
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Role
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Last Login
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {users.map((user) => {
-                                const isPending = (user as User & { _pending?: boolean })._pending;
-
-                                return (
-                                <tr key={user.id} className={`hover:bg-muted/50 ${isPending ? 'bg-yellow-50' : ''}`}>
-                                    <td className="whitespace-nowrap px-6 py-4">
-                                        <div>
-                                            <div className="font-medium flex items-center gap-2">
-                                                {user.name} {user.lastName}
-                                                {isPending && (
-                                                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 border border-yellow-200">
-                                                        <Clock className="h-3 w-3" />
-                                                        Pending
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {user.phone && (
-                                                <div className="text-sm text-muted-foreground">{user.phone}</div>
+                            return (
+                                <Row key={user.id}>
+                                    <div className="whitespace-nowrap">
+                                        <div className="font-medium flex items-center gap-2">
+                                            {user.name} {user.lastName}
+                                            {isPending && (
+                                                <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 border border-yellow-200">
+                                                    <Clock className="h-3 w-3" />
+                                                    Pending
+                                                </span>
                                             )}
                                         </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 text-sm">{user.email}</td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                                        {user.phone && (
+                                            <div className="text-sm text-muted-foreground">{user.phone}</div>
+                                        )}
+                                    </div>
+                                    <div className="whitespace-nowrap text-sm">{user.email}</div>
+                                    <div className="whitespace-nowrap">
                                         <span
                                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getRoleColor(user.role?.name)}`}
                                         >
                                             {user.role?.name}
                                         </span>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                                    </div>
+                                    <div className="whitespace-nowrap">
                                         <span
                                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                                 user.isActive
@@ -319,11 +292,11 @@ export function UsersPage() {
                                         >
                                             {user.isActive ? 'Active' : 'Inactive'}
                                         </span>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
+                                    </div>
+                                    <div className="whitespace-nowrap text-sm text-muted-foreground">
                                         {formatDate((user as any).lastLogin)}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                                    </div>
+                                    <div className="whitespace-nowrap">
                                         <div className="flex items-center gap-3">
                                             <button
                                                 onClick={() => {
@@ -359,14 +332,12 @@ export function UsersPage() {
                                                 Delete
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </div>
+                                </Row>
+                            );
+                        })}
+                    </Table>
+                </Summary>
 
             {/* User Modal (Add/Edit) */}
             {(isModalOpen || editingUser) && (
@@ -673,6 +644,10 @@ export function UsersPage() {
                     </div>
                 </div>
             )}
-        </div>
+            </div>
+        </Page>
     );
-}
+};
+
+
+export default UsersPage;
