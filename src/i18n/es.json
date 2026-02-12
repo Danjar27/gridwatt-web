@@ -31,6 +31,34 @@
             "loading": "Iniciando sesión..."
         }
     },
+    "pages": {
+        "profile": {
+            "title": "Mi perfil",
+            "subtitle": "Administra tu información personal y datos de acceso",
+            "personal": {
+                "title": "Información personal",
+                "subtitle": "Actualiza tus detalles personales"
+            }
+        },
+        "activities": {
+            "title": "Actividades",
+            "subtitle": "Administra las actividades y tareas de tu empresa",
+            "summary": {
+                "title": "Todas las actividades",
+                "subtitle": "Lista de acciones registradas en el sistema",
+                "total": "Total de registros: {count}"
+            }
+        },
+        "materials": {
+            "title": "Materiales",
+            "subtitle": "Administra los materiales de inventario y proveedores",
+            "summary": {
+                "title": "Todos los materiales",
+                "subtitle": "Lista de materiales disponibles",
+                "total": "Total de materiales: {count}"
+            }
+        }
+    },
     "toolbar": {
         "syncing": "Sincronización en progreso",
         "search": "Buscar..."

@@ -3,8 +3,14 @@ import { apiClient, type Material } from '@/lib/api-client';
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, X, AlertCircle, Loader2, Package, Clock } from 'lucide-react';
 import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
+import Page from '@layouts/Page.tsx';
+import { useTranslations } from 'use-intl';
+import Summary from '@components/Summary/Summary.tsx';
+import Table from '@components/Table/Table.tsx';
+import Row from '@components/Table/blocks/Row.tsx';
 
-export function MaterialsPage() {
+const MaterialsPage = () => {
+    const i18n = useTranslations();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
@@ -44,7 +50,9 @@ export function MaterialsPage() {
                 const optimistic = mutation.optimisticData as Material;
                 const index = result.findIndex((m) => m.id === optimistic.id);
                 if (index !== -1) {
-                    result[index] = { ...result[index], ...optimistic, _pending: true } as Material & { _pending?: boolean };
+                    result[index] = { ...result[index], ...optimistic, _pending: true } as Material & {
+                        _pending?: boolean;
+                    };
                 }
             }
         }
@@ -132,61 +140,30 @@ export function MaterialsPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">Material Management</h1>
-                    <p className="text-muted-foreground">Manage inventory materials and supplies</p>
+        <Page id="materials" title={i18n('pages.materials.title')} subtitle={i18n('pages.materials.subtitle')}>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add Material
+                    </button>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+
+                <Summary
+                    icon={Package}
+                    title={i18n('pages.materials.summary.title')}
+                    subtitle={i18n('pages.materials.summary.subtitle')}
+                    legend={i18n('pages.materials.summary.total', { count: materials.length })}
                 >
-                    <Plus className="h-4 w-4" />
-                    Add Material
-                </button>
-            </div>
+                    <Table columns={['Id', 'Name', 'Type', 'Unit', 'Decimals', 'Status', 'Actions']}>
+                        {materials.map((material) => {
+                            const isPending = (material as Material & { _pending?: boolean })._pending;
 
-            <div className="rounded-lg border bg-card shadow-sm">
-                <div className="flex items-center gap-2 border-b px-6 py-4">
-                    <Package className="h-5 w-5 text-primary" />
-                    <span className="font-medium">All Materials</span>
-                    <span className="ml-auto text-sm text-muted-foreground">{materials.length} materials</span>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="border-b bg-muted/30">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    ID
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Type
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Unit
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Decimals
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {materials.map((material) => {
-                                const isPending = (material as Material & { _pending?: boolean })._pending;
-
-                                return (
-                                <tr key={material.id} className={`hover:bg-muted/50 ${isPending ? 'bg-yellow-50' : ''}`}>
+                            return (
+                                <Row>
                                     <td className="whitespace-nowrap px-6 py-4 font-mono text-sm">
                                         <div className="flex items-center gap-2">
                                             {material.id}
@@ -202,7 +179,9 @@ export function MaterialsPage() {
                                         <div>
                                             <div className="font-medium">{material.name}</div>
                                             {material.description && (
-                                                <div className="text-sm text-muted-foreground">{material.description}</div>
+                                                <div className="text-sm text-muted-foreground">
+                                                    {material.description}
+                                                </div>
                                             )}
                                         </div>
                                     </td>
@@ -252,130 +231,133 @@ export function MaterialsPage() {
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                </Row>
+                            );
+                        })}
+                    </Table>
+                </Summary>
 
-            {/* Material Modal (Add/Edit) */}
-            {(isModalOpen || editingMaterial) && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-lg font-semibold">
-                                {editingMaterial ? 'Edit Material' : 'Add Material'}
-                            </h2>
-                            <button onClick={closeModal}>
-                                <X className="h-5 w-5" />
-                            </button>
-                        </div>
-
-                        {error && (
-                            <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
-                                <AlertCircle className="h-4 w-4 shrink-0" />
-                                <p>{error}</p>
+                {/* Material Modal (Add/Edit) */}
+                {(isModalOpen || editingMaterial) && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-lg font-semibold">
+                                    {editingMaterial ? 'Edit Material' : 'Add Material'}
+                                </h2>
+                                <button onClick={closeModal}>
+                                    <X className="h-5 w-5" />
+                                </button>
                             </div>
-                        )}
 
-                        <form key={editingMaterial?.id || 'new'} onSubmit={handleSubmit} className="space-y-4">
-                            {!editingMaterial && (
-                                <div>
-                                    <label className="block text-sm font-medium">ID</label>
-                                    <input
-                                        name="id"
-                                        required
-                                        className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
-                                    />
+                            {error && (
+                                <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+                                    <AlertCircle className="h-4 w-4 shrink-0" />
+                                    <p>{error}</p>
                                 </div>
                             )}
-                            <div>
-                                <label className="block text-sm font-medium">Name</label>
-                                <input
-                                    name="name"
-                                    defaultValue={editingMaterial?.name}
-                                    required
-                                    className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+
+                            <form key={editingMaterial?.id || 'new'} onSubmit={handleSubmit} className="space-y-4">
+                                {!editingMaterial && (
+                                    <div>
+                                        <label className="block text-sm font-medium">ID</label>
+                                        <input
+                                            name="id"
+                                            required
+                                            className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
+                                        />
+                                    </div>
+                                )}
                                 <div>
-                                    <label className="block text-sm font-medium">Type</label>
+                                    <label className="block text-sm font-medium">Name</label>
                                     <input
-                                        name="type"
-                                        defaultValue={editingMaterial?.type}
+                                        name="name"
+                                        defaultValue={editingMaterial?.name}
                                         required
                                         className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
                                     />
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium">Type</label>
+                                        <input
+                                            name="type"
+                                            defaultValue={editingMaterial?.type}
+                                            required
+                                            className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium">Unit</label>
+                                        <input
+                                            name="unit"
+                                            defaultValue={editingMaterial?.unit}
+                                            required
+                                            className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
+                                        />
+                                    </div>
+                                </div>
                                 <div>
-                                    <label className="block text-sm font-medium">Unit</label>
-                                    <input
-                                        name="unit"
-                                        defaultValue={editingMaterial?.unit}
-                                        required
+                                    <label className="block text-sm font-medium">Description</label>
+                                    <textarea
+                                        name="description"
+                                        defaultValue={editingMaterial?.description}
+                                        rows={3}
                                         className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
                                     />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium">Description</label>
-                                <textarea
-                                    name="description"
-                                    defaultValue={editingMaterial?.description}
-                                    rows={3}
-                                    className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium">Allows Decimals</label>
-                                    <select
-                                        name="allowsDecimals"
-                                        defaultValue={editingMaterial ? String(editingMaterial.allowsDecimals) : 'false'}
-                                        className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
-                                    >
-                                        <option value="true">Yes</option>
-                                        <option value="false">No</option>
-                                    </select>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium">Allows Decimals</label>
+                                        <select
+                                            name="allowsDecimals"
+                                            defaultValue={
+                                                editingMaterial ? String(editingMaterial.allowsDecimals) : 'false'
+                                            }
+                                            className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
+                                        >
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium">Status</label>
+                                        <select
+                                            name="isActive"
+                                            defaultValue={editingMaterial ? String(editingMaterial.isActive) : 'true'}
+                                            className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
+                                        >
+                                            <option value="true">Active</option>
+                                            <option value="false">Inactive</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium">Status</label>
-                                    <select
-                                        name="isActive"
-                                        defaultValue={editingMaterial ? String(editingMaterial.isActive) : 'true'}
-                                        className="mt-1 block w-full rounded-lg border px-3 py-2 focus:border-primary focus:ring-primary"
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={closeModal}
+                                        className="rounded-lg border px-4 py-2 text-sm hover:bg-muted"
                                     >
-                                        <option value="true">Active</option>
-                                        <option value="false">Inactive</option>
-                                    </select>
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={createMutation.isPending || updateMutation.isPending}
+                                        className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:opacity-50"
+                                    >
+                                        {(createMutation.isPending || updateMutation.isPending) && (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        )}
+                                        {editingMaterial ? 'Update' : 'Create'}
+                                    </button>
                                 </div>
-                            </div>
-                            <div className="flex justify-end gap-2 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={closeModal}
-                                    className="rounded-lg border px-4 py-2 text-sm hover:bg-muted"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={createMutation.isPending || updateMutation.isPending}
-                                    className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm text-white hover:bg-primary/90 disabled:opacity-50"
-                                >
-                                    {(createMutation.isPending || updateMutation.isPending) && (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    )}
-                                    {editingMaterial ? 'Update' : 'Create'}
-                                </button>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )}
+            </div>
+        </Page>
     );
-}
+};
+
+export default MaterialsPage;
