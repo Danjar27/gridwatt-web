@@ -1,31 +1,53 @@
+import type { Section } from './Sidebar.interface';
 import type { FC } from 'react';
 
-import Item from '@components/organisms/Sidebar/blocks/Item';
-import Logo from '@components/atoms/Logo';
-import Section from './blocks/Section';
+import { NAVIGATION_ITEMS } from './utils/constants.ts';
+import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
+
+import SidebarSection from './blocks/Section';
+import Logo from '@components/atoms/Logo';
+import User from './blocks/User.tsx';
+import Item from './blocks/Item';
 
 const Sidebar: FC = () => {
     const i18n = useTranslations();
 
+    const { user } = useAuthContext();
+
+    const userRole = user!.role.name;
+
+    const validSections: Array<Section> = [];
+
+    for (const section of NAVIGATION_ITEMS) {
+        const allowedRoutes = section.routes.filter((route) => !route.roles || route.roles.includes(userRole));
+
+        if (allowedRoutes.length > 0) {
+            validSections.push({ ...section, routes: allowedRoutes });
+        }
+    }
+
     return (
-        <aside className="flex flex-col w-1/4 bg-neutral-500 rounded-[20px] p-5 gap-5">
-            <div className="flex items-center w-full justify-center h-25">
-                <Logo className="h-14 w-14 text-black" />
-                <span className="text-xl font-semibold">Grid Watt</span>
+        <aside className="flex flex-col gap-5 w-full max-w-[20rem] justify-start">
+            <div className="flex flex-col w-full bg-neutral-500 rounded-[20px] p-5 gap-6">
+                <div className="flex items-center w-full justify-center h-25">
+                    <Logo className="h-14 w-14 text-black" />
+                    <span className="text-xl font-semibold">{i18n('brand')}</span>
+                </div>
+                {validSections.map((section) => (
+                    <SidebarSection key={section.name} title={i18n(section.label)}>
+                        {section.routes.map(({ name, href, icon: Icon, label }) => (
+                            <Item key={name} href={href}>
+                                <Icon width={20} height={20} />
+                                {i18n(label)}
+                            </Item>
+                        ))}
+                    </SidebarSection>
+                ))}
             </div>
-            <Section title={i18n('sidebar.sections.general')}>
-                <Item href="/dashboard">{i18n('routes.dashboard')}</Item>
-            </Section>
-            <Section title={i18n('sidebar.sections.catalogs')}>
-                <Item href="/activities">{i18n('routes.activities')}</Item>
-                <Item href="/orders">{i18n('routes.orders')}</Item>
-                <Item href="/materials">{i18n('routes.materials')}</Item>
-                <Item href="/seals">{i18n('routes.seals')}</Item>
-            </Section>
-            <Section title={i18n('sidebar.sections.settings')}>
-                <Item href="/users">{i18n('routes.users')}</Item>
-            </Section>
+            <div className="flex flex-col w-full bg-neutral-500 rounded-[20px] p-5 gap-5">
+                <User />
+            </div>
         </aside>
     );
 };

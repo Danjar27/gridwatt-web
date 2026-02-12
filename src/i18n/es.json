@@ -6,7 +6,8 @@
         "orders": "Órdenes",
         "materials": "Materiales",
         "seals": "Sellos",
-        "users": "Usuarios"
+        "users": "Usuarios",
+        "jobs": "Trabajos"
     },
     "sidebar": {
         "sections": {
