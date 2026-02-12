@@ -29,11 +29,13 @@ const Sidebar: FC = () => {
 
     return (
         <aside className="flex flex-col gap-5 min-w-76 justify-start">
-            <div className="flex flex-col w-full bg-neutral-500 rounded-[20px] px-5 py-10 gap-6 border border-neutral-800">
+            <div className="flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
                 <div className="flex items-center w-full justify-center py-5">
                     <Logo className="h-14 w-14 text-black dark:text-white" />
                     <span className="text-xl font-semibold">{i18n('brand')}</span>
                 </div>
+            </div>
+            <div className="flex flex-col w-full bg-neutral-500 rounded-lg px-5 py-10 gap-6 border border-neutral-800">
                 {validSections.map((section) => (
                     <SidebarSection key={section.name} title={i18n(section.label)}>
                         {section.routes.map(({ name, href, icon: Icon, label }) => (
@@ -45,7 +47,7 @@ const Sidebar: FC = () => {
                     </SidebarSection>
                 ))}
             </div>
-            <div className="flex flex-col w-full bg-neutral-500 rounded-[20px] p-5 gap-5 border border-neutral-800">
+            <div className="flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
                 <User />
             </div>
         </aside>

@@ -32,7 +32,8 @@
         }
     },
     "toolbar": {
-        "syncing": "Sincronización en progreso"
+        "syncing": "Sincronización en progreso",
+        "search": "Buscar..."
     },
     "rights": "© Grid Watt {year}. Desarrollado por Daniel Villalobos. Todos los derechos reservados."
 }
