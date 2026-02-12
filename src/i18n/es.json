@@ -1,5 +1,20 @@
 {
     "brand": "Grid Watt",
+    "routes": {
+        "dashboard": "Tablero",
+        "activities": "Actividades",
+        "orders": "Órdenes",
+        "materials": "Materiales",
+        "seals": "Sellos",
+        "users": "Usuarios"
+    },
+    "sidebar": {
+        "sections": {
+            "general": "General",
+            "catalogs": "Catálogos",
+            "settings": "Configuración"
+        }
+    },
     "auth": {
         "label": "Inicia sesión para continuar",
         "email": {
