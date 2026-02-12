@@ -19,7 +19,7 @@ const Connection = () => {
                 'bg-error-500': !online,
             })}
         >
-            <div className="flex items-center justify-center gap-2 text-sm text-secondary-800">
+            <div className="flex items-center justify-center gap-2 text-sm text-secondary-800 dark:text-white">
                 <Visible when={online && !needsToSync}>
                     <Cloud />
                 </Visible>

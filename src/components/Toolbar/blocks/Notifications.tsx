@@ -9,11 +9,11 @@ const Notifications = () => {
         <button
             className={classnames('cursor-pointer p-2 flex justify-center items-center rounded-lg', {
                 'hover:bg-neutral-700 bg-neutral-600': !hasNotifications,
-                'bg-primary-500 hover:bg-primary-600 text-white': hasNotifications,
+                'bg-secondary-500 hover:bg-secondary-600 text-white': hasNotifications,
             })}
         >
             <Visible when={hasNotifications}>
-                <div className="absolute inset-1 bg-primary-500 animate-ping rounded-lg"></div>
+                <div className="absolute inset-1.5 bg-secondary-500 animate-ping rounded-lg"></div>
             </Visible>
             <div className="z-10">
                 <Visible when={hasNotifications}>

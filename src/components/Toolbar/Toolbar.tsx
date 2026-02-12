@@ -3,7 +3,7 @@ import Notifications from './blocks/Notifications.tsx';
 import Connection from './blocks/Connection.tsx';
 
 const Toolbar = () => (
-    <div className="flex h-25 bg-neutral-500 rounded-[20px] justify-center items-center p-5 gap-5">
+    <div className="flex h-25 bg-neutral-500 rounded-[20px] justify-center items-center p-5 gap-5 border border-neutral-800">
         <Theme />
         <Notifications />
         <Connection />
