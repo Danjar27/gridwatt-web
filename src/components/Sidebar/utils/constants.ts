@@ -1,6 +1,6 @@
 import type { Section } from '../Sidebar.interface.ts';
 
-import { Activity, ClipboardList, LayoutDashboard, Package, Users, Lock, Briefcase } from 'lucide-react';
+import { Clipboard, LayoutDashboard, Package, Users, Lock, Briefcase, BookA } from 'lucide-react';
 
 export const NAVIGATION_ITEMS: Array<Section> = [
     {
@@ -19,14 +19,14 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 name: 'activities',
                 label: 'routes.activities',
                 href: '/activities',
-                icon: Activity,
+                icon: Clipboard,
                 roles: ['admin', 'manager'],
             },
             {
                 name: 'orders',
                 label: 'routes.orders',
                 href: '/orders',
-                icon: ClipboardList,
+                icon: BookA,
                 roles: ['admin', 'manager'],
             },
             {

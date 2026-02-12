@@ -15,7 +15,11 @@ const Sidebar: FC = () => {
 
     const { user } = useAuthContext();
 
-    const userRole = user!.role.name;
+    if (!user) {
+        return null;
+    }
+
+    const userRole = user.role?.name;
 
     const validSections: Array<Section> = [];
 
@@ -28,7 +32,7 @@ const Sidebar: FC = () => {
     }
 
     return (
-        <aside className="flex flex-col gap-5 min-w-76 justify-start">
+        <aside className="flex flex-col gap-5 min-w-70 justify-start">
             <div className="flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
                 <div className="flex items-center w-full justify-center py-5">
                     <Logo className="h-14 w-14 text-black dark:text-white" />
