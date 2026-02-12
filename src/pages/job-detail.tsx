@@ -178,7 +178,7 @@ export function JobDetailPage() {
                     </div>
                 )}
 
-                {/* Job Form */}
+                {/* Job Summary */}
                 <div className="rounded-lg border bg-card p-6">
                     <h2 className="mb-4 text-lg font-semibold">Job Information</h2>
                     <div className="space-y-4">

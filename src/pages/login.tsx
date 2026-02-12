@@ -9,11 +9,12 @@ import { useAuthActions, useAuthContext } from '@context/auth/context.ts';
 
 const LoginPage = () => {
     const i18n = useTranslations();
+
     const { isLoading: authLoading } = useAuthContext();
     const { login } = useAuthActions();
 
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
 
     const navigate = useNavigate();
