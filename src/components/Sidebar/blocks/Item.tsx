@@ -1,7 +1,7 @@
 import type { FC, PropsWithChildren } from 'react';
-import type { ItemProps } from '../Sidebar.interface';
+import type { ItemProps } from '../Sidebar.interface.ts';
 
-import { classnames } from '@utils/classnames';
+import { classnames } from '@utils/classnames.ts';
 import { Link, useLocation } from 'react-router-dom';
 
 const Item: FC<PropsWithChildren<ItemProps>> = ({ children, className, href }) => {

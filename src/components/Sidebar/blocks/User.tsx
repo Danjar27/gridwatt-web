@@ -19,7 +19,7 @@ const User: FC = () => {
             <div className="flex justify-center items-center font= h-12 w-12 rounded-full bg-primary-500">
                 <span className="text-white font-bold">{initials}</span>
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
                 <span>{fullName}</span>
                 <span className="max-w-max px-2 py-0.5 text-xs bg-neutral-800 text-neutral-500 rounded">{user.role.name}</span>
             </div>

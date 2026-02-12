@@ -1,4 +1,4 @@
-import type { SectionProps } from '../Sidebar.interface';
+import type { SectionProps } from '../Sidebar.interface.ts';
 import type { FC, PropsWithChildren } from 'react';
 
 import { Children } from 'react';

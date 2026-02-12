@@ -1,24 +1,25 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { RootLayout } from './layouts/root-layout';
-import { DashboardLayout } from './layouts/dashboard-layout';
-import { JobsPage } from './pages/jobs';
-import { JobDetailPage } from './pages/job-detail';
-import { OrdersPage } from './pages/orders';
-import { OrderDetailPage } from './pages/order-detail';
-import { MaterialsPage } from './pages/materials';
-import { ActivitiesPage } from './pages/activities';
-import { SealsPage } from './pages/seals';
-import { UsersPage } from './pages/users';
-import { ProfilePage } from './pages/profile';
-import { ProtectedRoute } from './components/protected-route';
+import { DashboardLayout } from '../../layouts/dashboard-layout.tsx';
+import { JobsPage } from '../../pages/jobs.tsx';
+import { JobDetailPage } from '../../pages/job-detail.tsx';
+import { OrdersPage } from '../../pages/orders.tsx';
+import { OrderDetailPage } from '../../pages/order-detail.tsx';
+import { OrdersImportPage } from '../../pages/orders-import.tsx';
+import { MaterialsPage } from '../../pages/materials.tsx';
+import { ActivitiesPage } from '../../pages/activities.tsx';
+import { SealsPage } from '../../pages/seals.tsx';
+import { UsersPage } from '../../pages/users.tsx';
+import { ProfilePage } from '../../pages/profile.tsx';
 
-import DashboardPage from './pages/dashboard';
-import LoginPage from './pages/login';
+import Protected from './blocks/Protected.tsx';
+import Root from '../../layouts/root.tsx';
+import DashboardPage from '../../pages/dashboard.tsx';
+import LoginPage from '../../pages/login.tsx';
 
-export const router = createBrowserRouter([
+const Router = createBrowserRouter([
     {
         path: '/',
-        element: <RootLayout />,
+        element: <Root />,
         children: [
             {
                 index: true,
@@ -29,7 +30,7 @@ export const router = createBrowserRouter([
                 element: <LoginPage />,
             },
             {
-                element: <ProtectedRoute />,
+                element: <Protected />,
                 children: [
                     {
                         element: <DashboardLayout />,
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
                             {
                                 path: 'orders',
                                 element: <OrdersPage />,
+                            },
+                            {
+                                path: 'orders/import',
+                                element: <OrdersImportPage />,
                             },
                             {
                                 path: 'orders/:id',
@@ -81,3 +86,5 @@ export const router = createBrowserRouter([
         ],
     },
 ]);
+
+export default Router;

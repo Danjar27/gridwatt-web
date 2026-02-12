@@ -1,14 +1,14 @@
-import type { Section } from './Sidebar.interface';
+import type { Section } from './Sidebar.interface.ts';
 import type { FC } from 'react';
 
 import { NAVIGATION_ITEMS } from './utils/constants.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
 
-import SidebarSection from './blocks/Section';
-import Logo from '@components/atoms/Logo';
+import SidebarSection from './blocks/Section.tsx';
+import Logo from '@components/atoms/Logo.tsx';
 import User from './blocks/User.tsx';
-import Item from './blocks/Item';
+import Item from './blocks/Item.tsx';
 
 const Sidebar: FC = () => {
     const i18n = useTranslations();
