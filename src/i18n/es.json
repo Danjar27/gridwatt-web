@@ -31,9 +31,8 @@
             "loading": "Iniciando sesión..."
         }
     },
-    "connection": {
-        "offline": "Estás desconectado. Tus cambios se sincronizarán cuando vuelvas a tener acceso a internet.",
-        "pending": "Se están sincronizando tus cambios. Por favor, espera..."
+    "toolbar": {
+        "syncing": "Sincronización en progreso"
     },
     "rights": "© Grid Watt {year}. Desarrollado por Daniel Villalobos. Todos los derechos reservados."
 }
