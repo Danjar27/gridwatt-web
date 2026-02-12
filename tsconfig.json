@@ -26,6 +26,7 @@
             "@lib/*": ["src/lib/*"],
             "@hooks/*": ["src/hooks/*"],
             "@i18n/*": ["src/i18n/*"],
+            "@interfaces/*": ["src/interfaces/*"],
             "@/*": ["src/*"]
         }
     },
