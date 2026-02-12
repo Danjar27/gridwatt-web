@@ -3,8 +3,14 @@ import { apiClient, type Seal } from '@/lib/api-client';
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, X, AlertCircle, Loader2, Tag, Clock } from 'lucide-react';
 import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
+import Page from '@layouts/Page.tsx';
+import { useTranslations } from 'use-intl';
+import Summary from '@components/Summary/Summary.tsx';
+import Table from '@components/Table/Table.tsx';
+import Row from '@components/Table/blocks/Row.tsx';
 
-export function SealsPage() {
+const SealsPage = () => {
+    const i18n = useTranslations();
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingSeal, setEditingSeal] = useState<Seal | null>(null);
@@ -43,7 +49,9 @@ export function SealsPage() {
                 const optimistic = mutation.optimisticData as Seal;
                 const index = result.findIndex((s) => s.id === optimistic.id);
                 if (index !== -1) {
-                    result[index] = { ...result[index], ...optimistic, _pending: true } as Seal & { _pending?: boolean };
+                    result[index] = { ...result[index], ...optimistic, _pending: true } as Seal & {
+                        _pending?: boolean;
+                    };
                 }
             }
         }
@@ -129,81 +137,51 @@ export function SealsPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold">Seal Management</h1>
-                    <p className="text-muted-foreground">Manage seal types and configurations</p>
+        <Page id="seals" title={i18n('pages.seals.title')} subtitle={i18n('pages.seals.subtitle')}>
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Add Seal
+                    </button>
                 </div>
-                <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+
+                <Summary
+                    icon={Tag}
+                    title={i18n('pages.seals.summary.title')}
+                    subtitle={i18n('pages.seals.summary.subtitle')}
+                    legend={i18n('pages.seals.summary.total', { count: seals.length })}
                 >
-                    <Plus className="h-4 w-4" />
-                    Add Seal
-                </button>
-            </div>
+                    <Table columns={['Id', 'Name', 'Type', 'Description', 'Status', 'Actions']}>
+                        {seals.map((seal) => {
+                            const isPending = (seal as Seal & { _pending?: boolean })._pending;
 
-            <div className="rounded-lg border bg-card shadow-sm">
-                <div className="flex items-center gap-2 border-b px-6 py-4">
-                    <Tag className="h-5 w-5 text-primary" />
-                    <span className="font-medium">All Seals</span>
-                    <span className="ml-auto text-sm text-muted-foreground">{seals.length} seals</span>
-                </div>
-
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="border-b bg-muted/30">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    ID
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Type
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Description
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Status
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {seals.map((seal) => {
-                                const isPending = (seal as Seal & { _pending?: boolean })._pending;
-
-                                return (
-                                <tr key={seal.id} className={`hover:bg-muted/50 ${isPending ? 'bg-yellow-50' : ''}`}>
-                                    <td className="whitespace-nowrap px-6 py-4 font-mono text-sm">
-                                        <div className="flex items-center gap-2">
-                                            {seal.id}
-                                            {isPending && (
-                                                <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 border border-yellow-200">
-                                                    <Clock className="h-3 w-3" />
-                                                    Pending
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4 font-medium">{seal.name}</td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                            return (
+                                <Row key={seal.id}>
+                                    <div className="flex items-center gap-2">
+                                        {seal.id}
+                                        {isPending && (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 border border-yellow-200">
+                                                <Clock className="h-3 w-3" />
+                                                Pending
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="whitespace-nowrap px-6 py-4 font-medium">{seal.name}</div>
+                                    <div className="whitespace-nowrap px-6 py-4">
                                         <span
                                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${getTypeColor(seal.type)}`}
                                         >
                                             {seal.type}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-muted-foreground">
+                                    </div>
+                                    <div className="px-6 py-4 text-sm text-muted-foreground">
                                         {seal.description || '-'}
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                                    </div>
+                                    <div className="whitespace-nowrap px-6 py-4">
                                         <span
                                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
                                                 seal.isActive
@@ -213,8 +191,8 @@ export function SealsPage() {
                                         >
                                             {seal.isActive ? 'Active' : 'Inactive'}
                                         </span>
-                                    </td>
-                                    <td className="whitespace-nowrap px-6 py-4">
+                                    </div>
+                                    <div className="whitespace-nowrap px-6 py-4">
                                         <div className="flex items-center gap-3">
                                             <button
                                                 onClick={() => setEditingSeal(seal)}
@@ -229,14 +207,12 @@ export function SealsPage() {
                                                 {seal.isActive ? 'Deactivate' : 'Activate'}
                                             </button>
                                         </div>
-                                    </td>
-                                </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                    </div>
+                                </Row>
+                            );
+                        })}
+                    </Table>
+                </Summary>
 
             {/* Seal Modal (Add/Edit) */}
             {(isModalOpen || editingSeal) && (
@@ -328,6 +304,10 @@ export function SealsPage() {
                     </div>
                 </div>
             )}
-        </div>
+            </div>
+        </Page>
     );
-}
+};
+
+
+export default SealsPage;

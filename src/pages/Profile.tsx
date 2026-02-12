@@ -7,7 +7,7 @@ import { useTranslations } from 'use-intl';
 import Page from '@layouts/Page.tsx';
 import Summary from '@components/Summary/Summary';
 
-export function ProfilePage() {
+const ProfilePage = () => {
     const i18n = useTranslations();
     const { user } = useAuthContext();
     const queryClient = useQueryClient();
@@ -158,4 +158,6 @@ export function ProfilePage() {
             </Summary>
         </Page>
     );
-}
+};
+
+export default ProfilePage;

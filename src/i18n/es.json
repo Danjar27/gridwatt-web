@@ -57,6 +57,49 @@
                 "subtitle": "Lista de materiales disponibles",
                 "total": "Total de materiales: {count}"
             }
+        },
+        "seals": {
+            "title": "Sellos",
+            "subtitle": "Administra los tipos de sellos y configuraciones",
+            "summary": {
+                "title": "Todos los sellos",
+                "subtitle": "Lista de sellos registrados",
+                "total": "Total de sellos: {count}"
+            }
+        },
+        "orders": {
+            "title": "Órdenes",
+            "subtitle": "Administra todas las órdenes de servicio",
+            "summary": {
+                "title": "Todas las órdenes",
+                "subtitle": "Lista de órdenes registradas",
+                "total": "Total de órdenes: {count}"
+            }
+        },
+        "users": {
+            "title": "Usuarios",
+            "subtitle": "Administra las cuentas de usuario y permisos",
+            "summary": {
+                "title": "Todos los usuarios",
+                "subtitle": "Lista de usuarios registrados",
+                "total": "Total de usuarios: {count}"
+            }
+        },
+        "dashboard": {
+            "title": "Tablero",
+            "subtitle": "Bienvenido, {name}! Aquí tienes un resumen de tu trabajo.",
+            "recentJobs": {
+                "title": "Trabajos recientes",
+                "subtitle": "Trabajos pendientes por completar"
+            },
+            "pendingOrders": {
+                "title": "Órdenes pendientes",
+                "subtitle": "Órdenes que requieren atención"
+            },
+            "dataExport": {
+                "title": "Exportar datos",
+                "subtitle": "Descarga información en formato CSV"
+            }
         }
     },
     "toolbar": {
