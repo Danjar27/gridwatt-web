@@ -12,35 +12,40 @@ const DashboardPage = () => {
     const i18n = useTranslations();
     const { user } = useAuthContext();
 
-    const userRole = user?.role?.name || user?.roleName;
+    const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
     const isAdmin = userRole === 'admin' || userRole === 'manager';
 
     const { data: jobs = [] } = useQuery({
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
         queryFn: () => (isTechnician ? apiClient.getMyJobs() : apiClient.getJobs()),
+        select: (d) => (Array.isArray(d) ? d : d.data),
     });
 
     const { data: orders = [] } = useQuery({
         queryKey: ['orders', isTechnician ? 'my' : 'all'],
         queryFn: () => (isTechnician ? apiClient.getMyOrders() : apiClient.getOrders()),
+        select: (d) => (Array.isArray(d) ? d : d.data),
     });
 
     const { data: materials = [] } = useQuery({
         queryKey: ['materials'],
         queryFn: () => apiClient.getMaterials(),
+        select: (d) => (Array.isArray(d) ? d : d.data),
         enabled: isAdmin,
     });
 
     const { data: activities = [] } = useQuery({
         queryKey: ['activities'],
         queryFn: () => apiClient.getActivities(),
+        select: (d) => (Array.isArray(d) ? d : d.data),
         enabled: isAdmin,
     });
 
     const { data: seals = [] } = useQuery({
         queryKey: ['seals'],
         queryFn: () => apiClient.getSeals(),
+        select: (d) => (Array.isArray(d) ? d : d.data),
         enabled: isAdmin,
     });
 

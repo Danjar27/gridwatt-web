@@ -144,6 +144,11 @@
     }
 }
 
+html, body, #root {
+    height: 100dvh;
+    overflow: hidden;
+}
+
 .scrollbar-hide {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
@@ -151,4 +156,9 @@
 
 .scrollbar-hide::-webkit-scrollbar {
     display: none; /* Chrome, Safari, and Opera */
+}
+
+/* Safe area padding for bottom nav on devices with home indicator */
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
