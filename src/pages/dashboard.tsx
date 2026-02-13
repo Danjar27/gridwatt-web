@@ -1,4 +1,4 @@
-import { Briefcase, ClipboardList, CheckCircle, Clock, LayoutDashboard } from 'lucide-react';
+import { Briefcase, ClipboardList, CheckCircle, Clock, Download, LayoutDashboard } from 'lucide-react';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@lib/api-client';
@@ -7,6 +7,8 @@ import Papa from 'papaparse';
 import Page from '@layouts/Page.tsx';
 import { useTranslations } from 'use-intl';
 import Summary from '@components/Summary/Summary.tsx';
+import DatePicker from '@components/DatePicker/DatePicker';
+import { INPUT_CLASS } from '@components/Form/utils/constants';
 
 const DashboardPage = () => {
     const i18n = useTranslations();
@@ -94,46 +96,7 @@ const DashboardPage = () => {
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [selectedTargets, setSelectedTargets] = useState<Array<(typeof exportTargets)[number]['value']>>([]);
-
-    const isWithinRange = (dateValue?: string) => {
-        if (!dateValue) {
-            return false;
-        }
-        const date = new Date(dateValue);
-        if (Number.isNaN(date.getTime())) {
-            return false;
-        }
-        if (startDate) {
-            const start = new Date(startDate);
-            if (!Number.isNaN(start.getTime()) && date < start) {
-                return false;
-            }
-        }
-        if (endDate) {
-            const end = new Date(endDate);
-            if (!Number.isNaN(end.getTime()) && date > end) {
-                return false;
-            }
-        }
-
-        return true;
-    };
-
-    const filteredOrders = orders.filter((order) => {
-        if (!startDate && !endDate) {
-            return true;
-        }
-
-        return isWithinRange(order.issueDate);
-    });
-
-    const filteredJobs = jobs.filter((job) => {
-        if (!startDate && !endDate) {
-            return true;
-        }
-
-        return isWithinRange(job.startDateTime);
-    });
+    const [isExporting, setIsExporting] = useState(false);
 
     const downloadCsv = (filename: string, rows: Array<Record<string, unknown>>) => {
         const csv = Papa.unparse(rows);
@@ -148,78 +111,53 @@ const DashboardPage = () => {
         window.URL.revokeObjectURL(url);
     };
 
-    const handleDownloadCSV = () => {
-        const targets = selectedTargets.length > 0 ? selectedTargets : exportTargets.map((t) => t.value);
+    const handleDownloadCSV = async () => {
+        setIsExporting(true);
+        try {
+            const targets = selectedTargets.length > 0 ? selectedTargets : exportTargets.map((t) => t.value);
+            const dateParams = { from: startDate || undefined, to: endDate || undefined, limit: 10000 };
 
-        targets.forEach((target) => {
-            if (target === 'orders') {
-                const rows = filteredOrders.map((order) => {
+            for (const target of targets) {
+                let data: Array<Record<string, unknown>> = [];
+                let fields: Array<string> = [];
+
+                if (target === 'orders') {
+                    const response = await apiClient.getOrders(dateParams);
+                    data = response.data;
+                    fields = orderFields;
+                } else if (target === 'jobs') {
+                    const response = await apiClient.getJobs(dateParams);
+                    data = response.data;
+                    fields = jobFields;
+                } else if (target === 'materials') {
+                    const response = await apiClient.getMaterials(dateParams);
+                    data = response.data;
+                    fields = materialFields;
+                } else if (target === 'activities') {
+                    const response = await apiClient.getActivities(dateParams);
+                    data = response.data;
+                    fields = activityFields;
+                } else if (target === 'seals') {
+                    const response = await apiClient.getSeals(dateParams);
+                    data = response.data;
+                    fields = sealFields;
+                }
+
+                const rows = data.map((item) => {
                     const row: Record<string, unknown> = {};
-                    orderFields.forEach((field) => {
-                        row[field] = (order as Record<string, unknown>)[field];
+                    fields.forEach((field) => {
+                        row[field] = (item as Record<string, unknown>)[field];
                     });
 
                     return row;
                 });
-                downloadCsv('orders.csv', rows);
-
-                return;
+                downloadCsv(`${target}.csv`, rows);
             }
-
-            if (target === 'jobs') {
-                const rows = filteredJobs.map((job) => {
-                    const row: Record<string, unknown> = {};
-                    jobFields.forEach((field) => {
-                        row[field] = (job as Record<string, unknown>)[field];
-                    });
-
-                    return row;
-                });
-                downloadCsv('jobs.csv', rows);
-
-                return;
-            }
-
-            if (target === 'materials') {
-                const rows = materials.map((material) => {
-                    const row: Record<string, unknown> = {};
-                    materialFields.forEach((field) => {
-                        row[field] = (material as Record<string, unknown>)[field];
-                    });
-
-                    return row;
-                });
-                downloadCsv('materials.csv', rows);
-
-                return;
-            }
-
-            if (target === 'activities') {
-                const rows = activities.map((activity) => {
-                    const row: Record<string, unknown> = {};
-                    activityFields.forEach((field) => {
-                        row[field] = (activity as Record<string, unknown>)[field];
-                    });
-
-                    return row;
-                });
-                downloadCsv('activities.csv', rows);
-
-                return;
-            }
-
-            if (target === 'seals') {
-                const rows = seals.map((seal) => {
-                    const row: Record<string, unknown> = {};
-                    sealFields.forEach((field) => {
-                        row[field] = (seal as Record<string, unknown>)[field];
-                    });
-
-                    return row;
-                });
-                downloadCsv('seals.csv', rows);
-            }
-        });
+        } catch (error) {
+            console.error('Export failed:', error);
+        } finally {
+            setIsExporting(false);
+        }
     };
 
     const stats = [
@@ -227,40 +165,47 @@ const DashboardPage = () => {
             name: 'Total Jobs',
             value: jobs.length,
             icon: Briefcase,
-            color: 'bg-blue-100 text-blue-600',
+            color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
         },
         {
             name: 'Pending Jobs',
             value: pendingJobs.length,
             icon: Clock,
-            color: 'bg-yellow-100 text-yellow-600',
+            color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
         },
         {
             name: 'Completed Jobs',
             value: completedJobs.length,
             icon: CheckCircle,
-            color: 'bg-green-100 text-green-600',
+            color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
         },
         {
             name: 'Pending Orders',
             value: pendingOrders.length,
             icon: ClipboardList,
-            color: 'bg-purple-100 text-purple-600',
+            color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
         },
     ];
 
     return (
-        <Page id="dashboard" title={i18n('pages.dashboard.title')} subtitle={i18n('pages.dashboard.subtitle', { name: user?.name || '' })}>
-            <div className="space-y-6">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Page
+            id="dashboard"
+            title={i18n('pages.dashboard.title')}
+            subtitle={i18n('pages.dashboard.subtitle', { name: user?.name || '' })}
+        >
+            <div className="flex flex-col gap-4 s768:gap-6 s992:gap-10">
+                <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-4">
                     {stats.map((stat) => (
-                        <div key={stat.name} className="rounded-lg border bg-card p-6 shadow-sm">
-                            <div className="flex items-center gap-4">
-                                <div className={`rounded-lg p-3 ${stat.color}`}>
-                                    <stat.icon className="h-6 w-6" />
+                        <div
+                            key={stat.name}
+                            className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 s768:p-5"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div className={`rounded-lg p-2.5 ${stat.color}`}>
+                                    <stat.icon className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="text-sm text-muted-foreground">{stat.name}</p>
+                                    <p className="text-xs text-neutral-900">{stat.name}</p>
                                     <p className="text-2xl font-bold">{stat.value}</p>
                                 </div>
                             </div>
@@ -268,28 +213,28 @@ const DashboardPage = () => {
                     ))}
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-4 s768:gap-6 s992:grid-cols-2">
                     <Summary
                         icon={Briefcase}
                         title={i18n('pages.dashboard.recentJobs.title')}
                         subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
                     >
                         {pendingJobs.length === 0 ? (
-                            <p className="text-muted-foreground">No pending jobs</p>
+                            <p className="text-sm text-neutral-900 py-2">No pending jobs</p>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="flex flex-col gap-2">
                                 {pendingJobs.slice(0, 5).map((job) => (
                                     <div
                                         key={job.id}
-                                        className="flex items-center justify-between rounded-lg bg-muted/50 p-3"
+                                        className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
                                     >
                                         <div>
-                                            <p className="font-medium">Job #{job.id}</p>
-                                            <p className="text-sm text-muted-foreground">
+                                            <p className="text-sm font-medium">Job #{job.id}</p>
+                                            <p className="text-xs text-neutral-900">
                                                 {job.order?.serviceType} - {job.order?.meterNumber}
                                             </p>
                                         </div>
-                                        <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800">
+                                        <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
                                             {job.jobStatus || 'In Progress'}
                                         </span>
                                     </div>
@@ -304,23 +249,23 @@ const DashboardPage = () => {
                         subtitle={i18n('pages.dashboard.pendingOrders.subtitle')}
                     >
                         {pendingOrders.length === 0 ? (
-                            <p className="text-muted-foreground">No pending orders</p>
+                            <p className="text-sm text-neutral-900 py-2">No pending orders</p>
                         ) : (
-                            <div className="space-y-3">
+                            <div className="flex flex-col gap-2">
                                 {pendingOrders.slice(0, 5).map((order) => (
                                     <div
                                         key={order.id}
-                                        className="flex items-center justify-between rounded-lg bg-muted/50 p-3"
+                                        className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
                                     >
                                         <div>
-                                            <p className="font-medium">
+                                            <p className="text-sm font-medium">
                                                 {order.firstName} {order.lastName}
                                             </p>
-                                            <p className="text-sm text-muted-foreground">
+                                            <p className="text-xs text-neutral-900">
                                                 {order.serviceType} - {order.meterNumber}
                                             </p>
                                         </div>
-                                        <span className="rounded-full bg-purple-100 px-2 py-1 text-xs text-purple-800">
+                                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
                                             {order.orderStatus}
                                         </span>
                                     </div>
@@ -336,51 +281,58 @@ const DashboardPage = () => {
                         title={i18n('pages.dashboard.dataExport.title')}
                         subtitle={i18n('pages.dashboard.dataExport.subtitle')}
                     >
-                        <div className="flex flex-col s768:flex-row flex-wrap items-stretch s768:items-center gap-3">
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(event) => setStartDate(event.target.value)}
-                                className="rounded-md border px-2 py-1 text-sm font-medium text-muted-foreground"
-                                placeholder="Start Date"
-                            />
-                            <input
-                                type="date"
-                                value={endDate}
-                                onChange={(event) => setEndDate(event.target.value)}
-                                min={startDate || undefined}
-                                className="rounded-md border px-2 py-1 text-sm font-medium text-muted-foreground"
-                                placeholder="End Date"
-                            />
-                            <div className="w-full s768:min-w-[260px] s768:w-auto">
-                                <label className="sr-only" htmlFor="export-targets">
-                                    Select node types to export
-                                </label>
-                                <select
-                                    id="export-targets"
-                                    multiple
-                                    value={selectedTargets}
-                                    onChange={(event) => {
-                                        const values = Array.from(event.target.selectedOptions).map(
-                                            (option) => option.value as (typeof exportTargets)[number]['value']
-                                        );
-                                        setSelectedTargets(values);
-                                    }}
-                                    className="h-28 w-full rounded-md border px-2 py-1 text-sm font-medium text-muted-foreground"
-                                >
-                                    {exportTargets.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
+                        <div className="flex flex-col gap-4">
+                            <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-3">
+                                <DatePicker
+                                    id="export-start-date"
+                                    label="From"
+                                    value={startDate}
+                                    onChange={setStartDate}
+                                    placeholder="Start Date"
+                                />
+                                <DatePicker
+                                    id="export-end-date"
+                                    label="To"
+                                    value={endDate}
+                                    onChange={setEndDate}
+                                    min={startDate || undefined}
+                                    placeholder="End Date"
+                                />
+                                <div className="flex flex-col s425:col-span-2 s992:col-span-1">
+                                    <label className="block text-sm font-medium mb-1" htmlFor="export-targets">
+                                        Data
+                                    </label>
+                                    <select
+                                        id="export-targets"
+                                        multiple
+                                        value={selectedTargets}
+                                        onChange={(event) => {
+                                            const values = Array.from(event.target.selectedOptions).map(
+                                                (option) => option.value as (typeof exportTargets)[number]['value']
+                                            );
+                                            setSelectedTargets(values);
+                                        }}
+                                        className={INPUT_CLASS + ' h-[7.5rem]'}
+                                    >
+                                        {exportTargets.map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
                             </div>
-                            <button
-                                onClick={handleDownloadCSV}
-                                className="rounded-md border border-primary px-3 py-2 text-sm font-medium text-primary transition hover:bg-primary/10"
-                            >
-                                Download CSV
-                            </button>
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => void handleDownloadCSV()}
+                                    disabled={isExporting}
+                                    className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+                                >
+                                    <Download className="h-4 w-4" />
+                                    {isExporting ? 'Exporting...' : 'Download CSV'}
+                                </button>
+                            </div>
                         </div>
                     </Summary>
                 )}

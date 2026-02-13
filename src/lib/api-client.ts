@@ -14,7 +14,7 @@ interface OfflineMutationOptions {
 }
 
 export interface PaginatedResponse<T> {
-    data: T[];
+    data: Array<T>;
     total: number;
     limit: number;
     offset: number;
@@ -242,6 +242,7 @@ class ApiClient {
     // Users
     async getUsers(params?: { limit?: number; offset?: number }) {
         const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+
         return this.request<PaginatedResponse<User>>(`/users${qs}`);
     }
 
@@ -301,8 +302,15 @@ class ApiClient {
     }
 
     // Orders
-    async getOrders(params?: { limit?: number; offset?: number }) {
-        const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+    async getOrders(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
         return this.request<PaginatedResponse<Order>>(`/orders${qs}`);
     }
 
@@ -335,9 +343,36 @@ class ApiClient {
         });
     }
 
+    async bulkAssignOrders(orderIds: number[], technicianId: number) {
+        return this.request<Order[]>('/orders/bulk-assign', {
+            method: 'PUT',
+            body: JSON.stringify({ orderIds, technicianId }),
+        });
+    }
+
+    // Notifications
+    async getNotifications() {
+        return this.request<Notification[]>('/notifications');
+    }
+
+    async markNotificationRead(id: number) {
+        return this.request('/notifications/' + id + '/read', { method: 'PUT' });
+    }
+
+    async markAllNotificationsRead() {
+        return this.request('/notifications/read-all', { method: 'PUT' });
+    }
+
     // Jobs
-    async getJobs(params?: { limit?: number; offset?: number }) {
-        const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+    async getJobs(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
         return this.request<PaginatedResponse<Job>>(`/jobs${qs}`);
     }
 
@@ -398,8 +433,15 @@ class ApiClient {
     }
 
     // Materials
-    async getMaterials(params?: { limit?: number; offset?: number }) {
-        const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+    async getMaterials(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
         return this.request<PaginatedResponse<Material>>(`/materials${qs}`);
     }
 
@@ -448,8 +490,15 @@ class ApiClient {
     }
 
     // Activities
-    async getActivities(params?: { limit?: number; offset?: number }) {
-        const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+    async getActivities(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
         return this.request<PaginatedResponse<Activity>>(`/activities${qs}`);
     }
 
@@ -492,8 +541,15 @@ class ApiClient {
     }
 
     // Seals
-    async getSeals(params?: { limit?: number; offset?: number }) {
-        const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+    async getSeals(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
         return this.request<PaginatedResponse<Seal>>(`/seals${qs}`);
     }
 
@@ -677,6 +733,17 @@ export interface OrdersImportPreviewResponse {
 
 export interface OrdersImportCommitResponse {
     createdCount: number;
+}
+
+export interface Notification {
+    id: number;
+    userId: number;
+    type: string;
+    title: string;
+    message: string;
+    data?: { orderId?: number; jobId?: number };
+    read: boolean;
+    createdAt: string;
 }
 
 export interface Job {

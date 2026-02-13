@@ -26,7 +26,7 @@ const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
     ];
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 flex s992:hidden bg-neutral-500 border-t border-neutral-800 safe-bottom">
+        <nav className="shrink-0 flex s992:hidden bg-neutral-500 border-t border-neutral-800 safe-bottom">
             {navItems.map((item) => {
                 const isActive = location.pathname.startsWith(item.href);
 

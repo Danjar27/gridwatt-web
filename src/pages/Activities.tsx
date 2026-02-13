@@ -3,7 +3,7 @@ import { apiClient, type Activity } from '@/lib/api-client';
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Clipboard, Clock } from 'lucide-react';
 import { formatEntityId } from '@/utils/format-id';
-import { type ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
 import { useServerPagination } from '@components/Table/hooks/useServerPagination';
 import Page from '@layouts/Page.tsx';
@@ -35,18 +35,18 @@ const ActivitiesPage = () => {
         };
         fetchPending();
         const interval = setInterval(fetchPending, 2000);
+
         return () => clearInterval(interval);
     }, []);
 
-    const columns = useMemo<ColumnDef<Activity, any>[]>(
+    const columns = useMemo<Array<ColumnDef<Activity, any>>>(
         () => [
             {
                 accessorKey: 'id',
                 header: 'Id',
                 cell: ({ row }) => {
-                    const isPending = pendingMutations.some(
-                        (m) => (m.optimisticData as any)?.id === row.original.id,
-                    );
+                    const isPending = pendingMutations.some((m) => (m.optimisticData as any)?.id === row.original.id);
+
                     return (
                         <div className="flex items-center gap-2 font-mono text-sm">
                             {formatEntityId('activity', row.original.id)}
@@ -69,9 +69,7 @@ const ActivitiesPage = () => {
                 accessorKey: 'description',
                 header: 'Description',
                 cell: ({ row }) => (
-                    <div className="text-sm text-muted-foreground">
-                        {row.original.description || '-'}
-                    </div>
+                    <div className="text-sm text-muted-foreground">{row.original.description || '-'}</div>
                 ),
             },
             {
@@ -110,7 +108,7 @@ const ActivitiesPage = () => {
                 ),
             },
         ],
-        [pendingMutations],
+        [pendingMutations]
     );
 
     const { table, isLoading, total } = useServerPagination<Activity>({
