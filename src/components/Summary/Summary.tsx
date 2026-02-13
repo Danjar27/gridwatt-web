@@ -5,8 +5,8 @@ import { classnames } from '@utils/classnames.ts';
 
 const Summary: FC<PropsWithChildren<SummaryProps>> = ({ title, subtitle, icon: Icon, children, legend, className }) => (
     <div className={classnames('rounded-lg border border-neutral-800 overflow-hidden', className)}>
-        <div className="flex justify-between items-center gap-5 border-b border-neutral-800 bg-neutral-600/60 px-6 py-2">
-            <div className="flex justify-between items-center gap-5">
+        <div className="flex flex-col s425:flex-row justify-between items-start s425:items-center gap-2 s425:gap-5 border-b border-neutral-800 bg-neutral-600/60 px-3 py-2 s768:px-6">
+            <div className="flex justify-between items-center gap-3 s425:gap-5">
                 {Icon && (
                     <Icon
                         width={32}
@@ -21,7 +21,7 @@ const Summary: FC<PropsWithChildren<SummaryProps>> = ({ title, subtitle, icon: I
             </div>
             {legend && <span className="text-xs text-neutral-900">{legend}</span>}
         </div>
-        <div className="px-6 py-2">{children}</div>
+        <div className="px-3 py-2 s768:px-6">{children}</div>
     </div>
 );
 

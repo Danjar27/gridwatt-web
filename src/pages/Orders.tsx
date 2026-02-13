@@ -82,8 +82,8 @@ const OrdersPage = () => {
     return (
         <Page id="orders" title={i18n('pages.orders.title')} subtitle={i18n('pages.orders.subtitle')}>
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
+                <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {!isTechnician && (
                             <>
                                 <button

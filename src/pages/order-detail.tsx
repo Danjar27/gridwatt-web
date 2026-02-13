@@ -80,12 +80,12 @@ export function OrderDetailPage() {
                 </Link>
             </div>
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold">Order #{order.id}</h1>
+                    <h1 className="text-xl s768:text-2xl font-bold">Order #{order.id}</h1>
                     <p className="text-muted-foreground">{order.serviceType}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col s425:flex-row gap-2">
                     {isAssignedToMe && !hasActiveJob && (
                         <button
                             onClick={() => startJobMutation.mutate()}
@@ -99,7 +99,7 @@ export function OrderDetailPage() {
                 </div>
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 s992:grid-cols-2">
                 {/* Customer Info */}
                 <div className="rounded-lg border bg-card p-6">
                     <h2 className="mb-4 text-lg font-semibold">Customer Information</h2>

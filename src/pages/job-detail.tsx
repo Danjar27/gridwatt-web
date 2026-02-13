@@ -106,12 +106,12 @@ export function JobDetailPage() {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold">Job #{job.id}</h1>
+                    <h1 className="text-xl s768:text-2xl font-bold">Job #{job.id}</h1>
                     <p className="text-muted-foreground">{job.jobType}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col s425:flex-row gap-2">
                     <button
                         onClick={handleSave}
                         disabled={updateMutation.isPending}
@@ -144,7 +144,7 @@ export function JobDetailPage() {
                 </div>
             )}
 
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 s992:grid-cols-2">
                 {/* Order Info */}
                 {job.order && (
                     <div className="rounded-lg border bg-card p-6">

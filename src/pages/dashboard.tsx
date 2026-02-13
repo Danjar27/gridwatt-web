@@ -331,7 +331,7 @@ const DashboardPage = () => {
                         title={i18n('pages.dashboard.dataExport.title')}
                         subtitle={i18n('pages.dashboard.dataExport.subtitle')}
                     >
-                        <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex flex-col s768:flex-row flex-wrap items-stretch s768:items-center gap-3">
                             <input
                                 type="date"
                                 value={startDate}
@@ -347,7 +347,7 @@ const DashboardPage = () => {
                                 className="rounded-md border px-2 py-1 text-sm font-medium text-muted-foreground"
                                 placeholder="End Date"
                             />
-                            <div className="min-w-[260px]">
+                            <div className="w-full s768:min-w-[260px] s768:w-auto">
                                 <label className="sr-only" htmlFor="export-targets">
                                     Select node types to export
                                 </label>

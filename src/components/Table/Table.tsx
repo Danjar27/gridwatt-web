@@ -4,10 +4,12 @@ import type { FC, PropsWithChildren } from 'react';
 import Header from './blocks/Header.tsx';
 
 const Table: FC<PropsWithChildren<TableProps>> = ({ children, columns = [] }) => (
-    <table className="grid w-full">
-        <Header row={columns} />
-        {children}
-    </table>
+    <div className="overflow-x-auto">
+        <table className="grid w-full min-w-[600px]">
+            <Header row={columns} />
+            {children}
+        </table>
+    </div>
 );
 
 export default Table;
