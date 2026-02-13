@@ -1,4 +1,4 @@
-import type { Section } from './Sidebar.interface.ts';
+import type { Section, SidebarProps } from './Sidebar.interface.ts';
 import type { FC } from 'react';
 
 import { NAVIGATION_ITEMS } from './utils/constants.ts';
@@ -7,10 +7,11 @@ import { useTranslations } from 'use-intl';
 
 import SidebarSection from './blocks/Section.tsx';
 import Logo from '@components/atoms/Logo.tsx';
-import User from './blocks/User.tsx';
 import Item from './blocks/Item.tsx';
+import DesktopSidebar from '@components/Sidebar/blocks/Desktop.tsx';
+import MobileSidebar from '@components/Sidebar/blocks/Mobile.tsx';
 
-const Sidebar: FC = () => {
+const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
     const i18n = useTranslations();
 
     const { user } = useAuthContext();
@@ -31,9 +32,9 @@ const Sidebar: FC = () => {
         }
     }
 
-    return (
-        <aside className="flex flex-col gap-5 min-w-70 justify-start">
-            <div className="flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
+    const SideBarContent = () => (
+        <>
+            <div className="hidden s992:flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
                 <div className="flex items-center w-full justify-center py-5">
                     <Logo className="h-14 w-14 text-black dark:text-white" />
                     <span className="text-xl font-semibold">{i18n('brand')}</span>
@@ -51,10 +52,18 @@ const Sidebar: FC = () => {
                     </SidebarSection>
                 ))}
             </div>
-            <div className="flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
-                <User />
-            </div>
-        </aside>
+        </>
+    );
+
+    return (
+        <>
+            <MobileSidebar className="flex s992:hidden" open={open} onClose={onClose}>
+                <SideBarContent />
+            </MobileSidebar>
+            <DesktopSidebar className="hidden s992:flex">
+                <SideBarContent />
+            </DesktopSidebar>
+        </>
     );
 };
 

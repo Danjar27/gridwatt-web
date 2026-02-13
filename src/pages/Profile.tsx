@@ -6,17 +6,17 @@ import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
 import Page from '@layouts/Page.tsx';
 import Summary from '@components/Summary/Summary';
+import Form from '@components/Form/Form';
+import Field from '@components/Form/blocks/Field';
+import TextInput from '@components/Form/blocks/TextInput';
+import PasswordInput from '@components/Form/blocks/PasswordInput';
+import PhoneInput from '@components/Form/blocks/PhoneInput';
+import FormError from '@components/Form/blocks/Error';
 
 const ProfilePage = () => {
     const i18n = useTranslations();
     const { user } = useAuthContext();
     const queryClient = useQueryClient();
-
-    const [name, setName] = useState(user?.name || '');
-    const [lastName, setLastName] = useState(user?.lastName || '');
-    const [phone, setPhone] = useState(user?.phone || '');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -25,8 +25,6 @@ const ProfilePage = () => {
             apiClient.updateProfile(data),
         onSuccess: () => {
             setSuccess('Profile updated successfully');
-            setPassword('');
-            setConfirmPassword('');
             queryClient.invalidateQueries({ queryKey: ['profile'] });
         },
         onError: (err) => {
@@ -34,33 +32,26 @@ const ProfilePage = () => {
         },
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = (data: any) => {
         setError('');
         setSuccess('');
 
-        if (password && password !== confirmPassword) {
+        if (data.password && data.password !== data.confirmPassword) {
             setError('Passwords do not match');
-
             return;
         }
 
-        const data: {
-            name?: string;
-            lastName?: string;
-            phone?: string;
-            password?: string;
-        } = {
-            name,
-            lastName,
-            phone,
+        const payload: { name?: string; lastName?: string; phone?: string; password?: string } = {
+            name: data.name,
+            lastName: data.lastName,
+            phone: data.phone,
         };
 
-        if (password) {
-            data.password = password;
+        if (data.password) {
+            payload.password = data.password;
         }
 
-        updateMutation.mutate(data);
+        updateMutation.mutate(payload);
     };
 
     return (
@@ -81,40 +72,31 @@ const ProfilePage = () => {
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">{error}</div>}
+                <Form
+                    onSubmit={handleSubmit}
+                    defaultValues={{
+                        name: user?.name || '',
+                        lastName: user?.lastName || '',
+                        phone: user?.phone || '',
+                        password: '',
+                        confirmPassword: '',
+                    }}
+                >
+                    <FormError message={error || null} />
                     {success && <div className="rounded-lg bg-green-50 p-3 text-sm text-green-600">{success}</div>}
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="block text-sm font-medium">First Name</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="mt-1 block w-full rounded-lg border px-3 py-2"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium">Last Name</label>
-                            <input
-                                type="text"
-                                value={lastName}
-                                onChange={(e) => setLastName(e.target.value)}
-                                className="mt-1 block w-full rounded-lg border px-3 py-2"
-                            />
-                        </div>
+                        <Field name="name" label="First Name">
+                            <TextInput name="name" />
+                        </Field>
+                        <Field name="lastName" label="Last Name">
+                            <TextInput name="lastName" />
+                        </Field>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium">Phone</label>
-                        <input
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="mt-1 block w-full rounded-lg border px-3 py-2"
-                        />
-                    </div>
+                    <Field name="phone" label="Phone">
+                        <PhoneInput name="phone" />
+                    </Field>
 
                     <hr className="my-6" />
 
@@ -122,26 +104,12 @@ const ProfilePage = () => {
                     <p className="text-sm text-muted-foreground">Leave blank to keep current password</p>
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label className="block text-sm font-medium">New Password</label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="mt-1 block w-full rounded-lg border px-3 py-2"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium">Confirm Password</label>
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="mt-1 block w-full rounded-lg border px-3 py-2"
-                                placeholder="••••••••"
-                            />
-                        </div>
+                        <Field name="password" label="New Password">
+                            <PasswordInput name="password" />
+                        </Field>
+                        <Field name="confirmPassword" label="Confirm Password">
+                            <PasswordInput name="confirmPassword" />
+                        </Field>
                     </div>
 
                     <div className="flex justify-end">
@@ -154,7 +122,7 @@ const ProfilePage = () => {
                             {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
-                </form>
+                </Form>
             </Summary>
         </Page>
     );

@@ -13,6 +13,13 @@ interface OfflineMutationOptions {
     optimisticData?: unknown;
 }
 
+export interface PaginatedResponse<T> {
+    data: Array<T>;
+    total: number;
+    limit: number;
+    offset: number;
+}
+
 class ApiClient {
     private accessToken: string | null = null;
     private refreshToken: string | null = null;
@@ -233,8 +240,10 @@ class ApiClient {
     }
 
     // Users
-    async getUsers() {
-        return this.request<Array<User>>('/users');
+    async getUsers(params?: { limit?: number; offset?: number }) {
+        const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+
+        return this.request<PaginatedResponse<User>>(`/users${qs}`);
     }
 
     async getRoles() {
@@ -293,8 +302,16 @@ class ApiClient {
     }
 
     // Orders
-    async getOrders() {
-        return this.request<Array<Order>>('/orders');
+    async getOrders(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
+        return this.request<PaginatedResponse<Order>>(`/orders${qs}`);
     }
 
     async getMyOrders() {
@@ -326,9 +343,37 @@ class ApiClient {
         });
     }
 
+    async bulkAssignOrders(orderIds: number[], technicianId: number) {
+        return this.request<Order[]>('/orders/bulk-assign', {
+            method: 'PUT',
+            body: JSON.stringify({ orderIds, technicianId }),
+        });
+    }
+
+    // Notifications
+    async getNotifications() {
+        return this.request<Notification[]>('/notifications');
+    }
+
+    async markNotificationRead(id: number) {
+        return this.request('/notifications/' + id + '/read', { method: 'PUT' });
+    }
+
+    async markAllNotificationsRead() {
+        return this.request('/notifications/read-all', { method: 'PUT' });
+    }
+
     // Jobs
-    async getJobs() {
-        return this.request<Array<Job>>('/jobs');
+    async getJobs(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
+        return this.request<PaginatedResponse<Job>>(`/jobs${qs}`);
     }
 
     async getMyJobs() {
@@ -387,9 +432,33 @@ class ApiClient {
         });
     }
 
+    async removeJobActivity(jobActivityId: string) {
+        return this.request(`/jobs/activities/${jobActivityId}`, { method: 'DELETE' });
+    }
+
+    async removeJobSeal(jobSealId: string) {
+        return this.request(`/jobs/seals/${jobSealId}`, { method: 'DELETE' });
+    }
+
+    async removeJobMaterial(workMaterialId: string) {
+        return this.request(`/jobs/materials/${workMaterialId}`, { method: 'DELETE' });
+    }
+
+    async removeJobPhoto(photoId: string) {
+        return this.request(`/jobs/photos/${photoId}`, { method: 'DELETE' });
+    }
+
     // Materials
-    async getMaterials() {
-        return this.request<Array<Material>>('/materials');
+    async getMaterials(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
+        return this.request<PaginatedResponse<Material>>(`/materials${qs}`);
     }
 
     async createMaterial(data: Partial<Material>) {
@@ -437,8 +506,16 @@ class ApiClient {
     }
 
     // Activities
-    async getActivities() {
-        return this.request<Array<Activity>>('/activities');
+    async getActivities(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
+        return this.request<PaginatedResponse<Activity>>(`/activities${qs}`);
     }
 
     async createActivity(data: Partial<Activity>) {
@@ -480,8 +557,16 @@ class ApiClient {
     }
 
     // Seals
-    async getSeals() {
-        return this.request<Array<Seal>>('/seals');
+    async getSeals(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+        const qs = params
+            ? `?${new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, v]) => v != null)
+                      .map(([k, v]) => [k, String(v)])
+              ).toString()}`
+            : '';
+
+        return this.request<PaginatedResponse<Seal>>(`/seals${qs}`);
     }
 
     async createSeal(data: Partial<Seal>) {
@@ -664,6 +749,17 @@ export interface OrdersImportPreviewResponse {
 
 export interface OrdersImportCommitResponse {
     createdCount: number;
+}
+
+export interface Notification {
+    id: number;
+    userId: number;
+    type: string;
+    title: string;
+    message: string;
+    data?: { orderId?: number; jobId?: number };
+    read: boolean;
+    createdAt: string;
 }
 
 export interface Job {

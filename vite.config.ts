@@ -17,7 +17,7 @@ export default defineConfig({
             registerType: 'prompt',
             includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
             manifest: {
-                background_color: '#ffffff',
+                background_color: '#EAE9EE',
                 description: 'Electrician work order management system',
                 display: 'standalone',
                 icons: [
@@ -37,7 +37,7 @@ export default defineConfig({
                 name: 'Grid Watt',
                 orientation: 'portrait',
                 short_name: 'GridWatt',
-                theme_color: '#3b82f6',
+                theme_color: '#EAE9EE',
             },
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
@@ -50,6 +50,34 @@ export default defineConfig({
                             expiration: {
                                 maxEntries: 100,
                                 maxAgeSeconds: 60 * 60 * 24, // 24 hours
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200],
+                            },
+                        },
+                    },
+                    {
+                        urlPattern: /^https:\/\/[abcd]\.basemaps\.cartocdn\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'map-tiles',
+                            expiration: {
+                                maxEntries: 5000,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200],
+                            },
+                        },
+                    },
+                    {
+                        urlPattern: /^https:\/\/[abc]\.tile\.openstreetmap\.org\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'map-tiles-osm',
+                            expiration: {
+                                maxEntries: 5000,
+                                maxAgeSeconds: 60 * 60 * 24 * 30,
                             },
                             cacheableResponse: {
                                 statuses: [0, 200],

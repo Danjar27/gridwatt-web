@@ -10,6 +10,18 @@ export interface SectionProps {
     title: string;
 }
 
+export interface MobileSidebarProps {
+    className?: string;
+    open: boolean;
+    onClose: () => void;
+}
+
+export interface DesktopSidebarProps {
+    className?: string;
+}
+
+export type SidebarProps = MobileSidebarProps & DesktopSidebarProps;
+
 interface Route {
     name: string;
     href: string;

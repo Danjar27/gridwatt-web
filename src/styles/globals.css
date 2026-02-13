@@ -72,8 +72,13 @@
     --color-error-400: var(--error-400);
     --color-error-500: var(--error-500);
 
-
-    --radius-20: 0.5rem;
+    --breakpoint-s320: 320px;
+    --breakpoint-s375: 375px;
+    --breakpoint-s425: 425px;
+    --breakpoint-s768: 768px;
+    --breakpoint-s992: 992px;
+    --breakpoint-s1200: 1200px;
+    --breakpoint-s1600: 1600px;
 }
 
 @layer base {
@@ -139,6 +144,11 @@
     }
 }
 
+html, body, #root {
+    height: 100dvh;
+    overflow: hidden;
+}
+
 .scrollbar-hide {
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
@@ -146,4 +156,9 @@
 
 .scrollbar-hide::-webkit-scrollbar {
     display: none; /* Chrome, Safari, and Opera */
+}
+
+/* Safe area padding for bottom nav on devices with home indicator */
+.safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }

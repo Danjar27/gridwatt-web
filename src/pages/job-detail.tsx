@@ -2,9 +2,15 @@ import { useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { addOfflineMutation, addPendingPhoto } from '@/lib/offline-store';
-import { useState } from 'react';
-import { Camera, Save, MapPin, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Camera, Save, MapPin, AlertCircle, X } from 'lucide-react';
 import { useOfflineContext } from '@context/offline/context.ts';
+import { INPUT_CLASS } from '@components/Form/utils/constants';
+import { JobActivitiesSection } from './job-detail/JobActivitiesSection';
+import { JobSealsSection } from './job-detail/JobSealsSection';
+import { JobMaterialsSection } from './job-detail/JobMaterialsSection';
+import * as leaflet from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 export function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -41,6 +47,13 @@ export function JobDetailPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['job', id] });
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
+        },
+    });
+
+    const removePhotoMutation = useMutation({
+        mutationFn: (photoId: string) => apiClient.removeJobPhoto(photoId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['job', id] });
         },
     });
 
@@ -91,7 +104,7 @@ export function JobDetailPage() {
     if (isLoading) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
             </div>
         );
     }
@@ -99,23 +112,23 @@ export function JobDetailPage() {
     if (!job) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <p className="text-muted-foreground">Job not found</p>
+                <p className="text-neutral-900">Job not found</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-3">
                 <div>
-                    <h1 className="text-2xl font-bold">Job #{job.id}</h1>
-                    <p className="text-muted-foreground">{job.jobType}</p>
+                    <h1 className="text-xl s768:text-2xl font-bold">Job #{job.id}</h1>
+                    <p className="text-neutral-900">{job.jobType}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col s425:flex-row gap-2">
                     <button
                         onClick={handleSave}
                         disabled={updateMutation.isPending}
-                        className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+                        className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
                         <Save className="h-4 w-4" />
                         Save
@@ -133,7 +146,7 @@ export function JobDetailPage() {
             </div>
 
             {!online && (
-                <div className="flex items-center gap-2 rounded-lg bg-yellow-50 p-4 text-yellow-800">
+                <div className="flex items-center gap-2 rounded-lg bg-secondary-500/10 p-4 text-secondary-500">
                     <AlertCircle className="h-5 w-5" />
                     <div>
                         <p className="font-medium">You're offline</p>
@@ -144,31 +157,31 @@ export function JobDetailPage() {
                 </div>
             )}
 
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="grid gap-6 grid-cols-1 s992:grid-cols-2">
                 {/* Order Info */}
                 {job.order && (
-                    <div className="rounded-lg border bg-card p-6">
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
                         <h2 className="mb-4 text-lg font-semibold">Order Details</h2>
                         <div className="space-y-2 text-sm">
                             <p>
-                                <span className="text-muted-foreground">Customer:</span> {job.order.firstName}{' '}
+                                <span className="text-neutral-900">Customer:</span> {job.order.firstName}{' '}
                                 {job.order.lastName}
                             </p>
                             <p>
-                                <span className="text-muted-foreground">Service Type:</span> {job.order.serviceType}
+                                <span className="text-neutral-900">Service Type:</span> {job.order.serviceType}
                             </p>
                             <p>
-                                <span className="text-muted-foreground">Meter Number:</span> {job.order.meterNumber}
+                                <span className="text-neutral-900">Meter Number:</span> {job.order.meterNumber}
                             </p>
                             <p>
-                                <span className="text-muted-foreground">Location:</span> {job.order.orderLocation}
+                                <span className="text-neutral-900">Location:</span> {job.order.orderLocation}
                             </p>
                             {job.order.latitude && job.order.longitude && (
                                 <a
                                     href={`https://maps.google.com/?q=${job.order.latitude},${job.order.longitude}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-1 text-primary hover:underline"
+                                    className="flex items-center gap-1 text-primary-500 hover:underline"
                                 >
                                     <MapPin className="h-4 w-4" />
                                     Open in Maps
@@ -179,26 +192,26 @@ export function JobDetailPage() {
                 )}
 
                 {/* Job Summary */}
-                <div className="rounded-lg border bg-card p-6">
+                <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
                     <h2 className="mb-4 text-lg font-semibold">Job Information</h2>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-muted-foreground">Meter Reading</label>
+                            <label className="block text-sm font-medium text-neutral-900">Meter Reading</label>
                             <input
                                 type="text"
                                 value={meterReading || job.meterReading || ''}
                                 onChange={(e) => setMeterReading(e.target.value)}
-                                className="mt-1 block w-full rounded-lg border px-3 py-2"
+                                className={`mt-1 ${INPUT_CLASS}`}
                                 placeholder="Enter meter reading"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-muted-foreground">Notes</label>
+                            <label className="block text-sm font-medium text-neutral-900">Notes</label>
                             <textarea
                                 value={notes || job.notes || ''}
                                 onChange={(e) => setNotes(e.target.value)}
                                 rows={4}
-                                className="mt-1 block w-full rounded-lg border px-3 py-2"
+                                className={`mt-1 ${INPUT_CLASS}`}
                                 placeholder="Enter notes..."
                             />
                         </div>
@@ -207,10 +220,10 @@ export function JobDetailPage() {
             </div>
 
             {/* Photos */}
-            <div className="rounded-lg border bg-card p-6">
+            <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="text-lg font-semibold">Photos</h2>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90">
+                    <label className="flex cursor-pointer items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">
                         <Camera className="h-4 w-4" />
                         {online ? 'Add Photo' : 'Select from Library'}
                         <input type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
@@ -222,6 +235,13 @@ export function JobDetailPage() {
                         {job.photos.map((photo) => (
                             <div key={photo.id} className="relative aspect-square overflow-hidden rounded-lg">
                                 <img src={photo.path} alt={photo.type} className="h-full w-full object-cover" />
+                                <button
+                                    onClick={() => removePhotoMutation.mutate(photo.id)}
+                                    disabled={removePhotoMutation.isPending}
+                                    className="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </button>
                                 <span className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-1 text-xs text-white">
                                     {photo.type}
                                 </span>
@@ -229,48 +249,53 @@ export function JobDetailPage() {
                         ))}
                     </div>
                 ) : (
-                    <p className="text-center text-muted-foreground">No photos yet</p>
+                    <p className="text-center text-neutral-900">No photos yet</p>
                 )}
             </div>
 
             {/* Activities */}
-            {job.jobActivities && job.jobActivities.length > 0 && (
-                <div className="rounded-lg border bg-card p-6">
-                    <h2 className="mb-4 text-lg font-semibold">Activities</h2>
-                    <div className="flex flex-wrap gap-2">
-                        {job.jobActivities.map((ja) => (
-                            <span key={ja.id} className="rounded-full bg-blue-100 px-3 py-1 text-sm text-blue-800">
-                                {ja.activity?.name}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            )}
+            <JobActivitiesSection jobId={job.id} jobActivities={job.jobActivities ?? []} />
+
+            {/* Seals */}
+            <JobSealsSection jobId={job.id} jobSeals={job.jobSeals ?? []} />
 
             {/* Materials */}
-            {job.workMaterials && job.workMaterials.length > 0 && (
-                <div className="rounded-lg border bg-card p-6">
-                    <h2 className="mb-4 text-lg font-semibold">Materials Used</h2>
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b">
-                                <th className="py-2 text-left">Material</th>
-                                <th className="py-2 text-right">Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {job.workMaterials.map((wm) => (
-                                <tr key={wm.id} className="border-b">
-                                    <td className="py-2">{wm.material?.name}</td>
-                                    <td className="py-2 text-right">
-                                        {wm.quantity} {wm.material?.unit}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            <JobMaterialsSection jobId={job.id} workMaterials={job.workMaterials ?? []} />
+
+            {/* Location Mini Map */}
+            {job.order?.latitude && job.order?.longitude && (
+                <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
+                    <h2 className="mb-4 text-lg font-semibold">Location</h2>
+                    <JobLocationMap lat={job.order.latitude} lng={job.order.longitude} />
                 </div>
             )}
         </div>
     );
+}
+
+function JobLocationMap({ lat, lng }: { lat: number; lng: number }) {
+    const mapRef = useRef<HTMLDivElement>(null);
+    const mapInstanceRef = useRef<leaflet.Map | null>(null);
+
+    useEffect(() => {
+        if (!mapRef.current || mapInstanceRef.current) return;
+        const map = leaflet.map(mapRef.current).setView([lat, lng], 15);
+        leaflet
+            .tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OSM &copy; CARTO',
+                subdomains: 'abcd',
+            })
+            .addTo(map);
+
+        leaflet.marker([lat, lng]).addTo(map);
+        mapInstanceRef.current = map;
+
+        return () => {
+            map.remove();
+            mapInstanceRef.current = null;
+        };
+    }, [lat, lng]);
+
+    return <div ref={mapRef} className="h-48 w-full rounded" />;
 }

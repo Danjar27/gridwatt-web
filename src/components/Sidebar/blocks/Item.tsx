@@ -13,7 +13,7 @@ const Item: FC<PropsWithChildren<ItemProps>> = ({ children, className, href }) =
         <Link
             to={href}
             className={classnames(
-                'px-4 py-2 rounded-20 w-full font-normal',
+                'px-4 py-2 rounded-lg w-full font-normal',
                 {
                     'bg-primary-500 text-white': isActive,
                     'hover:bg-neutral-600': !isActive,
