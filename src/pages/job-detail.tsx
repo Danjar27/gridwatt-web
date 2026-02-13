@@ -3,9 +3,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { addOfflineMutation, addPendingPhoto } from '@/lib/offline-store';
 import { useState, useEffect, useRef } from 'react';
-import { Camera, Save, MapPin, AlertCircle } from 'lucide-react';
+import { Camera, Save, MapPin, AlertCircle, X } from 'lucide-react';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import { JobActivitiesSection } from './job-detail/JobActivitiesSection';
+import { JobSealsSection } from './job-detail/JobSealsSection';
+import { JobMaterialsSection } from './job-detail/JobMaterialsSection';
 import * as leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -44,6 +47,13 @@ export function JobDetailPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['job', id] });
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
+        },
+    });
+
+    const removePhotoMutation = useMutation({
+        mutationFn: (photoId: string) => apiClient.removeJobPhoto(photoId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['job', id] });
         },
     });
 
@@ -225,6 +235,13 @@ export function JobDetailPage() {
                         {job.photos.map((photo) => (
                             <div key={photo.id} className="relative aspect-square overflow-hidden rounded-lg">
                                 <img src={photo.path} alt={photo.type} className="h-full w-full object-cover" />
+                                <button
+                                    onClick={() => removePhotoMutation.mutate(photo.id)}
+                                    disabled={removePhotoMutation.isPending}
+                                    className="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
+                                >
+                                    <X className="h-3.5 w-3.5" />
+                                </button>
                                 <span className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-1 text-xs text-white">
                                     {photo.type}
                                 </span>
@@ -237,43 +254,13 @@ export function JobDetailPage() {
             </div>
 
             {/* Activities */}
-            {job.jobActivities && job.jobActivities.length > 0 && (
-                <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                    <h2 className="mb-4 text-lg font-semibold">Activities</h2>
-                    <div className="flex flex-wrap gap-2">
-                        {job.jobActivities.map((ja) => (
-                            <span key={ja.id} className="rounded-full bg-primary-500/20 px-3 py-1 text-sm text-primary-500">
-                                {ja.activity?.name}
-                            </span>
-                        ))}
-                    </div>
-                </div>
-            )}
+            <JobActivitiesSection jobId={job.id} jobActivities={job.jobActivities ?? []} />
+
+            {/* Seals */}
+            <JobSealsSection jobId={job.id} jobSeals={job.jobSeals ?? []} />
 
             {/* Materials */}
-            {job.workMaterials && job.workMaterials.length > 0 && (
-                <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                    <h2 className="mb-4 text-lg font-semibold">Materials Used</h2>
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-neutral-800">
-                                <th className="py-2 text-left">Material</th>
-                                <th className="py-2 text-right">Quantity</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {job.workMaterials.map((wm) => (
-                                <tr key={wm.id} className="border-b border-neutral-800">
-                                    <td className="py-2">{wm.material?.name}</td>
-                                    <td className="py-2 text-right">
-                                        {wm.quantity} {wm.material?.unit}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+            <JobMaterialsSection jobId={job.id} workMaterials={job.workMaterials ?? []} />
 
             {/* Location Mini Map */}
             {job.order?.latitude && job.order?.longitude && (

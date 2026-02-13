@@ -432,6 +432,22 @@ class ApiClient {
         });
     }
 
+    async removeJobActivity(jobActivityId: string) {
+        return this.request(`/jobs/activities/${jobActivityId}`, { method: 'DELETE' });
+    }
+
+    async removeJobSeal(jobSealId: string) {
+        return this.request(`/jobs/seals/${jobSealId}`, { method: 'DELETE' });
+    }
+
+    async removeJobMaterial(workMaterialId: string) {
+        return this.request(`/jobs/materials/${workMaterialId}`, { method: 'DELETE' });
+    }
+
+    async removeJobPhoto(photoId: string) {
+        return this.request(`/jobs/photos/${photoId}`, { method: 'DELETE' });
+    }
+
     // Materials
     async getMaterials(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
         const qs = params
