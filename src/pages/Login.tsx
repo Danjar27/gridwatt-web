@@ -37,7 +37,7 @@ const LoginPage = () => {
     const isLoading = authLoading;
 
     return (
-        <div className="flex flex-col h-dvh items-center justify-center bg-main-500 p-4">
+        <div className="flex flex-col h-dvh items-center justify-center bg-primary-500 p-4">
             <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
                 <div className="mb-12 gap-2 flex flex-col items-center">
                     <div className="flex h-16 w-16 items-center justify-center">
@@ -88,7 +88,7 @@ const LoginPage = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="cursor-pointer w-full rounded-lg bg-main-500 px-4 py-2 font-medium text-white hover:bg-main-500/90 disabled:opacity-50"
+                            className="cursor-pointer w-full rounded-lg bg-primary-500 px-4 py-2 font-medium text-white hover:bg-primary-500/90 disabled:opacity-50"
                         >
                             {isLoading ? i18n('auth.submit.loading') : i18n('auth.submit.label')}
                         </button>
