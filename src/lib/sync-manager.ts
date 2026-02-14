@@ -11,6 +11,7 @@ import {
 } from './offline-store';
 import { queryClient } from './query-client';
 
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 const MAX_RETRIES = 3;
 
 // Map mutation types to their query keys
@@ -24,6 +25,17 @@ const typeToQueryKey: Record<MutationType, string> = {
     photo: 'photos',
 };
 
+/**
+ * Normalize endpoint: strip absolute API_URL prefix from old mutations
+ * so executeRequest (which prepends API_URL) works correctly.
+ */
+function normalizeEndpoint(endpoint: string): string {
+    if (endpoint.startsWith('http')) {
+        return endpoint.replace(API_URL, '');
+    }
+    return endpoint;
+}
+
 export async function syncPendingMutations(): Promise<{
     synced: number;
     failed: number;
@@ -36,41 +48,37 @@ export async function syncPendingMutations(): Promise<{
     let synced = 0;
     let failed = 0;
     const syncedTypes = new Set<MutationType>();
+    const syncedJobIds = new Set<string>();
 
     for (const mutation of mutations) {
         try {
             await updateMutationStatus(mutation.id, 'syncing');
 
-            // Execute the API call
-            const response = await fetch(mutation.endpoint, {
+            const endpoint = normalizeEndpoint(mutation.endpoint);
+
+            await apiClient.executeRequest(endpoint, {
                 method: mutation.method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${apiClient.getAccessToken()}`,
-                },
-                // Only include body if there's data (not for DELETE or some PATCH requests)
                 ...(mutation.data ? { body: JSON.stringify(mutation.data) } : {}),
             });
 
-            if (response.ok) {
-                await removeMutation(mutation.id);
-                synced++;
-                syncedTypes.add(mutation.type);
-            } else if (response.status === 401) {
-                // Token expired, will retry after refresh
-                await updateMutationStatus(mutation.id, 'pending');
-            } else {
-                // Permanent failure
-                if (mutation.retryCount >= MAX_RETRIES) {
-                    await updateMutationStatus(mutation.id, 'failed', mutation.retryCount);
-                    failed++;
-                } else {
-                    await updateMutationStatus(mutation.id, 'pending', mutation.retryCount + 1);
+            await removeMutation(mutation.id);
+            synced++;
+            syncedTypes.add(mutation.type);
+
+            // Track individual job IDs so we can clear _pendingSync from cache
+            if (mutation.type === 'job') {
+                const jobIdMatch = mutation.endpoint.match(/\/jobs\/(\d+)/);
+                if (jobIdMatch) {
+                    syncedJobIds.add(jobIdMatch[1]);
                 }
             }
         } catch (error) {
-            console.error(error);
-            // Network error, will retry
+            // 401 = token expired even after refresh → stop sync
+            if (error instanceof Error && error.message.startsWith('401')) {
+                await updateMutationStatus(mutation.id, 'pending');
+                break;
+            }
+
             if (mutation.retryCount >= MAX_RETRIES) {
                 await updateMutationStatus(mutation.id, 'failed', mutation.retryCount);
                 failed++;
@@ -86,6 +94,11 @@ export async function syncPendingMutations(): Promise<{
         if (queryKey) {
             await queryClient.invalidateQueries({ queryKey: [queryKey] });
         }
+    }
+
+    // Invalidate individual job queries so _pendingSync flag gets cleared
+    for (const jobId of syncedJobIds) {
+        await queryClient.invalidateQueries({ queryKey: ['job', jobId] });
     }
 
     return { synced, failed };
@@ -107,17 +120,14 @@ export async function syncPendingPhotos(): Promise<{
         try {
             await updatePhotoStatus(photo.id, 'uploading');
 
-            // For offline photos, we stored a file reference (local path)
-            // The user would need to re-select the file when online
-            // This is a simplified flow - in production you might use File System Access API
-            // or store the file in IndexedDB as a blob (but we agreed not to do that)
-
-            // For now, we'll create a photo record with the local path
-            // The actual upload happens when the user is online and re-selects the file
-            await apiClient.addJobPhoto(photo.jobId, photo.localPath, photo.type, photo.notes);
+            const file = new File([photo.blob], photo.type + '.jpg', { type: photo.blob.type });
+            await apiClient.uploadJobPhoto(file, photo.jobId, photo.type as 'antes' | 'despues');
 
             await removePhoto(photo.id);
             synced++;
+
+            // Invalidate job query to refresh photos from server
+            await queryClient.invalidateQueries({ queryKey: ['job', String(photo.jobId)] });
         } catch (error) {
             console.error(error);
             await updatePhotoStatus(photo.id, 'failed');
@@ -136,22 +146,6 @@ export async function performFullSync(): Promise<{
     const photos = await syncPendingPhotos();
 
     return { mutations, photos };
-}
-
-// Background sync registration
-export async function registerBackgroundSync(): Promise<void> {
-    if ('serviceWorker' in navigator && 'serviceWorker' in navigator) {
-        try {
-            const registration = await navigator.serviceWorker.ready;
-            await (
-                registration as unknown as {
-                    sync: { register: (tag: string) => Promise<void> };
-                }
-            ).sync.register('gridwatt-sync');
-        } catch (error) {
-            console.error('Background sync registration failed:', error);
-        }
-    }
 }
 
 // Listen for online event to trigger sync

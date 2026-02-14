@@ -1,7 +1,8 @@
-import type { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
 import type { FieldProps } from '../Form.interface';
+import type { FC } from 'react';
+
 import { LABEL_CLASS, ERROR_CLASS } from '../utils/constants';
+import { useFormContext } from 'react-hook-form';
 
 const Field: FC<FieldProps> = ({ name, label, required, helpText, children }) => {
     const {

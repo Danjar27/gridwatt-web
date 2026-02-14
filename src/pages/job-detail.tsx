@@ -1,25 +1,26 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
-import { addOfflineMutation, addPendingPhoto } from '@/lib/offline-store';
+import { apiClient, type Job } from '@/lib/api-client';
+import { isOnline } from '@/lib/offline-store';
 import { useState, useEffect, useRef } from 'react';
-import { Camera, Save, MapPin, AlertCircle, X } from 'lucide-react';
+import { Save, MapPin, AlertCircle, ExternalLink } from 'lucide-react';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { JobActivitiesSection } from './job-detail/JobActivitiesSection';
 import { JobSealsSection } from './job-detail/JobSealsSection';
 import { JobMaterialsSection } from './job-detail/JobMaterialsSection';
+import { JobPhotosSection } from './job-detail/JobPhotosSection';
 import * as leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 export function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     const { online } = useOfflineContext();
 
     const [notes, setNotes] = useState('');
     const [meterReading, setMeterReading] = useState('');
-    const [_selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const { data: job, isLoading } = useQuery({
         queryKey: ['job', id],
@@ -28,32 +29,40 @@ export function JobDetailPage() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: async (data: { notes?: string; meterReading?: string; jobStatus?: string }) => {
-            if (online) {
-                return apiClient.updateJob(Number(id), data);
-            } else {
-                // Queue for offline sync
-                await addOfflineMutation({
-                    type: 'job',
-                    action: 'update',
-                    data,
-                    endpoint: `/api/jobs/${id}`,
-                    method: 'PUT',
-                });
-
-                return { ...job, ...data };
+        mutationFn: (data: { notes?: string; meterReading?: string; jobStatus?: string }) =>
+            apiClient.updateJob(Number(id), data),
+        onMutate: async (data) => {
+            await queryClient.cancelQueries({ queryKey: ['job', id] });
+            await queryClient.cancelQueries({ queryKey: ['jobs'] });
+            const previousJob = queryClient.getQueryData<Job>(['job', id]);
+            const previousMyJobs = queryClient.getQueryData<Job[]>(['jobs', 'my']);
+            const pendingSync = !isOnline();
+            queryClient.setQueryData<Job>(['job', id], (old) =>
+                old ? { ...old, ...data, ...(pendingSync && { _pendingSync: true }) } : old
+            );
+            // Also update the jobs list so navigation back shows the change
+            if (previousMyJobs) {
+                queryClient.setQueryData<Job[]>(['jobs', 'my'], (jobs) =>
+                    jobs?.map((j) =>
+                        j.id === Number(id)
+                            ? { ...j, ...data, ...(pendingSync && { _pendingSync: true }) }
+                            : j
+                    )
+                );
+            }
+            return { previousJob, previousMyJobs };
+        },
+        onError: (_err, _data, context) => {
+            if (context?.previousJob) {
+                queryClient.setQueryData(['job', id], context.previousJob);
+            }
+            if (context?.previousMyJobs) {
+                queryClient.setQueryData(['jobs', 'my'], context.previousMyJobs);
             }
         },
-        onSuccess: () => {
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['job', id] });
             queryClient.invalidateQueries({ queryKey: ['jobs'] });
-        },
-    });
-
-    const removePhotoMutation = useMutation({
-        mutationFn: (photoId: string) => apiClient.removeJobPhoto(photoId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', id] });
         },
     });
 
@@ -70,35 +79,7 @@ export function JobDetailPage() {
             meterReading: meterReading || job?.meterReading,
             jobStatus: 'completed',
         });
-    };
-
-    const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) {
-            return;
-        }
-
-        setSelectedFile(file);
-
-        if (!online) {
-            // Store file reference for later upload
-            await addPendingPhoto({
-                jobId: Number(id),
-                localPath: file.name, // Store name as reference
-                type: 'photo',
-                notes: '',
-            });
-            alert('Photo saved for upload when you are back online.');
-        } else {
-            // Upload immediately
-            try {
-                const result = await apiClient.uploadFile(file);
-                await apiClient.addJobPhoto(Number(id), result.path, 'photo');
-                queryClient.invalidateQueries({ queryKey: ['job', id] });
-            } catch (error) {
-                console.error('Upload failed:', error);
-            }
-        }
+        navigate('/jobs');
     };
 
     if (isLoading) {
@@ -220,38 +201,7 @@ export function JobDetailPage() {
             </div>
 
             {/* Photos */}
-            <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                <div className="mb-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Photos</h2>
-                    <label className="flex cursor-pointer items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600">
-                        <Camera className="h-4 w-4" />
-                        {online ? 'Add Photo' : 'Select from Library'}
-                        <input type="file" accept="image/*" onChange={handlePhotoSelect} className="hidden" />
-                    </label>
-                </div>
-
-                {job.photos && job.photos.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-                        {job.photos.map((photo) => (
-                            <div key={photo.id} className="relative aspect-square overflow-hidden rounded-lg">
-                                <img src={photo.path} alt={photo.type} className="h-full w-full object-cover" />
-                                <button
-                                    onClick={() => removePhotoMutation.mutate(photo.id)}
-                                    disabled={removePhotoMutation.isPending}
-                                    className="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
-                                >
-                                    <X className="h-3.5 w-3.5" />
-                                </button>
-                                <span className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-1 text-xs text-white">
-                                    {photo.type}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-center text-neutral-900">No photos yet</p>
-                )}
-            </div>
+            <JobPhotosSection jobId={job.id} photos={job.photos ?? []} />
 
             {/* Activities */}
             <JobActivitiesSection jobId={job.id} jobActivities={job.jobActivities ?? []} />
@@ -267,6 +217,19 @@ export function JobDetailPage() {
                 <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
                     <h2 className="mb-4 text-lg font-semibold">Location</h2>
                     <JobLocationMap lat={job.order.latitude} lng={job.order.longitude} />
+                    <a
+                        href={
+                            /iPhone|iPad|iPod/i.test(navigator.userAgent)
+                                ? `maps://maps.apple.com/?q=${job.order.latitude},${job.order.longitude}`
+                                : `https://maps.google.com/?q=${job.order.latitude},${job.order.longitude}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+                    >
+                        <ExternalLink className="h-4 w-4" />
+                        Open in Maps
+                    </a>
                 </div>
             )}
         </div>

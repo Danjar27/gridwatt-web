@@ -11,14 +11,6 @@ import AuthProvider from '@context/auth/provider';
 import Router from '@components/Router/Router.tsx';
 import spanish from '@i18n/es.json';
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch((error) => {
-            console.error('SW registration failed:', error);
-        });
-    });
-}
-
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
         <IntlProvider messages={spanish} locale="es">

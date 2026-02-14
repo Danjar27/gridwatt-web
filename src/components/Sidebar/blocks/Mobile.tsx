@@ -1,15 +1,13 @@
 import type { MobileSidebarProps } from '@components/Sidebar/Sidebar.interface.ts';
 import type { FC, PropsWithChildren } from 'react';
-import { useEffect } from 'react';
 
 import { classnames } from '@utils/classnames.ts';
-import { X } from 'lucide-react';
-import User from '@components/Sidebar/blocks/User.tsx';
-import Connection from '@components/Toolbar/blocks/Connection.tsx';
-import Notifications from '@components/Toolbar/blocks/Notifications.tsx';
-import Theme from '@components/Toolbar/blocks/Theme.tsx';
-import Logout from '@components/Toolbar/blocks/Logout.tsx';
 import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { X } from 'lucide-react';
+
+import User from '@components/Sidebar/blocks/User.tsx';
+import Toolbar from '@components/Toolbar/Toolbar.tsx';
 
 const MobileSidebar: FC<PropsWithChildren<MobileSidebarProps>> = ({ className, open, onClose, children }) => {
     const location = useLocation();
@@ -45,13 +43,7 @@ const MobileSidebar: FC<PropsWithChildren<MobileSidebarProps>> = ({ className, o
                     <div className="hidden s992:flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
                         <User />
                     </div>
-
-                    <div className="flex bg-neutral-500 rounded-lg justify-center items-center p-5 gap-5 border border-neutral-800">
-                        <Connection />
-                        <Notifications />
-                        <Theme />
-                        <Logout />
-                    </div>
+                    <Toolbar />
                 </aside>
             </div>
         </>

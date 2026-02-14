@@ -4,7 +4,8 @@ import type { FC, PropsWithChildren } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AuthContext, AuthActions } from './context.ts';
 import { apiClient } from '@lib/api-client.ts';
-import { useMemo } from 'react';
+import { prefetchTechnicianData } from '@lib/technician-prefetch.ts';
+import { useMemo, useEffect, useRef } from 'react';
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const queryClient = useQueryClient();
@@ -17,7 +18,11 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
                 return null;
             }
             try {
-                return await apiClient.getMe();
+                const me = await apiClient.getMe();
+                if (me?.role?.name === 'technician') {
+                    prefetchTechnicianData().catch(() => {});
+                }
+                return me;
             } catch (error) {
                 // Only clear tokens if we are sure the session is invalid (401)
                 if (error instanceof Error && error.message.includes('401')) {
@@ -52,6 +57,9 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         },
         onSuccess: (userData) => {
             queryClient.setQueryData(['auth', 'me'], userData);
+            if (userData?.role?.name === 'technician') {
+                prefetchTechnicianData().catch(() => {});
+            }
         },
     });
 
@@ -72,6 +80,26 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const logout = async () => {
         await logoutMutation.mutateAsync();
     };
+
+    // Periodic prefetch for technicians (every 10 minutes while online)
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    useEffect(() => {
+        if (user?.role?.name === 'technician' && navigator.onLine) {
+            // Run immediately on mount/change, then every 10 minutes
+            prefetchTechnicianData().catch(() => {});
+            intervalRef.current = setInterval(() => {
+                if (navigator.onLine) {
+                    prefetchTechnicianData().catch(() => {});
+                }
+            }, 10 * 60 * 1000);
+        }
+        return () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [user?.role?.name]);
 
     const context: Context = useMemo(
         () => ({

@@ -1,7 +1,7 @@
 import { openDB, type IDBPDatabase } from 'idb';
 
 const DB_NAME = 'gridwatt-offline';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export type MutationType = 'job' | 'order' | 'photo' | 'material' | 'activity' | 'seal' | 'user';
 
@@ -19,19 +19,18 @@ export interface OfflineMutation {
     optimisticData?: unknown;
 }
 
-interface PendingPhoto {
+export interface PendingPhoto {
     id: string;
     jobId: number;
-    localPath: string; // File reference (not blob)
-    type: string;
-    notes?: string;
+    blob: Blob;
+    type: 'antes' | 'despues';
     createdAt: number;
     status: 'pending' | 'uploading' | 'failed';
 }
 
 async function getDB(): Promise<IDBPDatabase> {
     return openDB(DB_NAME, DB_VERSION, {
-        upgrade(db) {
+        upgrade(db, oldVersion) {
             // Store for offline mutations
             if (!db.objectStoreNames.contains('mutations')) {
                 const mutationsStore = db.createObjectStore('mutations', {
@@ -41,7 +40,11 @@ async function getDB(): Promise<IDBPDatabase> {
                 mutationsStore.createIndex('createdAt', 'createdAt');
             }
 
-            // Store for pending photos (file references only)
+            // V2: Recreate photos store to support blob storage
+            if (oldVersion < 2 && db.objectStoreNames.contains('photos')) {
+                db.deleteObjectStore('photos');
+            }
+
             if (!db.objectStoreNames.contains('photos')) {
                 const photosStore = db.createObjectStore('photos', { keyPath: 'id' });
                 photosStore.createIndex('jobId', 'jobId');
@@ -118,7 +121,23 @@ export async function clearCompletedMutations(): Promise<void> {
     }
 }
 
-// Pending Photos (file references only)
+export async function getFailedMutations(): Promise<Array<OfflineMutation>> {
+    const db = await getDB();
+
+    return db.getAllFromIndex('mutations', 'status', 'failed');
+}
+
+export async function resetMutationForRetry(id: string): Promise<void> {
+    const db = await getDB();
+    const mutation = await db.get('mutations', id);
+    if (mutation) {
+        mutation.status = 'pending';
+        mutation.retryCount = 0;
+        await db.put('mutations', mutation);
+    }
+}
+
+// Pending Photos (blob storage)
 export async function addPendingPhoto(photo: Omit<PendingPhoto, 'id' | 'createdAt' | 'status'>): Promise<string> {
     const db = await getDB();
     const id = `photo-${photo.jobId}-${Date.now()}`;

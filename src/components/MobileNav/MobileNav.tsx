@@ -15,8 +15,6 @@ const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
 
-    console.log('userRole:', userRole);
-
     const navItems = [
         { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         ...(isTechnician

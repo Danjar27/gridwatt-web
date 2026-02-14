@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+
 import { AlertCircle } from 'lucide-react';
 
 interface ErrorProps {
@@ -6,7 +7,9 @@ interface ErrorProps {
 }
 
 const FormError: FC<ErrorProps> = ({ message }) => {
-    if (!message) return null;
+    if (!message) {
+        return null;
+    }
 
     return (
         <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-600">

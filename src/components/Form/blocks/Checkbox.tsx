@@ -1,6 +1,7 @@
-import type { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
 import type { InputProps } from '../Form.interface';
+import type { FC } from 'react';
+
+import { useFormContext } from 'react-hook-form';
 
 const Checkbox: FC<InputProps & { label?: string }> = ({ name, rules, disabled, label }) => {
     const { register } = useFormContext();

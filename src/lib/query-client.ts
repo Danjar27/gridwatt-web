@@ -8,8 +8,7 @@ export const queryClient = new QueryClient({
             staleTime: 1000 * 60 * 5, // 5 minutes
             gcTime: 1000 * 60 * 60 * 24, // 24 hours
             retry: (failureCount, error) => {
-                // Don't retry on 401/403
-                if (error instanceof Error && error.message.includes('401')) {
+                if (error.message.includes('401')) {
                     return false;
                 }
 
@@ -23,7 +22,6 @@ export const queryClient = new QueryClient({
     },
 });
 
-// Persist queries to IndexedDB
 const persister = createIDBPersister();
 
 persistQueryClient({

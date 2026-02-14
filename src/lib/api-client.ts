@@ -163,6 +163,10 @@ class ApiClient {
         return this.refreshingPromise;
     }
 
+    async executeRequest<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+        return this.request<T>(endpoint, options);
+    }
+
     /**
      * Wrapper for mutation requests that handles offline scenarios.
      * When offline or network fails, stores the mutation in IndexedDB and returns optimistic data.
@@ -180,7 +184,7 @@ class ApiClient {
                 type: offlineOptions.type,
                 action: offlineOptions.action,
                 data: options.body ? JSON.parse(options.body as string) : null,
-                endpoint: `${API_URL}${endpoint}`,
+                endpoint,
                 method: options.method || 'POST',
                 optimisticData: offlineOptions.optimisticData,
             });
@@ -200,7 +204,7 @@ class ApiClient {
                     type: offlineOptions.type,
                     action: offlineOptions.action,
                     data: options.body ? JSON.parse(options.body as string) : null,
-                    endpoint: `${API_URL}${endpoint}`,
+                    endpoint,
                     method: options.method || 'POST',
                     optimisticData: offlineOptions.optimisticData,
                 });
@@ -257,8 +261,8 @@ class ApiClient {
             lastName: data.lastName || '',
             email: data.email || '',
             phone: data.phone,
-            roleId: data.roleId,
             isActive: data.isActive ?? true,
+            role: { id: data.roleId, name: 'technician' },
         };
 
         return this.mutationRequest<User>(
@@ -275,8 +279,8 @@ class ApiClient {
             lastName: data.lastName || '',
             email: data.email || '',
             phone: data.phone,
-            roleId: data.roleId || 0,
             isActive: data.isActive,
+            role: { id: data.roleId || 0, name: 'technician' }, // default to 'technician' or use a mapping if available
         };
 
         return this.mutationRequest<User>(
@@ -302,7 +306,7 @@ class ApiClient {
     }
 
     // Orders
-    async getOrders(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+    async getOrders(params?: { limit?: number; offset?: number; from?: string; to?: string; technicianId?: number }) {
         const qs = params
             ? `?${new URLSearchParams(
                   Object.entries(params)
@@ -323,36 +327,40 @@ class ApiClient {
     }
 
     async createOrder(data: Partial<Order>) {
-        return this.request<Order>('/orders', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
+        return this.mutationRequest<Order>(
+            '/orders',
+            { method: 'POST', body: JSON.stringify(data) },
+            { type: 'order', action: 'create', optimisticData: { id: -Date.now(), ...data } }
+        );
     }
 
     async updateOrder(id: number, data: Partial<Order>) {
-        return this.request<Order>(`/orders/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-        });
+        return this.mutationRequest<Order>(
+            `/orders/${id}`,
+            { method: 'PUT', body: JSON.stringify(data) },
+            { type: 'order', action: 'update', optimisticData: { id, ...data } }
+        );
     }
 
     async assignOrder(id: number, technicianId: number | null) {
-        return this.request<Order>(`/orders/${id}/assign`, {
-            method: 'PUT',
-            body: JSON.stringify({ technicianId }),
-        });
+        return this.mutationRequest<Order>(
+            `/orders/${id}/assign`,
+            { method: 'PUT', body: JSON.stringify({ technicianId }) },
+            { type: 'order', action: 'update', optimisticData: { id, technicianId } }
+        );
     }
 
     async bulkAssignOrders(orderIds: number[], technicianId: number) {
-        return this.request<Order[]>('/orders/bulk-assign', {
-            method: 'PUT',
-            body: JSON.stringify({ orderIds, technicianId }),
-        });
+        return this.mutationRequest<Order[]>(
+            '/orders/bulk-assign',
+            { method: 'PUT', body: JSON.stringify({ orderIds, technicianId }) },
+            { type: 'order', action: 'update', optimisticData: orderIds.map(id => ({ id, technicianId })) }
+        );
     }
 
     // Notifications
     async getNotifications() {
-        return this.request<Notification[]>('/notifications');
+        return this.request<Array<Notification>>('/notifications');
     }
 
     async markNotificationRead(id: number) {
@@ -364,7 +372,7 @@ class ApiClient {
     }
 
     // Jobs
-    async getJobs(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
+    async getJobs(params?: { limit?: number; offset?: number; from?: string; to?: string; technicianId?: number }) {
         const qs = params
             ? `?${new URLSearchParams(
                   Object.entries(params)
@@ -385,17 +393,19 @@ class ApiClient {
     }
 
     async createJob(data: Partial<Job>) {
-        return this.request<Job>('/jobs', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
+        return this.mutationRequest<Job>(
+            '/jobs',
+            { method: 'POST', body: JSON.stringify(data) },
+            { type: 'job', action: 'create', optimisticData: { id: -Date.now(), ...data } }
+        );
     }
 
     async updateJob(id: number, data: Partial<Job>) {
-        return this.request<Job>(`/jobs/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-        });
+        return this.mutationRequest<Job>(
+            `/jobs/${id}`,
+            { method: 'PUT', body: JSON.stringify(data) },
+            { type: 'job', action: 'update', optimisticData: { id, ...data } }
+        );
     }
 
     async markJobSynced(id: number) {
@@ -405,47 +415,67 @@ class ApiClient {
     }
 
     async addJobMaterial(jobId: number, materialId: string, quantity: number) {
-        return this.request(`/jobs/${jobId}/materials`, {
-            method: 'POST',
-            body: JSON.stringify({ materialId, quantity }),
-        });
+        return this.mutationRequest(
+            `/jobs/${jobId}/materials`,
+            { method: 'POST', body: JSON.stringify({ materialId, quantity }) },
+            { type: 'job', action: 'create', optimisticData: { jobId, materialId, quantity } }
+        );
     }
 
     async addJobActivity(jobId: number, activityId: string) {
-        return this.request(`/jobs/${jobId}/activities`, {
-            method: 'POST',
-            body: JSON.stringify({ activityId }),
-        });
+        return this.mutationRequest(
+            `/jobs/${jobId}/activities`,
+            { method: 'POST', body: JSON.stringify({ activityId }) },
+            { type: 'job', action: 'create', optimisticData: { jobId, activityId } }
+        );
     }
 
     async addJobSeal(jobId: number, sealId: string) {
-        return this.request(`/jobs/${jobId}/seals`, {
-            method: 'POST',
-            body: JSON.stringify({ sealId }),
-        });
+        return this.mutationRequest(
+            `/jobs/${jobId}/seals`,
+            { method: 'POST', body: JSON.stringify({ sealId }) },
+            { type: 'job', action: 'create', optimisticData: { jobId, sealId } }
+        );
     }
 
     async addJobPhoto(jobId: number, path: string, type: string, notes?: string) {
-        return this.request(`/jobs/${jobId}/photos`, {
-            method: 'POST',
-            body: JSON.stringify({ path, type, notes }),
-        });
+        return this.mutationRequest(
+            `/jobs/${jobId}/photos`,
+            { method: 'POST', body: JSON.stringify({ path, type, notes }) },
+            { type: 'job', action: 'create', optimisticData: { jobId, path, type, notes } }
+        );
     }
 
     async removeJobActivity(jobActivityId: string) {
-        return this.request(`/jobs/activities/${jobActivityId}`, { method: 'DELETE' });
+        return this.mutationRequest(
+            `/jobs/activities/${jobActivityId}`,
+            { method: 'DELETE' },
+            { type: 'job', action: 'delete', optimisticData: { id: jobActivityId } }
+        );
     }
 
     async removeJobSeal(jobSealId: string) {
-        return this.request(`/jobs/seals/${jobSealId}`, { method: 'DELETE' });
+        return this.mutationRequest(
+            `/jobs/seals/${jobSealId}`,
+            { method: 'DELETE' },
+            { type: 'job', action: 'delete', optimisticData: { id: jobSealId } }
+        );
     }
 
     async removeJobMaterial(workMaterialId: string) {
-        return this.request(`/jobs/materials/${workMaterialId}`, { method: 'DELETE' });
+        return this.mutationRequest(
+            `/jobs/materials/${workMaterialId}`,
+            { method: 'DELETE' },
+            { type: 'job', action: 'delete', optimisticData: { id: workMaterialId } }
+        );
     }
 
     async removeJobPhoto(photoId: string) {
-        return this.request(`/jobs/photos/${photoId}`, { method: 'DELETE' });
+        return this.mutationRequest(
+            `/jobs/photos/${photoId}`,
+            { method: 'DELETE' },
+            { type: 'job', action: 'delete', optimisticData: { id: photoId } }
+        );
     }
 
     // Materials
@@ -619,6 +649,20 @@ class ApiClient {
     }
 
     // Upload
+    async uploadJobPhoto(file: File, jobId: number, type: 'antes' | 'despues'): Promise<Photo> {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('jobId', String(jobId));
+        formData.append('type', type);
+        const response = await fetch(`${API_URL}/upload/job-photo`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${this.accessToken}` },
+            body: formData,
+        });
+        if (!response.ok) throw new Error('Upload failed');
+        return response.json();
+    }
+
     async uploadFile(file: File) {
         const formData = new FormData();
         formData.append('file', file);

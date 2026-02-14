@@ -1,14 +1,17 @@
+import type { Job, Order } from '@lib/api-client';
+
 import { Briefcase, ClipboardList, CheckCircle, Clock, Download, LayoutDashboard } from 'lucide-react';
+import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@lib/api-client';
+import { useTranslations } from 'use-intl';
 import { useState } from 'react';
+
+import DatePicker from '@components/DatePicker/DatePicker';
+import Summary from '@components/Summary/Summary.tsx';
 import Papa from 'papaparse';
 import Page from '@layouts/Page.tsx';
-import { useTranslations } from 'use-intl';
-import Summary from '@components/Summary/Summary.tsx';
-import DatePicker from '@components/DatePicker/DatePicker';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
 
 const DashboardPage = () => {
     const i18n = useTranslations();
@@ -18,42 +21,35 @@ const DashboardPage = () => {
     const isTechnician = userRole === 'technician';
     const isAdmin = userRole === 'admin' || userRole === 'manager';
 
-    const { data: jobs = [] } = useQuery({
+    const { data: jobs = [] } = useQuery<Array<Job>, Error>({
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
-        queryFn: () => (isTechnician ? apiClient.getMyJobs() : apiClient.getJobs()),
-        select: (d) => (Array.isArray(d) ? d : d.data),
+        queryFn: async () => {
+            if (isTechnician) {
+                return await apiClient.getMyJobs();
+            } else {
+                const res = await apiClient.getJobs();
+
+                return res.data;
+            }
+        },
     });
 
-    const { data: orders = [] } = useQuery({
+    const { data: orders = [] } = useQuery<Array<Order>, Error>({
         queryKey: ['orders', isTechnician ? 'my' : 'all'],
-        queryFn: () => (isTechnician ? apiClient.getMyOrders() : apiClient.getOrders()),
-        select: (d) => (Array.isArray(d) ? d : d.data),
+        queryFn: async () => {
+            if (isTechnician) {
+                return await apiClient.getMyOrders();
+            } else {
+                const res = await apiClient.getOrders();
+
+                return res.data;
+            }
+        },
     });
 
-    const { data: materials = [] } = useQuery({
-        queryKey: ['materials'],
-        queryFn: () => apiClient.getMaterials(),
-        select: (d) => (Array.isArray(d) ? d : d.data),
-        enabled: isAdmin,
-    });
-
-    const { data: activities = [] } = useQuery({
-        queryKey: ['activities'],
-        queryFn: () => apiClient.getActivities(),
-        select: (d) => (Array.isArray(d) ? d : d.data),
-        enabled: isAdmin,
-    });
-
-    const { data: seals = [] } = useQuery({
-        queryKey: ['seals'],
-        queryFn: () => apiClient.getSeals(),
-        select: (d) => (Array.isArray(d) ? d : d.data),
-        enabled: isAdmin,
-    });
-
-    const pendingJobs = jobs.filter((j) => j.jobStatus !== 'completed');
-    const completedJobs = jobs.filter((j) => j.jobStatus === 'completed');
-    const pendingOrders = orders.filter((o) => o.orderStatus === 'pending');
+    const pendingJobs = jobs.filter((j: Job) => j.jobStatus !== 'completed');
+    const completedJobs = jobs.filter((j: Job) => j.jobStatus === 'completed');
+    const pendingOrders = orders.filter((o: Order) => o.orderStatus === 'pending');
 
     const exportTargets = [
         { value: 'orders', label: 'Orders' },
@@ -118,7 +114,7 @@ const DashboardPage = () => {
             const dateParams = { from: startDate || undefined, to: endDate || undefined, limit: 10000 };
 
             for (const target of targets) {
-                let data: Array<Record<string, unknown>> = [];
+                let data: Array<unknown> = [];
                 let fields: Array<string> = [];
 
                 if (target === 'orders') {
@@ -146,7 +142,7 @@ const DashboardPage = () => {
                 const rows = data.map((item) => {
                     const row: Record<string, unknown> = {};
                     fields.forEach((field) => {
-                        row[field] = (item as Record<string, unknown>)[field];
+                        row[field] = (item as unknown as Record<string, unknown>)[field];
                     });
 
                     return row;
@@ -223,7 +219,7 @@ const DashboardPage = () => {
                             <p className="text-sm text-neutral-900 py-2">No pending jobs</p>
                         ) : (
                             <div className="flex flex-col gap-2">
-                                {pendingJobs.slice(0, 5).map((job) => (
+                                {pendingJobs.slice(0, 5).map((job: Job) => (
                                     <div
                                         key={job.id}
                                         className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
@@ -252,7 +248,7 @@ const DashboardPage = () => {
                             <p className="text-sm text-neutral-900 py-2">No pending orders</p>
                         ) : (
                             <div className="flex flex-col gap-2">
-                                {pendingOrders.slice(0, 5).map((order) => (
+                                {pendingOrders.slice(0, 5).map((order: Order) => (
                                     <div
                                         key={order.id}
                                         className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
@@ -312,7 +308,7 @@ const DashboardPage = () => {
                                             );
                                             setSelectedTargets(values);
                                         }}
-                                        className={INPUT_CLASS + ' h-[7.5rem]'}
+                                        className={INPUT_CLASS + ' h-30'}
                                     >
                                         {exportTargets.map((option) => (
                                             <option key={option.value} value={option.value}>

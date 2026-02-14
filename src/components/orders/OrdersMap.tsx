@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import type { Order, User } from '@lib/api-client.ts';
 
 interface OrdersMapProps {
-    orders: Array<any>;
-    technicians: Array<any>;
+    orders: Array<Order>;
+    technicians: Array<User>;
     onBulkAssign?: (orderIds: Array<number>, technicianId: number) => void;
     isAssigning?: boolean;
 }
@@ -33,8 +34,16 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
     // Color palette for technicians
     const technicianColors = useMemo(() => {
         const colors = [
-            '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4',
-            '#f97316', '#84cc16', '#6366f1', '#14b8a6', '#a855f7',
+            '#3b82f6',
+            '#10b981',
+            '#8b5cf6',
+            '#ec4899',
+            '#06b6d4',
+            '#f97316',
+            '#84cc16',
+            '#6366f1',
+            '#14b8a6',
+            '#a855f7',
         ];
         const colorMap = new Map<number, string>();
         technicians.forEach((tech, index) => {
@@ -63,9 +72,7 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
 
     // Technicians that actually appear in the current order set
     const activeTechnicians = useMemo(() => {
-        const techIdsInOrders = new Set(
-            orders.filter((o) => o.technicianId).map((o) => o.technicianId)
-        );
+        const techIdsInOrders = new Set(orders.filter((o) => o.technicianId).map((o) => o.technicianId));
 
         return technicians.filter((t) => techIdsInOrders.has(t.id));
     }, [orders, technicians]);
@@ -86,36 +93,48 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
 
     // Initialize map once
     useEffect(() => {
-        if (!mapRef.current || leafletMapRef.current) {return;}
+        if (!mapRef.current || leafletMapRef.current) {
+            return;
+        }
         const map = L.map(mapRef.current, { zoomControl: true }).setView([-0.039568, -78.442251], 13);
 
         // CartoDB Voyager — clean, modern tile style
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+            attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
             subdomains: 'abcd',
         }).addTo(map);
 
         // --- Custom rectangle selection via mousedown/mousemove/mouseup ---
         map.on('mousedown', (e: L.LeafletMouseEvent) => {
-            if (!selectModeRef.current) {return;}
+            if (!selectModeRef.current) {
+                return;
+            }
             // Prevent normal map drag
             map.dragging.disable();
             selStartRef.current = e.latlng;
             // Create a zero-size rectangle
             selRectRef.current = L.rectangle(
-                [e.latlng, e.latlng],
+                [
+                    [e.latlng.lat, e.latlng.lng],
+                    [e.latlng.lat, e.latlng.lng],
+                ],
                 { color: '#6366f1', weight: 2, fillOpacity: 0.15, dashArray: '6 3' }
             ).addTo(map);
         });
 
         map.on('mousemove', (e: L.LeafletMouseEvent) => {
-            if (!selStartRef.current || !selRectRef.current) {return;}
+            if (!selStartRef.current || !selRectRef.current) {
+                return;
+            }
             selRectRef.current.setBounds(L.latLngBounds(selStartRef.current, e.latlng));
         });
 
         map.on('mouseup', () => {
-            if (!selStartRef.current || !selRectRef.current) {return;}
+            if (!selStartRef.current || !selRectRef.current) {
+                return;
+            }
             const bounds = selRectRef.current.getBounds();
             map.removeLayer(selRectRef.current);
             selRectRef.current = null;
@@ -150,7 +169,9 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
 
     // Fit bounds when the actual data set changes (new/different orders), not on selection
     useEffect(() => {
-        if (!leafletMapRef.current || markersData.length === 0) {return;}
+        if (!leafletMapRef.current || markersData.length === 0) {
+            return;
+        }
         if (!hasFittedRef.current || markersData.length !== prevDataLenRef.current) {
             const bounds = L.latLngBounds(markersData.map((m) => m.position));
             leafletMapRef.current.fitBounds(bounds, { padding: [40, 40] });
@@ -161,7 +182,9 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
 
     // Update marker icons when data or selection changes — no zoom/pan
     useEffect(() => {
-        if (!leafletMapRef.current) {return;}
+        if (!leafletMapRef.current) {
+            return;
+        }
         const map = leafletMapRef.current;
 
         // Remove old markers
@@ -171,7 +194,7 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
         // Add new markers
         markersData.forEach((markerData) => {
             const isSelected = selectedOrderIds.has(markerData.id);
-            const color = markerData.icon === 'warning' ? '#f59e0b' : (markerData.color || '#3b82f6');
+            const color = markerData.icon === 'warning' ? '#f59e0b' : markerData.color || '#3b82f6';
             const size = isSelected ? 32 : 24;
             const icon = createIcon(color, size, isSelected);
 
@@ -201,7 +224,9 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
 
     // Toggle cursor style when selection mode changes
     useEffect(() => {
-        if (!mapRef.current) {return;}
+        if (!mapRef.current) {
+            return;
+        }
         mapRef.current.style.cursor = selectMode ? 'crosshair' : '';
     }, [selectMode]);
 
@@ -218,15 +243,16 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
     };
 
     return (
-        <div className="w-full h-full rounded-lg border border-neutral-800 flex flex-col overflow-hidden" style={{ minHeight: 320 }}>
+        <div
+            className="w-full h-full rounded-lg border border-neutral-800 flex flex-col overflow-hidden"
+            style={{ minHeight: 320 }}
+        >
             {/* Toolbar */}
             <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-neutral-800 bg-neutral-600/40">
                 <button
                     onClick={() => setSelectMode(!selectMode)}
                     className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
-                        selectMode
-                            ? 'bg-primary-500 text-white'
-                            : 'border border-neutral-800 hover:bg-neutral-600'
+                        selectMode ? 'bg-primary-500 text-white' : 'border border-neutral-800 hover:bg-neutral-600'
                     }`}
                 >
                     {selectMode ? 'Selection On' : 'Select Area'}

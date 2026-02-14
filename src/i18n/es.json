@@ -102,6 +102,15 @@
             }
         }
     },
+    "connection": {
+        "offline": "Sin conexión. Los cambios se guardan localmente.",
+        "pending": "{count} cambios pendientes por sincronizar",
+        "syncNow": "Sincronizar ahora",
+        "synced": "{count} cambios sincronizados",
+        "failedMutation": "Error: {action} {type}",
+        "retry": "Reintentar",
+        "dismiss": "Descartar"
+    },
     "toolbar": {
         "syncing": "Sincronización en progreso",
         "search": "Buscar..."

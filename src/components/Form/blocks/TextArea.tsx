@@ -1,11 +1,8 @@
+import type { TextAreaProps } from '../Form.interface';
 import type { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
-import type { InputProps } from '../Form.interface';
-import { INPUT_CLASS } from '../utils/constants';
 
-interface TextAreaProps extends InputProps {
-    rows?: number;
-}
+import { useFormContext } from 'react-hook-form';
+import { INPUT_CLASS } from '../utils/constants';
 
 const TextArea: FC<TextAreaProps> = ({ name, rules, placeholder, disabled, className, rows = 3 }) => {
     const { register } = useFormContext();

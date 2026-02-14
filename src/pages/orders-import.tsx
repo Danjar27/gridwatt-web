@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle, UploadCloud } from 'lucide-react';
-import { apiClient, OrdersImportPreviewResponse, OrderImportPreviewItem } from '@/lib/api-client';
+import { useQueryClient } from '@tanstack/react-query';
+import { apiClient, OrdersImportPreviewResponse, OrderImportPreviewItem, OrderImportData } from '@/lib/api-client';
 import { classnames } from '@utils/classnames.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 
 export function OrdersImportPage() {
     const { user } = useAuthContext();
-    const userRole = user?.role?.name || user?.roleName;
+    const queryClient = useQueryClient();
+    const userRole = user?.role?.name;
     const isRestricted = userRole === 'technician';
 
     const [files, setFiles] = useState<File[]>([]);
@@ -65,6 +67,7 @@ export function OrdersImportPage() {
         try {
             const response = await apiClient.commitOrdersImport(validOrders.map((order) => order.data));
             setCommitResult(response.createdCount);
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to import orders.');
         } finally {
@@ -203,7 +206,6 @@ export function OrdersImportPage() {
                                     <ImportRow
                                         key={`${order.fileName}-${order.rowNumber || index}`}
                                         order={order}
-                                        index={index}
                                         edits={edits[index] || {}}
                                         onEdit={(field, value) =>
                                             setEdits((prev) => ({
@@ -225,31 +227,26 @@ export function OrdersImportPage() {
 // Editable row for import preview
 function ImportRow({
     order,
-    index,
     edits,
     onEdit,
 }: {
     order: OrderImportPreviewItem;
-    index: number;
     edits: Partial<OrderImportPreviewItem['data']>;
     onEdit: (field: string, value: string) => void;
 }) {
     const hasErrors = !!order.errors && order.errors.length > 0;
     const hasWarnings = !!order.warnings && order.warnings.length > 0;
-    // Editable fields: firstName, lastName, email, phone, accountNumber, meterNumber, serviceType, orderStatus, issueDate, issueTime
-    const editableFields = [
-        'firstName',
-        'lastName',
-        'email',
-        'phone',
-        'accountNumber',
-        'meterNumber',
-        'serviceType',
-        'orderStatus',
-        'issueDate',
-        'issueTime',
-    ];
-    const getValue = (field: string) => (edits[field] !== undefined ? edits[field] : order.data[field] || '');
+    const getValue = (field: keyof OrderImportData): string => {
+        const editValue = edits[field];
+        const dataValue = order.data[field];
+        if (editValue !== undefined) {
+            return String(editValue);
+        }
+        if (dataValue !== undefined && dataValue !== null) {
+            return String(dataValue);
+        }
+        return '';
+    };
     return (
         <tr
             className={classnames('transition', {
