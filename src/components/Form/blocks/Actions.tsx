@@ -1,6 +1,7 @@
-import type { FC } from 'react';
-import { Loader2 } from 'lucide-react';
 import type { ActionsProps } from '../Form.interface';
+import type { FC } from 'react';
+
+import { Loader2 } from 'lucide-react';
 
 const Actions: FC<ActionsProps> = ({ submitLabel, onCancel, isLoading }) => (
     <div className="flex justify-end gap-2 pt-2">

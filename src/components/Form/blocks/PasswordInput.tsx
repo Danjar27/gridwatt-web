@@ -1,8 +1,9 @@
-import { type FC, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { Eye, EyeOff } from 'lucide-react';
 import type { InputProps } from '../Form.interface';
+import { type FC, useState } from 'react';
+
+import { useFormContext } from 'react-hook-form';
 import { INPUT_CLASS } from '../utils/constants';
+import { Eye, EyeOff } from 'lucide-react';
 
 const PasswordInput: FC<InputProps> = ({ name, rules, placeholder, disabled, autoFocus }) => {
     const { register } = useFormContext();

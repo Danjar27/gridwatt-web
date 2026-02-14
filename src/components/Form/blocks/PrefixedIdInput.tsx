@@ -1,15 +1,8 @@
+import type { PrefixedIdInputProps } from '@components/Form/Form.interface.ts';
 import type { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
-import type { RegisterOptions } from 'react-hook-form';
-import { INPUT_CLASS } from '../utils/constants';
 
-interface PrefixedIdInputProps {
-    name: string;
-    prefix: string;
-    rules?: RegisterOptions;
-    disabled?: boolean;
-    autoFocus?: boolean;
-}
+import { useFormContext } from 'react-hook-form';
+import { INPUT_CLASS } from '../utils/constants';
 
 const PrefixedIdInput: FC<PrefixedIdInputProps> = ({ name, prefix, rules, disabled, autoFocus }) => {
     const { register } = useFormContext();

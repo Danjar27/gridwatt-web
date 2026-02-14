@@ -1,6 +1,7 @@
-import type { FC } from 'react';
-import { useFormContext } from 'react-hook-form';
 import type { SelectProps } from '../Form.interface';
+import type { FC } from 'react';
+
+import { useFormContext } from 'react-hook-form';
 import { INPUT_CLASS } from '../utils/constants';
 
 const Select: FC<SelectProps> = ({ name, rules, options, disabled, className }) => {

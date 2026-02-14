@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import type { FieldValues, DefaultValues, UseFormReturn, RegisterOptions } from 'react-hook-form';
+import type { ReactNode } from 'react';
 
 export interface FormProps<T extends FieldValues> {
     onSubmit: (data: T) => void | Promise<void>;
@@ -31,7 +31,25 @@ export interface SelectOption {
 }
 
 export interface SelectProps extends InputProps {
-    options: SelectOption[];
+    options: Array<SelectOption>;
+}
+
+export interface NumberInputProps extends InputProps {
+    step?: string;
+    min?: number;
+    max?: number;
+}
+
+export interface PrefixedIdInputProps {
+    name: string;
+    prefix: string;
+    rules?: RegisterOptions;
+    disabled?: boolean;
+    autoFocus?: boolean;
+}
+
+export interface TextAreaProps extends InputProps {
+    rows?: number;
 }
 
 export interface ActionsProps {
