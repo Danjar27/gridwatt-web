@@ -7,7 +7,7 @@ import Visible from '@components/atoms/Visible.tsx';
 
 const Connection = () => {
     const i18n = useTranslations();
-    const { online, pendingCount } = useOfflineContext();
+    const { online, pendingCount, isSyncing } = useOfflineContext();
 
     const needsToSync = pendingCount > 0;
 
@@ -27,10 +27,8 @@ const Connection = () => {
                     <CloudAlert />
                 </Visible>
                 <Visible when={online && needsToSync}>
-                    <RefreshCw />
-                    <span>
-                        {i18n('toolbar.syncing')}
-                    </span>
+                    <RefreshCw className={isSyncing ? 'animate-spin' : ''} />
+                    <span>{i18n('toolbar.syncing')}</span>
                 </Visible>
             </div>
         </div>

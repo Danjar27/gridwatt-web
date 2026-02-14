@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Plus } from 'lucide-react';
-import { apiClient, type JobSeal } from '@/lib/api-client';
+import { apiClient, type Job, type JobSeal } from '@/lib/api-client';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 
@@ -18,22 +18,56 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     const { data: sealsData } = useQuery({
         queryKey: ['seals'],
         queryFn: () => apiClient.getSeals({ limit: 200 }),
-        enabled: modalOpen,
     });
+
+    const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
         mutationFn: (sealId: string) => apiClient.addJobSeal(jobId, sealId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+        onMutate: async (sealId) => {
+            await queryClient.cancelQueries({ queryKey: jobKey });
+            const previous = queryClient.getQueryData<Job>(jobKey);
+            const seal = sealsData?.data.find((s) => s.id === sealId);
+            const tempJobSeal: JobSeal = {
+                id: `temp-${Date.now()}`,
+                jobId,
+                sealId,
+                seal: seal ?? undefined,
+            };
+            queryClient.setQueryData<Job>(jobKey, (old) =>
+                old ? { ...old, jobSeals: [...(old.jobSeals ?? []), tempJobSeal] } : old
+            );
             setSelectedSealId('');
             setModalOpen(false);
+            return { previous };
+        },
+        onError: (_err, _data, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: jobKey });
         },
     });
 
     const removeMutation = useMutation({
         mutationFn: (jobSealId: string) => apiClient.removeJobSeal(jobSealId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+        onMutate: async (jobSealId) => {
+            await queryClient.cancelQueries({ queryKey: jobKey });
+            const previous = queryClient.getQueryData<Job>(jobKey);
+            queryClient.setQueryData<Job>(jobKey, (old) =>
+                old ? { ...old, jobSeals: old.jobSeals?.filter((js) => js.id !== jobSealId) } : old
+            );
+            return { previous };
+        },
+        onError: (_err, _data, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: jobKey });
         },
     });
 

@@ -1,41 +1,51 @@
 import type { Actions, Context } from '@context/offline/interface.ts';
 import type { FC, PropsWithChildren } from 'react';
 
-import { getPendingMutations, isOnline, onOnlineStatusChange } from '@lib/offline-store.ts';
+import {
+    getPendingMutations,
+    getFailedMutations,
+    resetMutationForRetry,
+    removeMutation,
+    isOnline,
+    onOnlineStatusChange,
+    type OfflineMutation,
+} from '@lib/offline-store.ts';
 import { performFullSync, setupAutoSync } from '@lib/sync-manager.ts';
 import { OfflineActions, OfflineContext } from './context.ts';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 const OfflineProvider: FC<PropsWithChildren> = ({ children }) => {
     const [online, setOnline] = useState(isOnline());
     const [pendingCount, setPendingCount] = useState(0);
     const [isSyncing, setIsSyncing] = useState(false);
+    const [failedMutations, setFailedMutations] = useState<OfflineMutation[]>([]);
     const [lastSyncResult, setLastSyncResult] = useState<{
         synced: number;
         failed: number;
     } | null>(null);
 
+    const refreshCounts = useCallback(async () => {
+        const pending = await getPendingMutations();
+        setPendingCount(pending.length);
+        const failed = await getFailedMutations();
+        setFailedMutations(failed);
+    }, []);
+
     useEffect(() => {
         const cleanup = onOnlineStatusChange(setOnline);
-
         const cleanupAutoSync = setupAutoSync();
 
-        const checkPending = async () => {
-            const mutations = await getPendingMutations();
-            setPendingCount(mutations.length);
-        };
-
-        checkPending();
-        const interval = setInterval(checkPending, 5000);
+        refreshCounts();
+        const interval = setInterval(refreshCounts, 5000);
 
         return () => {
             cleanup();
             cleanupAutoSync();
             clearInterval(interval);
         };
-    }, []);
+    }, [refreshCounts]);
 
-    const syncNow = async () => {
+    const syncNow = useCallback(async () => {
         if (!online || isSyncing) {
             return;
         }
@@ -47,13 +57,33 @@ const OfflineProvider: FC<PropsWithChildren> = ({ children }) => {
                 synced: result.mutations.synced + result.photos.synced,
                 failed: result.mutations.failed + result.photos.failed,
             });
-
-            const mutations = await getPendingMutations();
-            setPendingCount(mutations.length);
+            await refreshCounts();
         } finally {
             setIsSyncing(false);
         }
-    };
+    }, [online, isSyncing, refreshCounts]);
+
+    const retryMutation = useCallback(async (id: string) => {
+        await resetMutationForRetry(id);
+        await refreshCounts();
+        // Trigger sync after resetting
+        setIsSyncing(true);
+        try {
+            const result = await performFullSync();
+            setLastSyncResult({
+                synced: result.mutations.synced + result.photos.synced,
+                failed: result.mutations.failed + result.photos.failed,
+            });
+            await refreshCounts();
+        } finally {
+            setIsSyncing(false);
+        }
+    }, [refreshCounts]);
+
+    const dismissMutation = useCallback(async (id: string) => {
+        await removeMutation(id);
+        await refreshCounts();
+    }, [refreshCounts]);
 
     const context = useMemo<Context>(
         () => ({
@@ -61,15 +91,18 @@ const OfflineProvider: FC<PropsWithChildren> = ({ children }) => {
             pendingCount,
             isSyncing,
             lastSyncResult,
+            failedMutations,
         }),
-        [online, pendingCount, isSyncing, lastSyncResult]
+        [online, pendingCount, isSyncing, lastSyncResult, failedMutations]
     );
 
     const actions = useMemo<Actions>(
         () => ({
             syncNow,
+            retryMutation,
+            dismissMutation,
         }),
-        [syncNow]
+        [syncNow, retryMutation, dismissMutation]
     );
 
     return (

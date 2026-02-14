@@ -10,7 +10,7 @@ export function OrderDetailPage() {
     const { id } = useParams<{ id: string }>();
     const { user } = useAuthContext();
     const queryClient = useQueryClient();
-    const userRole = user?.role?.name || user?.roleName;
+    const userRole = user?.role?.name;
     const canAssign = userRole === 'admin' || userRole === 'manager';
 
     const [selectedTechnician, setSelectedTechnician] = useState<number | null>(null);

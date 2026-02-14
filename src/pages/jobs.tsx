@@ -1,17 +1,38 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { apiClient } from '@/lib/api-client';
+import { apiClient, type Job } from '@/lib/api-client';
 import { Eye, MapPin } from 'lucide-react';
+import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { useAuthContext } from '@context/auth/context.ts';
+import { useState } from 'react';
+import { INPUT_CLASS } from '@components/Form/utils/constants';
 
 export function JobsPage() {
     const { user } = useAuthContext();
-    const userRole = user?.role?.name || user?.roleName;
+    const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
 
-    const { data: jobs = [], isLoading } = useQuery({
-        queryKey: ['jobs', isTechnician ? 'my' : 'all'],
-        queryFn: () => (isTechnician ? apiClient.getMyJobs() : apiClient.getJobs()),
+    const [filterTechnicianId, setFilterTechnicianId] = useState<number | null>(null);
+
+    const { data: technicians = [] } = useQuery({
+        queryKey: ['technicians'],
+        queryFn: () => apiClient.getTechnicians(),
+        enabled: !isTechnician,
+    });
+
+    const { data: jobs = [], isLoading } = useQuery<Array<Job>, Error>({
+        queryKey: ['jobs', isTechnician ? 'my' : 'all', filterTechnicianId],
+        queryFn: async () => {
+            if (isTechnician) {
+                return await apiClient.getMyJobs();
+            } else {
+                const res = await apiClient.getJobs({
+                    limit: 10000,
+                    ...(filterTechnicianId ? { technicianId: filterTechnicianId } : {}),
+                });
+                return res.data;
+            }
+        },
     });
 
     const getStatusColor = (status?: string) => {
@@ -40,6 +61,20 @@ export function JobsPage() {
                     <h1 className="text-2xl font-bold">Jobs</h1>
                     <p className="text-neutral-900">{isTechnician ? 'Your assigned jobs' : 'Manage all jobs'}</p>
                 </div>
+                {!isTechnician && (
+                    <select
+                        className={INPUT_CLASS}
+                        value={filterTechnicianId ?? ''}
+                        onChange={(e) => setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)}
+                    >
+                        <option value="">All technicians</option>
+                        {technicians.map((tech) => (
+                            <option key={tech.id} value={tech.id}>
+                                {tech.name} {tech.lastName}
+                            </option>
+                        ))}
+                    </select>
+                )}
             </div>
 
             {jobs.length === 0 ? (
@@ -52,59 +87,55 @@ export function JobsPage() {
             ) : (
                 <div className="grid gap-4 grid-cols-1 s425:grid-cols-2 s992:grid-cols-3">
                     {jobs.map((job) => (
-                        <div
+                        <PendingSyncWrapper
                             key={job.id}
-                            className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 shadow-sm transition-shadow hover:shadow-md"
+                            pending={!!(job as Job & { _pendingSync?: boolean })._pendingSync}
                         >
-                            <div className="mb-3 flex items-start justify-between">
-                                <div>
-                                    <h3 className="font-semibold">Job #{job.id}</h3>
-                                    <p className="text-sm text-neutral-900">{job.jobType}</p>
+                            <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 shadow-sm transition-shadow hover:shadow-md">
+                                <div className="mb-3 flex items-start justify-between">
+                                    <div>
+                                        <h3 className="font-semibold">Job #{job.id}</h3>
+                                        <p className="text-sm text-neutral-900">{job.jobType}</p>
+                                    </div>
+                                    <span
+                                        className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(job.jobStatus)}`}
+                                    >
+                                        {job.jobStatus || 'pending'}
+                                    </span>
                                 </div>
-                                <span
-                                    className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(job.jobStatus)}`}
-                                >
-                                    {job.jobStatus || 'pending'}
-                                </span>
-                            </div>
 
-                            {job.order && (
-                                <div className="mb-3 space-y-1 text-sm">
-                                    <p>
-                                        <span className="text-neutral-900">Customer:</span> {job.order.firstName}{' '}
-                                        {job.order.lastName}
-                                    </p>
-                                    <p>
-                                        <span className="text-neutral-900">Meter:</span> {job.order.meterNumber}
-                                    </p>
-                                    {job.order.latitude && job.order.longitude && (
-                                        <p className="flex items-center gap-1">
-                                            <MapPin className="h-3 w-3 text-neutral-900" />
-                                            <span className="text-neutral-900">Has location</span>
+                                {job.order && (
+                                    <div className="mb-3 space-y-1 text-sm">
+                                        <p>
+                                            <span className="text-neutral-900">Customer:</span> {job.order.firstName}{' '}
+                                            {job.order.lastName}
                                         </p>
-                                    )}
-                                </div>
-                            )}
+                                        <p>
+                                            <span className="text-neutral-900">Meter:</span> {job.order.meterNumber}
+                                        </p>
+                                        {job.order.latitude && job.order.longitude && (
+                                            <p className="flex items-center gap-1">
+                                                <MapPin className="h-3 w-3 text-neutral-900" />
+                                                <span className="text-neutral-900">Has location</span>
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
 
-                            <div className="flex items-center justify-between border-t border-neutral-800 pt-3">
-                                <p className="text-xs text-neutral-900">
-                                    {new Date(job.startDateTime).toLocaleDateString()}
-                                </p>
-                                <Link
-                                    to={`/jobs/${job.id}`}
-                                    className="flex items-center gap-1 text-sm text-primary-500 hover:underline"
-                                >
-                                    <Eye className="h-4 w-4" />
-                                    View
-                                </Link>
+                                <div className="flex items-center justify-between border-t border-neutral-800 pt-3">
+                                    <p className="text-xs text-neutral-900">
+                                        {new Date(job.startDateTime).toLocaleDateString()}
+                                    </p>
+                                    <Link
+                                        to={`/jobs/${job.id}`}
+                                        className="flex items-center gap-1 text-sm text-primary-500 hover:underline"
+                                    >
+                                        <Eye className="h-4 w-4" />
+                                        View
+                                    </Link>
+                                </div>
                             </div>
-
-                            {!job.synchronized && (
-                                <div className="mt-2 rounded bg-secondary-500/10 px-2 py-1 text-xs text-secondary-500">
-                                    Not synced
-                                </div>
-                            )}
-                        </div>
+                        </PendingSyncWrapper>
                     ))}
                 </div>
             )}

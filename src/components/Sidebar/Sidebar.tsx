@@ -35,7 +35,7 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
     const SideBarContent = () => (
         <>
             <div className="hidden s992:flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
-                <div className="flex items-center w-full justify-center py-5">
+                <div className="flex items-center w-full justify-center">
                     <Logo className="h-14 w-14 text-black dark:text-white" />
                     <span className="text-xl font-semibold">{i18n('brand')}</span>
                 </div>

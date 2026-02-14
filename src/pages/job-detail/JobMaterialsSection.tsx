@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Plus } from 'lucide-react';
-import { apiClient, type WorkMaterial, type Material } from '@/lib/api-client';
+import { apiClient, type Job, type WorkMaterial, type Material } from '@/lib/api-client';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 
@@ -20,25 +20,60 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     const { data: materialsData } = useQuery({
         queryKey: ['materials'],
         queryFn: () => apiClient.getMaterials({ limit: 200 }),
-        enabled: modalOpen,
     });
+
+    const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
         mutationFn: ({ materialId, qty }: { materialId: string; qty: number }) =>
             apiClient.addJobMaterial(jobId, materialId, qty),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+        onMutate: async ({ materialId, qty }) => {
+            await queryClient.cancelQueries({ queryKey: jobKey });
+            const previous = queryClient.getQueryData<Job>(jobKey);
+            const material = materialsData?.data.find((m) => m.id === materialId);
+            const tempWorkMaterial: WorkMaterial = {
+                id: `temp-${Date.now()}`,
+                jobId,
+                materialId,
+                quantity: qty,
+                material: material ?? undefined,
+            };
+            queryClient.setQueryData<Job>(jobKey, (old) =>
+                old ? { ...old, workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial] } : old
+            );
             setSelectedMaterialId('');
             setQuantity('');
             setSelectedMaterial(null);
             setModalOpen(false);
+            return { previous };
+        },
+        onError: (_err, _data, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: jobKey });
         },
     });
 
     const removeMutation = useMutation({
         mutationFn: (workMaterialId: string) => apiClient.removeJobMaterial(workMaterialId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+        onMutate: async (workMaterialId) => {
+            await queryClient.cancelQueries({ queryKey: jobKey });
+            const previous = queryClient.getQueryData<Job>(jobKey);
+            queryClient.setQueryData<Job>(jobKey, (old) =>
+                old ? { ...old, workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId) } : old
+            );
+            return { previous };
+        },
+        onError: (_err, _data, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: jobKey });
         },
     });
 

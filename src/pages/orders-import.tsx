@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle, UploadCloud } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { apiClient, OrdersImportPreviewResponse, OrderImportPreviewItem } from '@/lib/api-client';
 import { classnames } from '@utils/classnames.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 
 export function OrdersImportPage() {
     const { user } = useAuthContext();
-    const userRole = user?.role?.name || user?.roleName;
+    const queryClient = useQueryClient();
+    const userRole = user?.role?.name;
     const isRestricted = userRole === 'technician';
 
     const [files, setFiles] = useState<File[]>([]);
@@ -65,6 +67,7 @@ export function OrdersImportPage() {
         try {
             const response = await apiClient.commitOrdersImport(validOrders.map((order) => order.data));
             setCommitResult(response.createdCount);
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to import orders.');
         } finally {
@@ -249,7 +252,11 @@ function ImportRow({
         'issueDate',
         'issueTime',
     ];
-    const getValue = (field: string) => (edits[field] !== undefined ? edits[field] : order.data[field] || '');
+    const getValue = (field: string) => {
+        return (edits as Record<string, unknown>)[field] !== undefined
+            ? (edits as Record<string, unknown>)[field]
+            : (order.data as Record<string, unknown>)[field] || '';
+    };
     return (
         <tr
             className={classnames('transition', {

@@ -10,10 +10,11 @@ import type { PaginatedResponse } from '@/lib/api-client';
 
 interface UseServerPaginationOptions<T> {
     queryKey: string[];
-    fetchFn: (params: { limit: number; offset: number }) => Promise<PaginatedResponse<T>>;
+    fetchFn: (params: { limit: number; offset: number } & Record<string, any>) => Promise<PaginatedResponse<T>>;
     columns: ColumnDef<T, any>[];
     defaultPageSize?: number;
     enabled?: boolean;
+    extraParams?: Record<string, any>;
 }
 
 export function useServerPagination<T>({
@@ -22,6 +23,7 @@ export function useServerPagination<T>({
     columns,
     defaultPageSize = 10,
     enabled = true,
+    extraParams,
 }: UseServerPaginationOptions<T>) {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
@@ -29,11 +31,12 @@ export function useServerPagination<T>({
     });
 
     const { data: response, isLoading } = useQuery({
-        queryKey: [...queryKey, pagination.pageIndex, pagination.pageSize],
+        queryKey: [...queryKey, pagination.pageIndex, pagination.pageSize, extraParams],
         queryFn: () =>
             fetchFn({
                 limit: pagination.pageSize,
                 offset: pagination.pageIndex * pagination.pageSize,
+                ...extraParams,
             }),
         enabled,
     });

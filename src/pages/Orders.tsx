@@ -20,6 +20,7 @@ const OrdersPage = () => {
     const queryClient = useQueryClient();
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
+    const [filterTechnicianId, setFilterTechnicianId] = useState<number | null>(null);
 
     // Technician view stays non-paginated
     const { data: myOrders = [], isLoading: myLoading } = useQuery({
@@ -36,28 +37,31 @@ const OrdersPage = () => {
 
     // Fetch all orders for map view (high limit to get all)
     const { data: allOrdersResponse } = useQuery({
-        queryKey: ['orders', 'all-map'],
-        queryFn: () => apiClient.getOrders({ limit: 10000, offset: 0 }),
+        queryKey: ['orders', 'all-map', filterTechnicianId],
+        queryFn: () => apiClient.getOrders({ limit: 10000, offset: 0, ...(filterTechnicianId ? { technicianId: filterTechnicianId } : {}) }),
         enabled: !isTechnician,
     });
     const allOrders = allOrdersResponse?.data || [];
 
     const bulkAssignMutation = useMutation({
-        mutationFn: ({ orderIds, technicianId }: { orderIds: number[]; technicianId: number }) =>
+        mutationFn: ({ orderIds, technicianId }: { orderIds: Array<number>; technicianId: number }) =>
             apiClient.bulkAssignOrders(orderIds, technicianId),
         onMutate: async ({ orderIds, technicianId }) => {
             // Cancel outgoing refetches so they don't overwrite optimistic update
             await queryClient.cancelQueries({ queryKey: ['orders', 'all-map'] });
 
             // Snapshot previous value for rollback
-            const previous = queryClient.getQueryData<{ data: Order[] }>(['orders', 'all-map']);
+            const previous = queryClient.getQueryData<{ data: Array<Order> }>(['orders', 'all-map']);
 
             // Find the technician object for the optimistic update
             const tech = technicians.find((t) => t.id === technicianId);
 
             // Optimistically update the map cache
-            queryClient.setQueryData<{ data: Order[] } | undefined>(['orders', 'all-map'], (old) => {
-                if (!old) return old;
+            queryClient.setQueryData<{ data: Array<Order> } | undefined>(['orders', 'all-map'], (old) => {
+                if (!old) {
+                    return old;
+                }
+
                 return {
                     ...old,
                     data: old.data.map((order) =>
@@ -65,7 +69,15 @@ const OrdersPage = () => {
                             ? {
                                   ...order,
                                   technicianId,
-                                  technician: tech ? { id: tech.id, name: tech.name, lastName: tech.lastName } : order.technician,
+                                  technician: tech
+                                      ? {
+                                            id: tech.id,
+                                            name: tech.name,
+                                            lastName: tech.lastName,
+                                            email: tech.email ?? '',
+                                            role: { id: tech.role?.id ?? 0, name: tech.role?.name ?? 'technician' },
+                                        }
+                                      : order.technician,
                               }
                             : order
                     ),
@@ -122,7 +134,7 @@ const OrdersPage = () => {
         }
     };
 
-    const handleBulkAssign = (orderIds: number[], technicianId: number) => {
+    const handleBulkAssign = (orderIds: Array<number>, technicianId: number) => {
         bulkAssignMutation.mutate({ orderIds, technicianId });
     };
 
@@ -216,10 +228,9 @@ const OrdersPage = () => {
         []
     );
 
-    // Technician columns (no technician column)
-    const techColumns = useMemo<Array<ColumnDef<Order, any>>>(
-        () => adminColumns.filter((c) => c.id !== 'technician'),
-        [adminColumns]
+    const extraParams = useMemo(
+        () => (filterTechnicianId ? { technicianId: filterTechnicianId } : undefined),
+        [filterTechnicianId]
     );
 
     const {
@@ -231,17 +242,8 @@ const OrdersPage = () => {
         fetchFn: (params) => apiClient.getOrders(params),
         columns: adminColumns,
         enabled: !isTechnician,
+        extraParams,
     });
-
-    // For technician view, create a simple client-side table
-    const techTable = useMemo(() => {
-        if (!isTechnician) {
-            return null;
-        }
-
-        // We use the raw react-table for client-side data
-        return null;
-    }, [isTechnician]);
 
     const isLoading = isTechnician ? myLoading : paginatedLoading;
 
@@ -288,6 +290,20 @@ const OrdersPage = () => {
                             <option value="table">Table</option>
                             <option value="map">Map</option>
                         </select>
+                        {!isTechnician && (
+                            <select
+                                className={INPUT_CLASS}
+                                value={filterTechnicianId ?? ''}
+                                onChange={(e) => setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)}
+                            >
+                                <option value="">All technicians</option>
+                                {technicians.map((tech) => (
+                                    <option key={tech.id} value={tech.id}>
+                                        {tech.name} {tech.lastName}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                 </div>
 
@@ -295,7 +311,10 @@ const OrdersPage = () => {
                     <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
                         <h2 className="text-xl font-bold mb-4">Create Order</h2>
                         <OrderForm onSubmit={handleCreateOrder} />
-                        <button className="mt-4 text-sm text-primary-500 underline" onClick={() => setShowOrderForm(false)}>
+                        <button
+                            className="mt-4 text-sm text-primary-500 underline"
+                            onClick={() => setShowOrderForm(false)}
+                        >
                             Cancel
                         </button>
                         {creating && <div className="mt-2 text-sm text-neutral-900">Creating order...</div>}
@@ -355,9 +374,7 @@ const OrdersPage = () => {
                                                         <div>
                                                             {order.firstName} {order.lastName}
                                                         </div>
-                                                        <div className="text-sm text-neutral-900">
-                                                            {order.email}
-                                                        </div>
+                                                        <div className="text-sm text-neutral-900">{order.email}</div>
                                                     </td>
                                                     <td className="px-6 py-4 text-sm">{order.serviceType}</td>
                                                     <td className="px-6 py-4 text-sm">

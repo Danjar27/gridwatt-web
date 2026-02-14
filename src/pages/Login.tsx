@@ -1,6 +1,6 @@
 import type { SubmitEvent } from 'react';
 
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
@@ -18,9 +18,6 @@ const LoginPage = () => {
     const [error, setError] = useState<string | null>(null);
 
     const navigate = useNavigate();
-    const location = useLocation();
-
-    const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
 
     const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -28,7 +25,7 @@ const LoginPage = () => {
 
         try {
             await login(email, password);
-            navigate(from, { replace: true });
+            navigate('/dashboard', { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed');
         }

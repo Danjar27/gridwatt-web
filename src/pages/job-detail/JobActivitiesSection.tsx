@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Plus } from 'lucide-react';
-import { apiClient, type JobActivity } from '@/lib/api-client';
+import { apiClient, type Job, type JobActivity } from '@/lib/api-client';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 
@@ -18,22 +18,56 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
     const { data: activitiesData } = useQuery({
         queryKey: ['activities'],
         queryFn: () => apiClient.getActivities({ limit: 200 }),
-        enabled: modalOpen,
     });
+
+    const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
         mutationFn: (activityId: string) => apiClient.addJobActivity(jobId, activityId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+        onMutate: async (activityId) => {
+            await queryClient.cancelQueries({ queryKey: jobKey });
+            const previous = queryClient.getQueryData<Job>(jobKey);
+            const activity = activitiesData?.data.find((a) => a.id === activityId);
+            const tempJobActivity: JobActivity = {
+                id: `temp-${Date.now()}`,
+                jobId,
+                activityId,
+                activity: activity ?? undefined,
+            };
+            queryClient.setQueryData<Job>(jobKey, (old) =>
+                old ? { ...old, jobActivities: [...(old.jobActivities ?? []), tempJobActivity] } : old
+            );
             setSelectedActivityId('');
             setModalOpen(false);
+            return { previous };
+        },
+        onError: (_err, _data, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: jobKey });
         },
     });
 
     const removeMutation = useMutation({
         mutationFn: (jobActivityId: string) => apiClient.removeJobActivity(jobActivityId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+        onMutate: async (jobActivityId) => {
+            await queryClient.cancelQueries({ queryKey: jobKey });
+            const previous = queryClient.getQueryData<Job>(jobKey);
+            queryClient.setQueryData<Job>(jobKey, (old) =>
+                old ? { ...old, jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId) } : old
+            );
+            return { previous };
+        },
+        onError: (_err, _data, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: jobKey });
         },
     });
 
