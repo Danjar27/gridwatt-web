@@ -89,7 +89,7 @@ export function JobsPage() {
                     {jobs.map((job) => (
                         <PendingSyncWrapper
                             key={job.id}
-                            pending={!!(job as Job & { _pendingSync?: boolean })._pendingSync}
+                            pending={!!job._pendingSync}
                         >
                             <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 shadow-sm transition-shadow hover:shadow-md">
                                 <div className="mb-3 flex items-start justify-between">

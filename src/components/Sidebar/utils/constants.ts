@@ -1,6 +1,6 @@
 import type { Section } from '../Sidebar.interface.ts';
 
-import { Clipboard, LayoutDashboard, Package, Users, Briefcase, BookA, Tag } from 'lucide-react';
+import { Clipboard, LayoutDashboard, Package, Users, Briefcase, BookA, Tag, Building2 } from 'lucide-react';
 
 export const NAVIGATION_ITEMS: Array<Section> = [
     {
@@ -42,6 +42,9 @@ export const NAVIGATION_ITEMS: Array<Section> = [
     {
         name: 'settings',
         label: 'sidebar.sections.settings',
-        routes: [{ name: 'users', label: 'routes.users', href: '/users', icon: Users, roles: ['admin'] }],
+        routes: [
+            { name: 'users', label: 'routes.users', href: '/users', icon: Users, roles: ['admin'] },
+            { name: 'tenants', label: 'routes.tenants', href: '/tenants', icon: Building2, roles: ['admin'] },
+        ],
     },
 ];

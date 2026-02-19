@@ -55,9 +55,10 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
             return userData;
         },
-        onSuccess: (userData) => {
-            queryClient.setQueryData(['auth', 'me'], userData);
-            if (userData?.role?.name === 'technician') {
+        onSuccess: async () => {
+            const fullUser = await apiClient.getMe();
+            queryClient.setQueryData(['auth', 'me'], fullUser);
+            if (fullUser?.role?.name === 'technician') {
                 prefetchTechnicianData().catch(() => {});
             }
         },

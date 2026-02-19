@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Plus } from 'lucide-react';
 import { apiClient, type Job, type WorkMaterial, type Material } from '@/lib/api-client';
+import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import { markJobPendingInLists } from './utils';
 
 interface Props {
     jobId: number;
@@ -38,9 +40,13 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 quantity: qty,
                 material: material ?? undefined,
             };
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial] } : old
+                old ? { ...old, workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial], ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             setSelectedMaterialId('');
             setQuantity('');
             setSelectedMaterial(null);
@@ -53,7 +59,9 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
@@ -62,9 +70,13 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
         onMutate: async (workMaterialId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId) } : old
+                old ? { ...old, workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId), ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -73,7 +85,9 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 

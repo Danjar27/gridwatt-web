@@ -15,6 +15,7 @@ import ActivitiesPage from '@pages/Activities.tsx';
 import SealsPage from '@pages/Seals.tsx';
 import ProfilePage from '@pages/Profile.tsx';
 import UsersPage from '@pages/Users.tsx';
+import TenantsPage from '@pages/Tenants.tsx';
 import OrdersPage from '@pages/Orders.tsx';
 
 const Router = createBrowserRouter([
@@ -75,6 +76,10 @@ const Router = createBrowserRouter([
                             {
                                 path: 'users',
                                 element: <UsersPage />,
+                            },
+                            {
+                                path: 'tenants',
+                                element: <TenantsPage />,
                             },
                             {
                                 path: 'profile',

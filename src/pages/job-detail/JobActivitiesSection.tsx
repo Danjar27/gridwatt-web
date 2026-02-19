@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Plus } from 'lucide-react';
 import { apiClient, type Job, type JobActivity } from '@/lib/api-client';
+import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import { markJobPendingInLists } from './utils';
 
 interface Props {
     jobId: number;
@@ -34,9 +36,13 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 activityId,
                 activity: activity ?? undefined,
             };
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobActivities: [...(old.jobActivities ?? []), tempJobActivity] } : old
+                old ? { ...old, jobActivities: [...(old.jobActivities ?? []), tempJobActivity], ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             setSelectedActivityId('');
             setModalOpen(false);
             return { previous };
@@ -47,7 +53,9 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
@@ -56,9 +64,13 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
         onMutate: async (jobActivityId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId) } : old
+                old ? { ...old, jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId), ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -67,7 +79,9 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 

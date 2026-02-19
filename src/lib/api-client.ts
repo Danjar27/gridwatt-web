@@ -1,7 +1,29 @@
 import { addOfflineMutation, isOnline, type MutationType } from './offline-store';
-import type { Role } from '@interfaces/user.interface.ts';
+import type { Role, Tenant } from '@interfaces/user.interface.ts';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
+
+/**
+ * Detect network errors across browsers:
+ * - Chrome: "Failed to fetch"
+ * - Safari/iOS: "Load failed" / "The network connection was lost."
+ * - Firefox: "NetworkError when attempting to fetch resource."
+ */
+function isNetworkError(error: unknown): boolean {
+    if (!(error instanceof TypeError)) {
+        return false;
+    }
+    const msg = error.message.toLowerCase();
+
+    return (
+        msg.includes('failed to fetch') ||
+        msg.includes('load failed') ||
+        msg.includes('networkerror') ||
+        msg.includes('network request failed') ||
+        msg.includes('network connection was lost') ||
+        msg.includes('cancelled')
+    );
+}
 
 interface RequestOptions extends RequestInit {
     skipAuth?: boolean;
@@ -197,8 +219,7 @@ class ApiClient {
         try {
             return await this.request<T>(endpoint, options);
         } catch (error) {
-            // Check if it's a network error (Failed to fetch)
-            if (error instanceof TypeError && error.message.includes('fetch')) {
+            if (isNetworkError(error)) {
                 // Store mutation for later sync
                 await addOfflineMutation({
                     type: offlineOptions.type,
@@ -350,11 +371,11 @@ class ApiClient {
         );
     }
 
-    async bulkAssignOrders(orderIds: number[], technicianId: number) {
-        return this.mutationRequest<Order[]>(
+    async bulkAssignOrders(orderIds: Array<number>, technicianId: number) {
+        return this.mutationRequest<Array<Order>>(
             '/orders/bulk-assign',
             { method: 'PUT', body: JSON.stringify({ orderIds, technicianId }) },
-            { type: 'order', action: 'update', optimisticData: orderIds.map(id => ({ id, technicianId })) }
+            { type: 'order', action: 'update', optimisticData: orderIds.map((id) => ({ id, technicianId })) }
         );
     }
 
@@ -659,7 +680,10 @@ class ApiClient {
             headers: { Authorization: `Bearer ${this.accessToken}` },
             body: formData,
         });
-        if (!response.ok) throw new Error('Upload failed');
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+
         return response.json();
     }
 
@@ -709,6 +733,32 @@ class ApiClient {
             body: JSON.stringify({ orders }),
         });
     }
+
+    // Tenants
+    async getTenants(params?: { limit?: number; offset?: number }) {
+        const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+        return this.request<PaginatedResponse<TenantWithCounts>>(`/tenants${qs}`);
+    }
+
+    async createTenant(data: { name: string; slug: string }) {
+        return this.request<TenantWithCounts>('/tenants', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async updateTenant(id: number, data: { name?: string; slug?: string; isActive?: boolean }) {
+        return this.request<TenantWithCounts>(`/tenants/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(data),
+        });
+    }
+
+    async deactivateTenant(id: number) {
+        return this.request<TenantWithCounts>(`/tenants/${id}`, {
+            method: 'DELETE',
+        });
+    }
 }
 
 export const apiClient = new ApiClient();
@@ -722,6 +772,25 @@ export interface User {
     phone?: string;
     isActive?: boolean;
     role: { id: number; name: Role };
+    tenantId: number;
+    tenant?: Tenant;
+}
+
+export interface TenantWithCounts {
+    id: number;
+    name: string;
+    slug: string;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    _count: {
+        users: number;
+        orders: number;
+        jobs: number;
+        materials: number;
+        activities: number;
+        seals: number;
+    };
 }
 
 export interface Order {
@@ -824,6 +893,8 @@ export interface Job {
     workMaterials?: Array<WorkMaterial>;
     jobActivities?: Array<JobActivity>;
     jobSeals?: Array<JobSeal>;
+    /** Client-side flag: true when changes are queued for sync */
+    _pendingSync?: boolean;
 }
 
 export interface Photo {

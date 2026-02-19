@@ -35,9 +35,16 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
     const SideBarContent = () => (
         <>
             <div className="hidden s992:flex flex-col w-full bg-neutral-500 rounded-lg p-5 gap-5 border border-neutral-800">
-                <div className="flex items-center w-full justify-center">
-                    <Logo className="h-14 w-14 text-black dark:text-white" />
-                    <span className="text-xl font-semibold">{i18n('brand')}</span>
+                <div className="flex flex-col items-center w-full justify-center gap-1">
+                    <div className="flex items-center justify-center">
+                        <Logo className="h-14 w-14 text-black dark:text-white" />
+                        <span className="text-xl font-semibold">{i18n('brand')}</span>
+                    </div>
+                    {user.tenant && (
+                        <span className="text-xs text-neutral-900 truncate max-w-full">
+                            {user.tenant.name}
+                        </span>
+                    )}
                 </div>
             </div>
             <div className="flex flex-col w-full bg-neutral-500 rounded-lg px-5 py-10 gap-6 border border-neutral-800">

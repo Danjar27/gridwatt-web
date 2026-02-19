@@ -4,6 +4,7 @@ import { apiClient, type Job } from '@/lib/api-client';
 import { isOnline } from '@/lib/offline-store';
 import { useState, useEffect, useRef } from 'react';
 import { Save, MapPin, AlertCircle, ExternalLink } from 'lucide-react';
+import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { JobActivitiesSection } from './job-detail/JobActivitiesSection';
@@ -35,34 +36,42 @@ export function JobDetailPage() {
             await queryClient.cancelQueries({ queryKey: ['job', id] });
             await queryClient.cancelQueries({ queryKey: ['jobs'] });
             const previousJob = queryClient.getQueryData<Job>(['job', id]);
-            const previousMyJobs = queryClient.getQueryData<Job[]>(['jobs', 'my']);
             const pendingSync = !isOnline();
+            const patchedData = { ...data, ...(pendingSync ? { _pendingSync: true } : {}) };
+
             queryClient.setQueryData<Job>(['job', id], (old) =>
-                old ? { ...old, ...data, ...(pendingSync && { _pendingSync: true }) } : old
+                old ? { ...old, ...patchedData } : old
             );
-            // Also update the jobs list so navigation back shows the change
-            if (previousMyJobs) {
-                queryClient.setQueryData<Job[]>(['jobs', 'my'], (jobs) =>
+
+            // Update ALL jobs list caches so navigation back shows the change
+            // (covers ['jobs', 'my'], ['jobs', 'all', ...], etc.)
+            const previousJobsCache = queryClient.getQueriesData<Array<Job>>({ queryKey: ['jobs'] });
+            for (const [queryKey, cachedJobs] of previousJobsCache) {
+                if (!Array.isArray(cachedJobs)) continue;
+                queryClient.setQueryData<Array<Job>>(queryKey, (jobs) =>
                     jobs?.map((j) =>
-                        j.id === Number(id)
-                            ? { ...j, ...data, ...(pendingSync && { _pendingSync: true }) }
-                            : j
+                        j.id === Number(id) ? { ...j, ...patchedData } : j
                     )
                 );
             }
-            return { previousJob, previousMyJobs };
+
+            return { previousJob, previousJobsCache };
         },
         onError: (_err, _data, context) => {
             if (context?.previousJob) {
                 queryClient.setQueryData(['job', id], context.previousJob);
             }
-            if (context?.previousMyJobs) {
-                queryClient.setQueryData(['jobs', 'my'], context.previousMyJobs);
+            if (context?.previousJobsCache) {
+                for (const [queryKey, cachedJobs] of context.previousJobsCache) {
+                    queryClient.setQueryData(queryKey, cachedJobs);
+                }
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', id] });
-            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: ['job', id] });
+                queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            }
         },
     });
 
@@ -98,7 +107,10 @@ export function JobDetailPage() {
         );
     }
 
+    const hasPendingSync = !!job._pendingSync;
+
     return (
+        <PendingSyncWrapper pending={hasPendingSync}>
         <div className="space-y-6">
             <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-3">
                 <div>
@@ -233,6 +245,7 @@ export function JobDetailPage() {
                 </div>
             )}
         </div>
+        </PendingSyncWrapper>
     );
 }
 
@@ -241,7 +254,7 @@ function JobLocationMap({ lat, lng }: { lat: number; lng: number }) {
     const mapInstanceRef = useRef<leaflet.Map | null>(null);
 
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) return;
+        if (!mapRef.current || mapInstanceRef.current) {return;}
         const map = leaflet.map(mapRef.current).setView([lat, lng], 15);
         leaflet
             .tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {

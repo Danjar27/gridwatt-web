@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient, type Photo } from '@/lib/api-client';
-import { addPendingPhoto, getPendingPhotos, type PendingPhoto } from '@/lib/offline-store';
+import { addPendingPhoto, getPendingPhotos, isOnline, type PendingPhoto } from '@/lib/offline-store';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { Camera, X } from 'lucide-react';
@@ -62,7 +62,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+            }
         },
     });
 

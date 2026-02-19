@@ -7,7 +7,8 @@
         "materials": "Materiales",
         "seals": "Sellos",
         "users": "Usuarios",
-        "jobs": "Trabajos"
+        "jobs": "Trabajos",
+        "tenants": "Empresas"
     },
     "sidebar": {
         "sections": {
@@ -83,6 +84,15 @@
                 "title": "Todos los usuarios",
                 "subtitle": "Lista de usuarios registrados",
                 "total": "Total de usuarios: {count}"
+            }
+        },
+        "tenants": {
+            "title": "Empresas",
+            "subtitle": "Administra las empresas registradas",
+            "summary": {
+                "title": "Todas las empresas",
+                "subtitle": "Lista de empresas registradas en el sistema",
+                "total": "Total de empresas: {count}"
             }
         },
         "dashboard": {

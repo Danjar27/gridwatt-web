@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { apiClient, type Order } from '@/lib/api-client';
+import { isOnline } from '@/lib/offline-store';
 import { Eye, MapPin, User, ClipboardList, BookA } from 'lucide-react';
 import { useAuthContext } from '@context/auth/context.ts';
 import { OrderForm } from '@/components/orders/OrderForm';
@@ -93,10 +94,11 @@ const OrdersPage = () => {
             }
         },
         onSettled: () => {
-            // Refetch to ensure server state after mutation completes
-            queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
-            queryClient.invalidateQueries({ queryKey: ['orders', 'all'] });
-            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
+                queryClient.invalidateQueries({ queryKey: ['orders', 'all'] });
+                queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            }
         },
     });
 
