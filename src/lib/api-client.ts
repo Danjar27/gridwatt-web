@@ -275,7 +275,7 @@ class ApiClient {
         return this.request<Array<{ id: number; name: string }>>('/users/roles');
     }
 
-    async createUser(data: Partial<User> & { password?: string; roleId: number }) {
+    async createUser(data: Partial<User> & { password?: string; roleId: number; tenantId?: number }) {
         const optimisticData: User = {
             id: data.id || -Date.now(),
             name: data.name || '',
@@ -284,6 +284,7 @@ class ApiClient {
             phone: data.phone,
             isActive: data.isActive ?? true,
             role: { id: data.roleId, name: 'technician' },
+            tenantId: data.tenantId || 0,
         };
 
         return this.mutationRequest<User>(
@@ -301,7 +302,8 @@ class ApiClient {
             email: data.email || '',
             phone: data.phone,
             isActive: data.isActive,
-            role: { id: data.roleId || 0, name: 'technician' }, // default to 'technician' or use a mapping if available
+            role: { id: data.roleId || 0, name: 'technician' },
+            tenantId: data.tenantId || 0,
         };
 
         return this.mutationRequest<User>(
@@ -737,6 +739,7 @@ class ApiClient {
     // Tenants
     async getTenants(params?: { limit?: number; offset?: number }) {
         const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+
         return this.request<PaginatedResponse<TenantWithCounts>>(`/tenants${qs}`);
     }
 
@@ -773,7 +776,7 @@ export interface User {
     isActive?: boolean;
     role: { id: number; name: Role };
     tenantId: number;
-    tenant?: Tenant;
+    tenant: Tenant;
 }
 
 export interface TenantWithCounts {

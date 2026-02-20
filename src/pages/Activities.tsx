@@ -6,6 +6,8 @@ import { formatEntityId } from '@/utils/format-id';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
 import { useServerPagination } from '@components/Table/hooks/useServerPagination';
+import { useAuthContext } from '@context/auth/context';
+import { Navigate } from 'react-router-dom';
 import Page from '@layouts/Page.tsx';
 import { useTranslations } from 'use-intl';
 import Summary from '@components/Summary/Summary.tsx';
@@ -23,6 +25,11 @@ import FormError from '@components/Form/blocks/Error';
 const ActivitiesPage = () => {
     const i18n = useTranslations();
     const queryClient = useQueryClient();
+    const { user: currentUser } = useAuthContext();
+
+    if (currentUser?.role?.name === 'admin') {
+        return <Navigate to="/dashboard" replace />;
+    }
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
     const [error, setError] = useState<string | null>(null);

@@ -1,14 +1,35 @@
 import type { Section } from '../Sidebar.interface.ts';
 
-import { Clipboard, LayoutDashboard, Package, Users, Briefcase, BookA, Tag, Building2 } from 'lucide-react';
+import {
+    HouseIcon,
+    BagSimpleIcon,
+    ClipboardIcon,
+    TruckIcon,
+    ToolboxIcon,
+    StampIcon,
+    UsersIcon,
+    BuildingOfficeIcon,
+} from '@phosphor-icons/react';
 
 export const NAVIGATION_ITEMS: Array<Section> = [
     {
         name: 'general',
         label: 'sidebar.sections.general',
         routes: [
-            { name: 'dashboard', label: 'routes.dashboard', href: '/dashboard', icon: LayoutDashboard },
-            { name: 'jobs', label: 'routes.jobs', href: '/jobs', icon: Briefcase, roles: ['technician'] },
+            {
+                name: 'dashboard',
+                label: 'routes.dashboard',
+                href: '/dashboard',
+                icon: HouseIcon,
+                roles: ['manager'],
+            },
+            {
+                name: 'jobs',
+                label: 'routes.jobs',
+                href: '/jobs',
+                icon: BagSimpleIcon,
+                roles: ['technician', 'manager'],
+            },
         ],
     },
     {
@@ -19,32 +40,38 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 name: 'activities',
                 label: 'routes.activities',
                 href: '/activities',
-                icon: Clipboard,
-                roles: ['admin', 'manager'],
+                icon: ClipboardIcon,
+                roles: ['manager'],
             },
             {
                 name: 'orders',
                 label: 'routes.orders',
                 href: '/orders',
-                icon: BookA,
-                roles: ['admin', 'manager'],
+                icon: TruckIcon,
+                roles: ['manager'],
             },
             {
                 name: 'materials',
                 label: 'routes.materials',
                 href: '/materials',
-                icon: Package,
-                roles: ['admin', 'manager'],
+                icon: ToolboxIcon,
+                roles: ['manager'],
             },
-            { name: 'seals', label: 'routes.seals', href: '/seals', icon: Tag, roles: ['admin', 'manager'] },
+            { name: 'seals', label: 'routes.seals', href: '/seals', icon: StampIcon, roles: ['manager'] },
         ],
     },
     {
         name: 'settings',
         label: 'sidebar.sections.settings',
         routes: [
-            { name: 'users', label: 'routes.users', href: '/users', icon: Users, roles: ['admin'] },
-            { name: 'tenants', label: 'routes.tenants', href: '/tenants', icon: Building2, roles: ['admin'] },
+            {
+                name: 'users',
+                label: 'routes.users',
+                href: '/users',
+                icon: UsersIcon,
+                roles: ['admin', 'manager'],
+            },
+            { name: 'tenants', label: 'routes.tenants', href: '/tenants', icon: BuildingOfficeIcon, roles: ['admin'] },
         ],
     },
 ];

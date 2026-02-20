@@ -22,6 +22,7 @@
 
     --sucesss-400: #74FFAE;
     --success-500: #41B06F;
+    --success-600: #166c3b;
 
     --error-400: #FF93B5;
     --error-500: #EB5E8B;
@@ -44,6 +45,7 @@
 
     --sucesss-400: #5EEEA0;
     --success-500: #38C76E;
+    --success-600: #248C4A;
 
     --error-400: #FF8AAE;
     --error-500: #E04F7A;
@@ -68,6 +70,7 @@
 
     --color-success-400: var(--sucesss-400);
     --color-success-500: var(--success-500);
+    --color-success-600: var(--success-600);
 
     --color-error-400: var(--error-400);
     --color-error-500: var(--error-500);

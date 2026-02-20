@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { apiClient, type Job } from '@/lib/api-client';
 import { Eye, MapPin } from 'lucide-react';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
@@ -11,6 +11,10 @@ export function JobsPage() {
     const { user } = useAuthContext();
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
+
+    if (userRole === 'admin') {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     const [filterTechnicianId, setFilterTechnicianId] = useState<number | null>(null);
 

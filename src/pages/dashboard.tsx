@@ -19,7 +19,8 @@ const DashboardPage = () => {
 
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
-    const isAdmin = userRole === 'admin' || userRole === 'manager';
+    const isManager = userRole === 'manager';
+    const isAdminRole = userRole === 'admin';
 
     const { data: jobs = [] } = useQuery<Array<Job>, Error>({
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
@@ -32,6 +33,7 @@ const DashboardPage = () => {
                 return res.data;
             }
         },
+        enabled: !isAdminRole,
     });
 
     const { data: orders = [] } = useQuery<Array<Order>, Error>({
@@ -45,6 +47,7 @@ const DashboardPage = () => {
                 return res.data;
             }
         },
+        enabled: !isAdminRole,
     });
 
     const pendingJobs = jobs.filter((j: Job) => j.jobStatus !== 'completed');
@@ -190,27 +193,29 @@ const DashboardPage = () => {
             subtitle={i18n('pages.dashboard.subtitle', { name: user?.name || '' })}
         >
             <div className="flex flex-col gap-4 s768:gap-6 s992:gap-10">
-                <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-4">
-                    {stats.map((stat) => (
-                        <div
-                            key={stat.name}
-                            className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 s768:p-5"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`rounded-lg p-2.5 ${stat.color}`}>
-                                    <stat.icon className="h-5 w-5" />
+                {!isAdminRole && (
+                    <>
+                        <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-4">
+                            {stats.map((stat) => (
+                                <div
+                                    key={stat.name}
+                                    className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 s768:p-5"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`rounded-lg p-2.5 ${stat.color}`}>
+                                            <stat.icon className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-neutral-900">{stat.name}</p>
+                                            <p className="text-2xl font-bold">{stat.value}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-neutral-900">{stat.name}</p>
-                                    <p className="text-2xl font-bold">{stat.value}</p>
-                                </div>
-                            </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
 
-                <div className="grid gap-4 s768:gap-6 s992:grid-cols-2">
-                    <Summary
+                        <div className="grid gap-4 s768:gap-6 s992:grid-cols-2">
+                            <Summary
                         icon={Briefcase}
                         title={i18n('pages.dashboard.recentJobs.title')}
                         subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
@@ -269,9 +274,11 @@ const DashboardPage = () => {
                             </div>
                         )}
                     </Summary>
-                </div>
+                        </div>
+                    </>
+                )}
 
-                {isAdmin && (
+                {isManager && (
                     <Summary
                         icon={LayoutDashboard}
                         title={i18n('pages.dashboard.dataExport.title')}

@@ -16,8 +16,8 @@ const User: FC = () => {
     const initials = buildUserInitials(fullName);
 
     return (
-        <Link to="/profile" className="flex gap-5 hover:bg-neutral-600 p-3 rounded-lg">
-            <div className="flex justify-center items-center font= h-12 w-12 rounded-full bg-primary-500">
+        <Link to="/profile" className="flex items-center gap-5 hover:bg-neutral-500 p-3 rounded-lg">
+            <div className="flex justify-center items-center font= h-10 w-10 rounded-full bg-primary-500">
                 <span className="text-white font-bold">{initials}</span>
             </div>
             <div className="flex flex-col gap-1">

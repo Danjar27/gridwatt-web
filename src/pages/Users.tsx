@@ -70,6 +70,7 @@ const UsersPage = () => {
 
     const userRole = currentUser?.role?.name;
     const isAuthorized = userRole === 'admin' || userRole === 'manager';
+    const isAdmin = userRole === 'admin';
 
     useEffect(() => {
         if (searchParams.get('add') === 'true' && isAuthorized) {
@@ -96,7 +97,24 @@ const UsersPage = () => {
         enabled: isAuthorized,
     });
 
-    const roleOptions = useMemo(() => roles.map((role) => ({ label: role.name, value: role.id })), [roles]);
+    const { data: tenantsData } = useQuery({
+        queryKey: ['tenants'],
+        queryFn: () => apiClient.getTenants({ limit: 100, offset: 0 }),
+        enabled: isAdmin,
+    });
+
+    const tenantOptions = useMemo(
+        () => (tenantsData?.data ?? []).map((t) => ({ label: t.name, value: t.id })),
+        [tenantsData]
+    );
+
+    const roleOptions = useMemo(
+        () =>
+            roles
+                .filter((role) => isAdmin || role.name !== 'admin')
+                .map((role) => ({ label: role.name, value: role.id })),
+        [roles, isAdmin]
+    );
 
     const columns = useMemo<Array<ColumnDef<User, any>>>(
         () => [
@@ -291,13 +309,18 @@ const UsersPage = () => {
     };
 
     const handleFormSubmit = (data: any) => {
-        const payload = {
-            ...data,
+        const { isActive, tenantId, ...rest } = data;
+        const payload: any = {
+            ...rest,
             roleId: Number(data.roleId),
-            isActive: data.isActive === 'true',
         };
 
+        if (isAdmin && tenantId) {
+            payload.tenantId = Number(tenantId);
+        }
+
         if (editingUser) {
+            payload.isActive = isActive === 'true';
             updateMutation.mutate({ id: editingUser.id, data: payload });
         } else {
             createMutation.mutate(payload);
@@ -372,6 +395,7 @@ const UsersPage = () => {
                                       phone: editingUser.phone || '',
                                       roleId: editingUser.role?.id,
                                       isActive: String(editingUser.isActive),
+                                      ...(isAdmin ? { tenantId: editingUser.tenantId } : {}),
                                   }
                                 : { isActive: 'true' }
                         }
@@ -408,6 +432,15 @@ const UsersPage = () => {
                                 options={[{ label: 'Select a role', value: '' }, ...roleOptions]}
                             />
                         </Field>
+                        {isAdmin && (
+                            <Field name="tenantId" label="Tenant" required>
+                                <Select
+                                    name="tenantId"
+                                    rules={{ required: 'Tenant is required' }}
+                                    options={[{ label: 'Select a tenant', value: '' }, ...tenantOptions]}
+                                />
+                            </Field>
+                        )}
                         <Field name="isActive" label="Status">
                             <Select
                                 name="isActive"
@@ -470,7 +503,11 @@ const UsersPage = () => {
                         }}
                     >
                         <Field name="roleId" label="New Role" required>
-                            <Select name="roleId" rules={{ required: 'Role is required' }} options={roleOptions} />
+                            <Select
+                                name="roleId"
+                                rules={{ required: 'Role is required' }}
+                                options={roleOptions}
+                            />
                         </Field>
                         <Actions
                             submitLabel="Change Role"

@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { MapPin, User, ArrowLeft } from 'lucide-react';
@@ -11,7 +11,11 @@ export function OrderDetailPage() {
     const { user } = useAuthContext();
     const queryClient = useQueryClient();
     const userRole = user?.role?.name;
-    const canAssign = userRole === 'admin' || userRole === 'manager';
+    const canAssign = userRole === 'manager';
+
+    if (userRole === 'admin') {
+        return <Navigate to="/dashboard" replace />;
+    }
 
     const [selectedTechnician, setSelectedTechnician] = useState<number | null>(null);
 

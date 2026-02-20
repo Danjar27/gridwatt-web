@@ -9,7 +9,7 @@ export function OrdersImportPage() {
     const { user } = useAuthContext();
     const queryClient = useQueryClient();
     const userRole = user?.role?.name;
-    const isRestricted = userRole === 'technician';
+    const isRestricted = userRole === 'technician' || userRole === 'admin';
 
     const [files, setFiles] = useState<File[]>([]);
     const [preview, setPreview] = useState<OrdersImportPreviewResponse | null>(null);

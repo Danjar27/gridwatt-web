@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { apiClient, type Order } from '@/lib/api-client';
 import { isOnline } from '@/lib/offline-store';
 import { Eye, MapPin, User, ClipboardList, BookA } from 'lucide-react';
@@ -21,6 +21,10 @@ const OrdersPage = () => {
     const queryClient = useQueryClient();
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
+
+    if (userRole === 'admin') {
+        return <Navigate to="/dashboard" replace />;
+    }
     const [filterTechnicianId, setFilterTechnicianId] = useState<number | null>(null);
 
     // Technician view stays non-paginated

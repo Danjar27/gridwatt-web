@@ -1,7 +1,7 @@
 import type { Actions, Context, Credentials } from '@context/auth/interface.ts';
 import type { FC, PropsWithChildren } from 'react';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useIsRestoring } from '@tanstack/react-query';
 import { AuthContext, AuthActions } from './context.ts';
 import { apiClient } from '@lib/api-client.ts';
 import { prefetchTechnicianData } from '@lib/technician-prefetch.ts';
@@ -9,6 +9,7 @@ import { useMemo, useEffect, useRef } from 'react';
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const queryClient = useQueryClient();
+    const isRestoring = useIsRestoring();
 
     const { data: user = null, isLoading } = useQuery({
         queryKey: ['auth', 'me'],
@@ -51,14 +52,14 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const loginMutation = useMutation({
         mutationFn: async ({ email, password }: Credentials) => {
-            const { user: userData } = await apiClient.login(email, password);
+            await apiClient.login(email, password);
 
-            return userData;
+            // Fetch full user data (with tenant info) right after login
+            return apiClient.getMe();
         },
-        onSuccess: async () => {
-            const fullUser = await apiClient.getMe();
-            queryClient.setQueryData(['auth', 'me'], fullUser);
-            if (fullUser?.role?.name === 'technician') {
+        onSuccess: (userData) => {
+            queryClient.setQueryData(['auth', 'me'], userData);
+            if (userData?.role?.name === 'technician') {
                 prefetchTechnicianData().catch(() => {});
             }
         },
@@ -105,10 +106,10 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const context: Context = useMemo(
         () => ({
             user: user,
-            isLoading: isLoading || loginMutation.isPending || logoutMutation.isPending,
+            isLoading: isLoading || isRestoring || loginMutation.isPending || logoutMutation.isPending,
             isAuthenticated: user !== null,
         }),
-        [user, isLoading, loginMutation.isPending, logoutMutation.isPending]
+        [user, isLoading, isRestoring, loginMutation.isPending, logoutMutation.isPending]
     );
 
     const actions: Actions = useMemo(
