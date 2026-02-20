@@ -16,7 +16,7 @@ function Table<T>({ table, isLoading, ...rest }: TableProps<T> & { total?: numbe
 
     return (
         <div className="overflow-x-auto">
-            <table className="w-full min-w-[600px]">
+            <table className="w-full min-w-150">
                 <Header headerGroups={table.getHeaderGroups()} />
                 <Body rows={table.getRowModel().rows} />
             </table>

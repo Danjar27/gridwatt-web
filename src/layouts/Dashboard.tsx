@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
-import Sidebar from '@components/Sidebar/Sidebar';
-import MobileNav from '@components/MobileNav/MobileNav.tsx';
-import PageTitleProvider from '@context/page-title/provider.tsx';
 
-const DashboardContent = () => {
+import MobileNav from '@components/MobileNav/MobileNav.tsx';
+import Sidebar from '@components/Sidebar/Sidebar';
+
+const Dashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleSidebarClose = () => setSidebarOpen(false);
@@ -23,11 +23,5 @@ const DashboardContent = () => {
         </div>
     );
 };
-
-const Dashboard = () => (
-    <PageTitleProvider>
-        <DashboardContent />
-    </PageTitleProvider>
-);
 
 export default Dashboard;

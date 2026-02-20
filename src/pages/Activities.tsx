@@ -25,11 +25,12 @@ import FormError from '@components/Form/blocks/Error';
 const ActivitiesPage = () => {
     const i18n = useTranslations();
     const queryClient = useQueryClient();
-    const { user: currentUser } = useAuthContext();
+    const { user } = useAuthContext();
 
-    if (currentUser?.role?.name === 'admin') {
+    if (user?.role?.name === 'admin') {
         return <Navigate to="/dashboard" replace />;
     }
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
     const [error, setError] = useState<string | null>(null);
