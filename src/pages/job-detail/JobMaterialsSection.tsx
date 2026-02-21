@@ -9,7 +9,7 @@ import { markJobPendingInLists } from './utils';
 
 interface Props {
     jobId: number;
-    workMaterials: WorkMaterial[];
+    workMaterials: Array<WorkMaterial>;
 }
 
 export function JobMaterialsSection({ jobId, workMaterials }: Props) {
@@ -51,6 +51,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             setQuantity('');
             setSelectedMaterial(null);
             setModalOpen(false);
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -77,6 +78,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
             }
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -115,7 +117,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                     className="flex items-center gap-1 rounded-lg bg-primary-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-600"
                 >
                     <Plus className="h-4 w-4" />
-                    Add
+                    Create
                 </button>
             </div>
 
@@ -152,7 +154,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 <p className="text-center text-neutral-900">No materials added</p>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add Material">
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Material">
                 <div className="space-y-4">
                     <select
                         value={selectedMaterialId}
@@ -180,7 +182,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                         disabled={!selectedMaterialId || !quantity || Number(quantity) <= 0 || addMutation.isPending}
                         className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
-                        Add
+                        Create
                     </button>
                 </div>
             </Modal>

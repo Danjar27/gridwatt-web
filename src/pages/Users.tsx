@@ -375,11 +375,11 @@ const UsersPage = () => {
                     <Table table={table} isLoading={isLoading} total={total} />
                 </Summary>
 
-                {/* Add/Edit User Modal */}
+                {/* Create/Edit User Modal */}
                 <Modal
                     open={isModalOpen || !!editingUser}
                     onClose={closeModal}
-                    title={editingUser ? 'Edit User' : 'Add User'}
+                    title={editingUser ? 'Edit User' : 'Create User'}
                     icon={UsersIcon}
                 >
                     <FormError message={error} />

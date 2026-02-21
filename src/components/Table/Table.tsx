@@ -16,7 +16,7 @@ const Table: FC<TableProps> = ({ table, isLoading, total }) => {
 
     return (
         <div className="overflow-x-auto">
-            <table className="w-full min-w-150">
+            <table className="w-full min-w-150 overflow-x-auto">
                 <Header headerGroups={table.getHeaderGroups()} />
                 <Body rows={table.getRowModel().rows} />
             </table>

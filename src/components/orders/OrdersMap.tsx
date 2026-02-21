@@ -191,7 +191,7 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
         markersRef.current.forEach((marker) => map.removeLayer(marker));
         markersRef.current.clear();
 
-        // Add new markers
+        // Create new markers
         markersData.forEach((markerData) => {
             const isSelected = selectedOrderIds.has(markerData.id);
             const color = markerData.icon === 'warning' ? '#f59e0b' : markerData.color || '#3b82f6';

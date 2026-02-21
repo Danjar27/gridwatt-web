@@ -9,7 +9,7 @@ import { markJobPendingInLists } from './utils';
 
 interface Props {
     jobId: number;
-    jobActivities: JobActivity[];
+    jobActivities: Array<JobActivity>;
 }
 
 export function JobActivitiesSection({ jobId, jobActivities }: Props) {
@@ -45,6 +45,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             }
             setSelectedActivityId('');
             setModalOpen(false);
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -71,6 +72,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
             }
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -97,7 +99,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                     className="flex items-center gap-1 rounded-lg bg-primary-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-600"
                 >
                     <Plus className="h-4 w-4" />
-                    Add
+                    Create
                 </button>
             </div>
 
@@ -123,7 +125,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 <p className="text-center text-neutral-900">No activities added</p>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add Activity">
+            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Activity">
                 <div className="space-y-4">
                     <select
                         value={selectedActivityId}
@@ -142,7 +144,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                         disabled={!selectedActivityId || addMutation.isPending}
                         className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
-                        Add
+                        Create
                     </button>
                 </div>
             </Modal>

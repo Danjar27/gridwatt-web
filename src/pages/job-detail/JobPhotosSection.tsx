@@ -8,7 +8,7 @@ import { Camera, X } from 'lucide-react';
 
 interface Props {
     jobId: number;
-    photos: Photo[];
+    photos: Array<Photo>;
 }
 
 type SlotType = 'antes' | 'despues';
@@ -21,14 +21,15 @@ export function JobPhotosSection({ jobId, photos }: Props) {
 
     useEffect(() => {
         let cancelled = false;
-        getPendingPhotos(jobId).then((pending: PendingPhoto[]) => {
-            if (cancelled) return;
+        getPendingPhotos(jobId).then((pending: Array<PendingPhoto>) => {
+            if (cancelled) {return;}
             const map: Record<string, Blob> = {};
             for (const p of pending) {
                 map[p.type] = p.blob;
             }
             setPendingPhotos(map);
         });
+
         return () => { cancelled = true; };
     }, [jobId]);
 
@@ -39,6 +40,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
             urls[type] = URL.createObjectURL(blob);
         }
         setObjectUrls(urls);
+
         return () => {
             for (const url of Object.values(urls)) {
                 URL.revokeObjectURL(url);
@@ -50,10 +52,11 @@ export function JobPhotosSection({ jobId, photos }: Props) {
         mutationFn: (photoId: string) => apiClient.removeJobPhoto(photoId),
         onMutate: async (photoId) => {
             await queryClient.cancelQueries({ queryKey: ['job', String(jobId)] });
-            const previous = queryClient.getQueryData<{ photos?: Photo[] }>(['job', String(jobId)]);
+            const previous = queryClient.getQueryData<{ photos?: Array<Photo> }>(['job', String(jobId)]);
             queryClient.setQueryData(['job', String(jobId)], (old: any) =>
                 old ? { ...old, photos: old.photos?.filter((p: Photo) => p.id !== photoId) } : old
             );
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -127,7 +130,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
                         >
                             <Camera className="h-4 w-4" />
-                            {online ? 'Add Photo' : 'Select from Library'}
+                            {online ? 'Create Photo' : 'Select from Library'}
                         </button>
                         <input
                             ref={fileInputRef}
@@ -136,7 +139,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) handleCapture(file, type);
+                                if (file) {handleCapture(file, type);}
                                 e.target.value = '';
                             }}
                         />

@@ -227,7 +227,7 @@ const MaterialsPage = () => {
                 <Modal
                     open={isModalOpen || !!editingMaterial}
                     onClose={closeModal}
-                    title={editingMaterial ? 'Edit Material' : 'Add Material'}
+                    title={editingMaterial ? 'Edit Material' : 'Create Material'}
                     icon={Package}
                 >
                     <FormError message={error} />

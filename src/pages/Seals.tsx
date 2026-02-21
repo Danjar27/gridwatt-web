@@ -3,7 +3,7 @@ import { apiClient, type Seal } from '@/lib/api-client';
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Tag, Clock } from 'lucide-react';
 import { formatEntityId } from '@/utils/format-id';
-import { type ColumnDef } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
 import { useServerPagination } from '@components/Table/hooks/useServerPagination';
 import { useAuthContext } from '@context/auth/context';
@@ -42,6 +42,7 @@ const SealsPage = () => {
         };
         fetchPending();
         const interval = setInterval(fetchPending, 2000);
+
         return () => clearInterval(interval);
     }, []);
 
@@ -58,7 +59,7 @@ const SealsPage = () => {
         }
     };
 
-    const columns = useMemo<ColumnDef<Seal, any>[]>(
+    const columns = useMemo<Array<ColumnDef<Seal, any>>>(
         () => [
             {
                 accessorKey: 'id',
@@ -67,6 +68,7 @@ const SealsPage = () => {
                     const isPending = pendingMutations.some(
                         (m) => (m.optimisticData as any)?.id === row.original.id,
                     );
+
                     return (
                         <div className="flex items-center gap-2 font-mono text-sm">
                             {formatEntityId('seal', row.original.id)}
@@ -211,7 +213,7 @@ const SealsPage = () => {
                 <Modal
                     open={isModalOpen || !!editingSeal}
                     onClose={closeModal}
-                    title={editingSeal ? 'Edit Seal' : 'Add Seal'}
+                    title={editingSeal ? 'Edit Seal' : 'Create Seal'}
                     icon={Tag}
                 >
                     <FormError message={error} />
