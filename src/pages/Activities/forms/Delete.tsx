@@ -52,11 +52,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="delete-activity" isOpen={isDeleteOpen} onOpen={openDelete} onClose={handleCancel}>
-            <Window
-                title={i18n('pages.activities.form.delete.title')}
-                className="w-full max-w-120 px-4"
-                icon={ClipboardIcon}
-            >
+            <Window title={i18n('pages.activities.form.delete')} className="w-full max-w-120 px-4" icon={ClipboardIcon}>
                 <FormError message={error} />
                 <Form key={selected.id} onSubmit={handleConfirm}>
                     <div className="flex flex-col items-center gap-3 py-4 text-center">

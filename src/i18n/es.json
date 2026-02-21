@@ -3,7 +3,8 @@
         "cancel": "Cancelar",
         "create": "Crear",
         "update": "Actualizar",
-        "delete": "Eliminar"
+        "delete": "Eliminar",
+        "actions": "Acciones"
     },
     "common": {
         "confirmation": "Esta acción no se puede deshacer. ¿Deseas continuar?"
@@ -56,9 +57,9 @@
             "subtitle": "Administra las actividades y tareas de tu empresa",
             "action": "Agregar actividad",
             "form": {
-                "create": { "title": "Nueva Actividad" },
-                "update": { "title": "Actualizar Actividad" },
-                "delete": { "title": "Eliminar Actividad" },
+                "create": "Nueva Actividad",
+                "update": "Actualizar Actividad",
+                "delete": "Eliminar Actividad",
                 "id": "Identificador",
                 "name": "Nombre",
                 "description": "Descripción"
