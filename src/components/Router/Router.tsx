@@ -10,11 +10,11 @@ import DashboardPage from '@pages/dashboard.tsx';
 import LoginPage from '@pages/Login.tsx';
 import Root from '@layouts/Root.tsx';
 import Dashboard from '@layouts/Dashboard.tsx';
-import MaterialsPage from '@pages/Materials.tsx';
+import MaterialsPage from '@pages/Materials/Page.tsx';
 import ActivitiesPage from '@pages/Activities/Page.tsx';
-import SealsPage from '@pages/Seals.tsx';
+import SealsPage from '@pages/Seals/Page.tsx';
 import ProfilePage from '@pages/Profile.tsx';
-import UsersPage from '@pages/Users.tsx';
+import UsersPage from '@pages/Users/Page.tsx';
 import TenantsPage from '@pages/Tenants.tsx';
 import OrdersPage from '@pages/Orders.tsx';
 

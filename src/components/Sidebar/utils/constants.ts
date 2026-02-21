@@ -23,6 +23,19 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 icon: HouseIcon,
                 roles: ['manager'],
             },
+        ],
+    },
+    {
+        name: 'inventories',
+        label: 'sidebar.sections.inventories',
+        routes: [
+            {
+                name: 'orders',
+                label: 'routes.orders',
+                href: '/orders',
+                icon: TruckIcon,
+                roles: ['manager'],
+            },
             {
                 name: 'jobs',
                 label: 'routes.jobs',
@@ -41,13 +54,6 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 label: 'routes.activities',
                 href: '/activities',
                 icon: ClipboardIcon,
-                roles: ['manager'],
-            },
-            {
-                name: 'orders',
-                label: 'routes.orders',
-                href: '/orders',
-                icon: TruckIcon,
                 roles: ['manager'],
             },
             {

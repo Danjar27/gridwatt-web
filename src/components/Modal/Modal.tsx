@@ -14,7 +14,7 @@ const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen,
         if (event.key === 'Escape') {
             onClose();
         }
-    }, []);
+    }, [onClose]);
 
     useEffect(() => {
         if (isOpen) {
@@ -22,7 +22,7 @@ const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen,
 
             return () => document.removeEventListener('keydown', handleKeyDown);
         }
-    }, [onOpen, handleKeyDown]);
+    }, [isOpen, handleKeyDown]);
 
     const context: Context = useMemo(
         () => ({

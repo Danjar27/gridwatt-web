@@ -2,7 +2,7 @@ import type { Row } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 
 interface BodyProps<T> {
-    rows: Row<T>[];
+    rows: Array<Row<T>>;
 }
 
 function Body<T>({ rows }: BodyProps<T>) {
@@ -23,7 +23,7 @@ function Body<T>({ rows }: BodyProps<T>) {
             {rows.map((row) => (
                 <tr
                     key={row.id}
-                    className="grid border-b border-neutral-200"
+                    className="grid border-b last:border-none border-neutral-300 dark:border-neutral-700"
                     style={{ gridTemplateColumns: `repeat(${row.getVisibleCells().length}, minmax(0, 1fr))` }}
                 >
                     {row.getVisibleCells().map((cell) => (

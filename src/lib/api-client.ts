@@ -558,6 +558,14 @@ class ApiClient {
         );
     }
 
+    async deleteMaterial(id: string) {
+        return this.mutationRequest<void>(
+            `/materials/${id}`,
+            { method: 'DELETE' },
+            { type: 'material', action: 'delete', optimisticData: { id } }
+        );
+    }
+
     async toggleMaterialActive(id: string) {
         return this.mutationRequest<Material>(
             `/materials/${id}/toggle-active`,
@@ -659,6 +667,14 @@ class ApiClient {
             `/seals/${id}`,
             { method: 'PUT', body: JSON.stringify(data) },
             { type: 'seal', action: 'update', optimisticData }
+        );
+    }
+
+    async deleteSeal(id: string) {
+        return this.mutationRequest<void>(
+            `/seals/${id}`,
+            { method: 'DELETE' },
+            { type: 'seal', action: 'delete', optimisticData: { id } }
         );
     }
 

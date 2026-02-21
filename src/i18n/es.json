@@ -23,7 +23,8 @@
         "sections": {
             "general": "General",
             "catalogs": "Catálogos",
-            "settings": "Configuración"
+            "settings": "Configuración",
+            "inventories": "Inventarios"
         }
     },
     "auth": {
@@ -55,15 +56,9 @@
             "subtitle": "Administra las actividades y tareas de tu empresa",
             "action": "Agregar actividad",
             "form": {
-                "create": {
-                    "title": "Nueva Actividad"
-                },
-                "update": {
-                    "title": "Actualizar Actividad"
-                },
-                "delete": {
-                    "title": "Eliminar Actividad"
-                },
+                "create": { "title": "Nueva Actividad" },
+                "update": { "title": "Actualizar Actividad" },
+                "delete": { "title": "Eliminar Actividad" },
                 "id": "Identificador",
                 "name": "Nombre",
                 "description": "Descripción"
@@ -77,6 +72,19 @@
         "materials": {
             "title": "Materiales",
             "subtitle": "Administra los materiales de inventario y proveedores",
+            "action": "Agregar material",
+            "form": {
+                "create": { "title": "Nuevo Material" },
+                "update": { "title": "Actualizar Material" },
+                "delete": { "title": "Eliminar Material" },
+                "id": "Identificador",
+                "name": "Nombre",
+                "type": "Tipo",
+                "unit": "Unidad",
+                "description": "Descripción",
+                "allowsDecimals": "Permite decimales",
+                "isActive": "Estado"
+            },
             "summary": {
                 "title": "Todos los materiales",
                 "subtitle": "Lista de materiales disponibles",
@@ -86,6 +94,17 @@
         "seals": {
             "title": "Sellos",
             "subtitle": "Administra los tipos de sellos y configuraciones",
+            "action": "Agregar sello",
+            "form": {
+                "create": { "title": "Nuevo Sello" },
+                "update": { "title": "Actualizar Sello" },
+                "delete": { "title": "Eliminar Sello" },
+                "id": "Identificador",
+                "name": "Nombre",
+                "type": "Tipo",
+                "description": "Descripción",
+                "isActive": "Estado"
+            },
             "summary": {
                 "title": "Todos los sellos",
                 "subtitle": "Lista de sellos registrados",
@@ -104,6 +123,22 @@
         "users": {
             "title": "Usuarios",
             "subtitle": "Administra las cuentas de usuario y permisos",
+            "action": "Agregar usuario",
+            "form": {
+                "create": { "title": "Nuevo Usuario" },
+                "update": { "title": "Actualizar Usuario" },
+                "delete": { "title": "Eliminar Usuario" },
+                "passwordReset": { "title": "Restablecer contraseña" },
+                "changeRole": { "title": "Cambiar rol" },
+                "name": "Nombre",
+                "lastName": "Apellido",
+                "email": "Correo electrónico",
+                "password": "Contraseña",
+                "phone": "Teléfono",
+                "role": "Rol",
+                "tenant": "Empresa",
+                "isActive": "Estado"
+            },
             "summary": {
                 "title": "Todos los usuarios",
                 "subtitle": "Lista de usuarios registrados",
