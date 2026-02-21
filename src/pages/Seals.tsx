@@ -211,7 +211,7 @@ const SealsPage = () => {
                 </Summary>
 
                 <Modal
-                    open={isModalOpen || !!editingSeal}
+                    onOpen={isModalOpen || !!editingSeal}
                     onClose={closeModal}
                     title={editingSeal ? 'Edit Seal' : 'Create Seal'}
                     icon={Tag}

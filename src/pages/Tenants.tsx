@@ -218,7 +218,7 @@ const TenantsPage = () => {
                 </Summary>
 
                 <Modal
-                    open={isModalOpen || !!editingTenant}
+                    onOpen={isModalOpen || !!editingTenant}
                     onClose={closeModal}
                     title={editingTenant ? 'Editar Empresa' : 'Agregar Empresa'}
                     icon={Building2}

@@ -225,7 +225,7 @@ const MaterialsPage = () => {
                 </Summary>
 
                 <Modal
-                    open={isModalOpen || !!editingMaterial}
+                    onOpen={isModalOpen || !!editingMaterial}
                     onClose={closeModal}
                     title={editingMaterial ? 'Edit Material' : 'Create Material'}
                     icon={Package}

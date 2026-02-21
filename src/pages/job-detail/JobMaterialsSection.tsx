@@ -154,7 +154,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 <p className="text-center text-neutral-900">No materials added</p>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Material">
+            <Modal onOpen={modalOpen} onClose={() => setModalOpen(false)} title="Create Material">
                 <div className="space-y-4">
                     <select
                         value={selectedMaterialId}

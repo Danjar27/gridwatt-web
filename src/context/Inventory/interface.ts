@@ -1,10 +1,8 @@
-import type { OfflineMutation } from '@lib/offline-store.ts';
-
-export interface Context {
+export interface Context<T> {
     /**
-     * The selected inventory item ID. Used to target mutations (e.g. update, delete).
+     * The selected record. Used as default values for the update form.
      */
-    selected: string | number | null;
+    selected: T | null;
     /**
      * Whether the creation modal is currently open.
      */
@@ -13,21 +11,13 @@ export interface Context {
      * Whether the update modal is currently open.
      */
     isUpdateOpen: boolean;
-    /**
-     * Offline mutations pending sync for this inventory entity type.
-     */
-    pendingMutations: Array<OfflineMutation>;
 }
 
-export interface Actions {
+export interface Actions<T> {
     /**
-     * Selects an inventory item by its ID and opens the update modal.
+     * Selects a record and opens the update modal.
      */
-    select: (id?: string | number) => void;
-    /**
-     * Clears the current selection and closes the update modal.
-     */
-    deselect: () => void;
+    select: (record: T) => void;
     /**
      * Opens the creation modal.
      */
@@ -41,14 +31,7 @@ export interface Actions {
      */
     openUpdate: () => void;
     /**
-     * Closes the update modal.
+     * Closes the update modal and clears the selection.
      */
     closeUpdate: () => void;
-}
-
-export interface InventoryProviderProps {
-    /**
-     * The entity type used to filter pending offline mutations (e.g. 'activity', 'material').
-     */
-    type: string;
 }

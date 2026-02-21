@@ -12,50 +12,57 @@ import Field from '@components/Form/blocks/Field';
 import Modal from '@components/Modal/Modal';
 import Form from '@components/Form/Form';
 
+import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { ClipboardIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
 import { apiClient } from '@lib/api-client';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import { useInventoryContext } from '@context/Inventory/context.ts';
 
-const Update: FC<MutationForm> = ({ onSubmit, onCancel, isOpen, open, close }) => {
-    const { selected } = useInventoryContext();
+const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
+
+    const { selected } = useInventoryContext();
+    const { isUpdateOpen } = useInventoryContext();
+    const { openUpdate, closeUpdate } = useInventoryActions();
     const [error, setError] = useState<string | null>(null);
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: UpdateQuery<Activity>) => apiClient.updateActivity(id, data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
-            onSubmit();
+            closeUpdate();
+            onSubmit?.();
         },
         onError: (err: Error) => setError(err.message || 'Failed to update activity'),
     });
 
-    const handleFormSubmit = (data: UpdateQuery<Activity>) => {
-        updateMutation.mutate(data);
+    const handleSubmit = ({ id, ...rest }: Activity) => {
+        updateMutation.mutate({ id, data: rest });
     };
 
+    const handleCancel = () => {
+        closeUpdate();
+        onCancel?.();
+    };
+
+    if (!selected) {
+        return null;
+    }
+
     return (
-        <Modal id="update-activity" isOpen={isOpen} open={open} close={close}>
+        <Modal id="update-activity" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
             <Window title={i18n('pages.activities.modal.title')} className="w-full max-w-150 px-4" icon={ClipboardIcon}>
                 <FormError message={error} />
-                <Form
-                    key="new"
-                    onSubmit={handleFormSubmit}
-                    defaultValues={{
-                        ...selected,
-                    }}
-                >
+                <Form key={selected.id} onSubmit={handleSubmit} defaultValues={selected}>
                     <Field name="name" label={i18n('pages.activities.form.name')} required>
                         <TextInput name="name" rules={{ required: 'Name is required' }} />
                     </Field>
                     <Field name="description" label={i18n('pages.activities.form.description')}>
                         <TextArea name="description" rows={3} />
                     </Field>
-                    <Actions submitLabel="Update" onCancel={onCancel} isLoading={updateMutation.isPending} />
+                    <Actions submitLabel="Update" onCancel={handleCancel} isLoading={updateMutation.isPending} />
                 </Form>
             </Window>
         </Modal>

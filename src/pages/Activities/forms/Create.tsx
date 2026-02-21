@@ -12,6 +12,7 @@ import Field from '@components/Form/blocks/Field';
 import Modal from '@components/Modal/Modal';
 import Form from '@components/Form/Form';
 
+import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { ClipboardIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
@@ -19,28 +20,36 @@ import { apiClient } from '@lib/api-client';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
-const Create: FC<MutationForm> = ({ onSubmit, onCancel, isOpen, open, close }) => {
+const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
+
+    const { isCreateOpen } = useInventoryContext();
+    const { openCreate, closeCreate } = useInventoryActions();
     const [error, setError] = useState<string | null>(null);
 
     const createMutation = useMutation({
         mutationFn: (data: Partial<Activity>) => apiClient.createActivity(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
-            onSubmit();
+            onSubmit?.();
         },
         onError: (err: Error) => setError(err.message || 'Failed to create activity'),
     });
 
-    const handleFormSubmit = (data: Partial<Activity>) => {
+    const handleSubmit = (data: Partial<Activity>) => {
         createMutation.mutate(data);
     };
 
+    const handleCancel = () => {
+        closeCreate();
+        onCancel?.();
+    };
+
     return (
-        <Modal id="new-activity" isOpen={isOpen} open={open} close={close}>
+        <Modal id="new-activity" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
             <Window title={i18n('pages.activities.modal.title')} className="w-full max-w-150 px-4" icon={ClipboardIcon}>
                 <FormError message={error} />
-                <Form key="new" onSubmit={handleFormSubmit}>
+                <Form key="new" onSubmit={handleSubmit}>
                     <Field name="id" label={i18n('pages.activities.form.id')} required>
                         <PrefixedIdInput name="id" prefix="ACT" rules={{ required: 'ID is required' }} />
                     </Field>
@@ -50,7 +59,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel, isOpen, open, close }) =
                     <Field name="description" label={i18n('pages.activities.form.description')}>
                         <TextArea name="description" rows={3} />
                     </Field>
-                    <Actions submitLabel="Create" onCancel={onCancel} isLoading={createMutation.isPending} />
+                    <Actions submitLabel="Create" onCancel={handleCancel} isLoading={createMutation.isPending} />
                 </Form>
             </Window>
         </Modal>

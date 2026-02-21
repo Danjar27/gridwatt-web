@@ -125,7 +125,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 <p className="text-center text-neutral-900">No activities added</p>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Activity">
+            <Modal onOpen={modalOpen} onClose={() => setModalOpen(false)} title="Create Activity">
                 <div className="space-y-4">
                     <select
                         value={selectedActivityId}

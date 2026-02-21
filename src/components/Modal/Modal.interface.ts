@@ -21,8 +21,8 @@ export interface Actions {
 export interface ModalProps {
     id: string;
     isOpen: boolean;
-    close: () => void;
-    open: () => void;
+    onClose: () => void;
+    onOpen: () => void;
     className?: string;
 }
 

@@ -9,10 +9,10 @@ import Backdrop from '@components/Backdrop/Backdrop.tsx';
 import Visible from '@components/atoms/Visible.tsx';
 import Portal from '@components/atoms/Portal.tsx';
 
-const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen, close, open }) => {
+const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen, onClose, onOpen }) => {
     const handleKeyDown = useCallback((event: KeyboardEvent) => {
         if (event.key === 'Escape') {
-            close();
+            onClose();
         }
     }, []);
 
@@ -22,7 +22,7 @@ const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen,
 
             return () => document.removeEventListener('keydown', handleKeyDown);
         }
-    }, [open, handleKeyDown]);
+    }, [onOpen, handleKeyDown]);
 
     const context: Context = useMemo(
         () => ({
@@ -33,10 +33,10 @@ const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen,
 
     const actions: Actions = useMemo(
         () => ({
-            open,
-            close,
+            open: onOpen,
+            close: onClose,
         }),
-        [open, close]
+        [onOpen, onClose]
     );
 
     return (
@@ -54,7 +54,7 @@ const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen,
                             aria-modal="true"
                             data-testid="modal-base"
                         >
-                            <Backdrop isEnabled={isOpen} onClick={close} />
+                            <Backdrop isEnabled={isOpen} onClick={onClose} />
                             {children}
                         </div>
                     </Portal>

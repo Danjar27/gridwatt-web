@@ -125,7 +125,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                 <p className="text-center text-neutral-900">No seals added</p>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Create Seal">
+            <Modal onOpen={modalOpen} onClose={() => setModalOpen(false)} title="Create Seal">
                 <div className="space-y-4">
                     <select
                         value={selectedSealId}

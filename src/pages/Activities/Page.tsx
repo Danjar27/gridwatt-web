@@ -1,10 +1,10 @@
-import InventoryProvider from '@context/Inventory/provider.tsx';
+import { Provider } from './utils/context.ts';
 import Inventory from '@pages/Activities/Inventory.tsx';
 
 const Page = () => (
-    <InventoryProvider type="activity">
+    <Provider>
         <Inventory />
-    </InventoryProvider>
+    </Provider>
 );
 
 export default Page;

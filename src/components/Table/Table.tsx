@@ -3,9 +3,8 @@ import type { TableProps } from './Table.interface';
 import Header from './blocks/Header';
 import Body from './blocks/Body';
 import Pagination from './blocks/Pagination';
-import type { FC } from 'react';
 
-const Table: FC<TableProps> = ({ table, isLoading, total }) => {
+function Table<T>({ table, isLoading, total }: TableProps<T>) {
     if (isLoading) {
         return (
             <div className="flex h-32 items-center justify-center">

@@ -377,7 +377,7 @@ const UsersPage = () => {
 
                 {/* Create/Edit User Modal */}
                 <Modal
-                    open={isModalOpen || !!editingUser}
+                    onOpen={isModalOpen || !!editingUser}
                     onClose={closeModal}
                     title={editingUser ? 'Edit User' : 'Create User'}
                     icon={UsersIcon}
@@ -459,7 +459,7 @@ const UsersPage = () => {
                 </Modal>
 
                 {/* Reset Password Modal */}
-                <Modal open={isPasswordModalOpen} onClose={closePasswordModal} title="Reset Password" icon={Key}>
+                <Modal onOpen={isPasswordModalOpen} onClose={closePasswordModal} title="Reset Password" icon={Key}>
                     <FormError message={error} />
                     <p className="mb-4 text-sm text-muted-foreground">
                         Resetting password for{' '}
@@ -487,7 +487,7 @@ const UsersPage = () => {
                 </Modal>
 
                 {/* Change Role Modal */}
-                <Modal open={isRoleModalOpen} onClose={closeRoleModal} title="Change Role" icon={Shield}>
+                <Modal onOpen={isRoleModalOpen} onClose={closeRoleModal} title="Change Role" icon={Shield}>
                     <FormError message={error} />
                     <p className="mb-4 text-sm text-muted-foreground">
                         Changing role for{' '}
@@ -518,7 +518,7 @@ const UsersPage = () => {
                 </Modal>
 
                 {/* Delete Confirmation Modal */}
-                <Modal open={isDeleteModalOpen} onClose={closeDeleteModal} title="Delete User" icon={Trash2}>
+                <Modal onOpen={isDeleteModalOpen} onClose={closeDeleteModal} title="Delete User" icon={Trash2}>
                     <p className="mb-4 text-sm text-muted-foreground">
                         Are you sure you want to delete{' '}
                         <strong>

@@ -2,16 +2,16 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { Activity } from '@lib/api-client.ts';
 import { apiClient } from '@lib/api-client.ts';
 
-import { useInventoryActions } from '@context/Inventory/context.ts';
+import { useInventoryActions } from '../utils/context.ts';
 
 import Table from '@components/Table/Table.tsx';
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
-import { PencilSimpleIcon } from '@phosphor-icons/react';
+import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 
 const ViewTable = () => {
     const { select } = useInventoryActions();
 
-    const columns: Array<ColumnDef<Partial<Activity>>> = [
+    const columns: Array<ColumnDef<Activity>> = [
         {
             accessorKey: 'id',
             header: 'Id',
@@ -47,11 +47,14 @@ const ViewTable = () => {
             header: 'Actions',
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
+                    <button onClick={() => select(row.original)} className="text-sm font-medium cursor-pointer">
+                        <PencilSimpleIcon weight="duotone" width={20} height={20} />
+                    </button>
                     <button
-                        onClick={() => select(row.original)}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-800 cursor-pointer"
+                        onClick={() => remove(row.original.id!)}
+                        className="text-sm font-medium text-red-600 hover:text-red-800 cursor-pointer"
                     >
-                        <PencilSimpleIcon width={20} height={20} />
+                        <TrashIcon weight="duotone" width={20} height={20} />
                     </button>
                 </div>
             ),
