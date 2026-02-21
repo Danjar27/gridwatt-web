@@ -33,6 +33,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
             closeUpdate();
+            setError(null);
             onSubmit?.();
         },
         onError: (err: Error) => setError(err.message || 'Failed to update activity'),
@@ -44,6 +45,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     const handleCancel = () => {
         closeUpdate();
+        setError(null);
         onCancel?.();
     };
 

@@ -28,6 +28,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
             closeDelete();
+            setError(null);
             onSubmit?.();
         },
         onError: (err: Error) => setError(err.message || 'Failed to delete activity'),
@@ -41,6 +42,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     const handleCancel = () => {
         closeDelete();
+        setError(null);
         onCancel?.();
     };
 

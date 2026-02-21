@@ -117,6 +117,10 @@ class ApiClient {
                         throw new Error(message);
                     }
 
+                    if (retryResponse.status === 204 || retryResponse.headers.get('content-length') === '0') {
+                        return null as T;
+                    }
+
                     return retryResponse.json();
                 }
             } catch (error) {
@@ -130,6 +134,10 @@ class ApiClient {
         if (!response.ok) {
             const error = await response.json().catch(() => ({}));
             throw new Error(error.message || `${response.status}: ${response.statusText}`);
+        }
+
+        if (response.status === 204 || response.headers.get('content-length') === '0') {
+            return null as T;
         }
 
         return response.json();

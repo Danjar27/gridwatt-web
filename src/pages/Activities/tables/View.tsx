@@ -1,12 +1,12 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Activity } from '@lib/api-client.ts';
-import { apiClient } from '@lib/api-client.ts';
 
-import { useInventoryActions } from '../utils/context.ts';
-
-import Table from '@components/Table/Table.tsx';
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
+import { useInventoryActions } from '../utils/context.ts';
+import { apiClient } from '@lib/api-client.ts';
+
+import Table from '@components/Table/Table.tsx';
 
 const ViewTable = () => {
     const { select, openUpdate, openDelete } = useInventoryActions();
@@ -57,14 +57,11 @@ const ViewTable = () => {
             header: 'Actions',
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    <button onClick={() => handleEdit(row.original)} className="text-sm font-medium cursor-pointer">
-                        <PencilSimpleIcon weight="duotone" width={20} height={20} />
+                    <button onClick={() => handleEdit(row.original)} className="cursor-pointer">
+                        <PencilSimpleIcon weight="duotone" className="text-primary-500 dark:text-white" width={20} height={20} />
                     </button>
-                    <button
-                        onClick={() => handleRemove(row.original)}
-                        className="text-sm font-medium text-red-600 hover:text-red-800 cursor-pointer"
-                    >
-                        <TrashIcon weight="duotone" width={20} height={20} />
+                    <button onClick={() => handleRemove(row.original)} className="cursor-pointer">
+                        <TrashIcon weight="duotone" className="text-secondary-500" width={20} height={20} />
                     </button>
                 </div>
             ),

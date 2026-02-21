@@ -10,7 +10,7 @@ const Stepper: FC<StepperProps> = ({ selected, total, onSelect, onNext, onPrevio
     const steps = calculateVisibleSteps(selected, total);
 
     return (
-        <div className="flex items-center gap-1 text-primary-500">
+        <div className="flex items-center gap-1 text-primary-500 dark:text-white">
             <button onClick={onPrevious} disabled={!hasPrevious} className="disabled:opacity-20 cursor-pointer">
                 <CaretLeftIcon weight="fill" width={16} height={16} />
             </button>

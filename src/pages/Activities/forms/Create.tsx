@@ -31,6 +31,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         mutationFn: (data: Partial<Activity>) => apiClient.createActivity(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
+            setError(null);
             onSubmit?.();
         },
         onError: (err: Error) => setError(err.message || 'Failed to create activity'),
@@ -42,6 +43,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     const handleCancel = () => {
         closeCreate();
+        setError(null);
         onCancel?.();
     };
 

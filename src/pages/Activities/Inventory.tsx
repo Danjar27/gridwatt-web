@@ -10,7 +10,6 @@ import Update from '@pages/Activities/forms/Update.tsx';
 import Delete from '@pages/Activities/forms/Delete.tsx';
 import Summary from '@components/Summary/Summary.tsx';
 import Button from '@components/Button/Button.tsx';
-import Page from '@layouts/Page.tsx';
 
 const Inventory = () => {
     const i18n = useTranslations();
@@ -23,7 +22,7 @@ const Inventory = () => {
     }
 
     return (
-        <Page id="activities" title={i18n('pages.activities.title')} subtitle={i18n('pages.activities.subtitle')}>
+
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
                     <Button icon={PlusCircleIcon} onClick={openCreate}>
@@ -43,7 +42,6 @@ const Inventory = () => {
                 <Update />
                 <Delete />
             </div>
-        </Page>
     );
 };
 
