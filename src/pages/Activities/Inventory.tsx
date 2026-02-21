@@ -7,6 +7,7 @@ import { useTranslations } from 'use-intl';
 import ViewTable from '@pages/Activities/tables/View.tsx';
 import Create from '@pages/Activities/forms/Create.tsx';
 import Update from '@pages/Activities/forms/Update.tsx';
+import Delete from '@pages/Activities/forms/Delete.tsx';
 import Summary from '@components/Summary/Summary.tsx';
 import Button from '@components/Button/Button.tsx';
 import Page from '@layouts/Page.tsx';
@@ -40,6 +41,7 @@ const Inventory = () => {
 
                 <Create />
                 <Update />
+                <Delete />
             </div>
         </Page>
     );

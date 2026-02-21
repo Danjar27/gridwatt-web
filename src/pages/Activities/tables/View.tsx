@@ -9,7 +9,17 @@ import { useServerPagination } from '@components/Table/hooks/useServerPagination
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 
 const ViewTable = () => {
-    const { select } = useInventoryActions();
+    const { select, openUpdate, openDelete } = useInventoryActions();
+
+    const handleEdit = (activity: Activity) => {
+        select(activity);
+        openUpdate();
+    };
+
+    const handleRemove = (activity: Activity) => {
+        select(activity);
+        openDelete();
+    };
 
     const columns: Array<ColumnDef<Activity>> = [
         {
@@ -47,11 +57,11 @@ const ViewTable = () => {
             header: 'Actions',
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    <button onClick={() => select(row.original)} className="text-sm font-medium cursor-pointer">
+                    <button onClick={() => handleEdit(row.original)} className="text-sm font-medium cursor-pointer">
                         <PencilSimpleIcon weight="duotone" width={20} height={20} />
                     </button>
                     <button
-                        onClick={() => remove(row.original.id!)}
+                        onClick={() => handleRemove(row.original)}
                         className="text-sm font-medium text-red-600 hover:text-red-800 cursor-pointer"
                     >
                         <TrashIcon weight="duotone" width={20} height={20} />

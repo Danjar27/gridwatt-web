@@ -9,6 +9,7 @@ export function createInventoryContext<T>() {
         selected: null,
         isCreateOpen: false,
         isUpdateOpen: false,
+        isDeleteOpen: false,
     });
 
     const InventoryActionsContext = createContext<Actions<T>>({
@@ -17,33 +18,38 @@ export function createInventoryContext<T>() {
         closeCreate: () => {},
         openUpdate: () => {},
         closeUpdate: () => {},
+        openDelete: () => {},
+        closeDelete: () => {},
     });
 
     function Provider({ children }: PropsWithChildren) {
         const [selected, setSelected] = useState<T | null>(null);
         const [isCreateOpen, openCreate, closeCreate] = useModal();
         const [isUpdateOpen, openUpdate, closeUpdate] = useModal();
+        const [isDeleteOpen, openDelete, closeDelete] = useModal();
 
-        const select = useCallback(
-            (record: T) => {
-                setSelected(record);
-                openUpdate();
-            },
-            [openUpdate]
-        );
+        const select = useCallback((record: T) => {
+            setSelected(record);
+        }, []);
 
         const handleCloseUpdate = useCallback(() => {
             setSelected(null);
             closeUpdate();
         }, [closeUpdate]);
 
+        const handleCloseDelete = useCallback(() => {
+            setSelected(null);
+            closeDelete();
+        }, [closeDelete]);
+
         const context: Context<T> = useMemo(
             () => ({
                 selected,
                 isCreateOpen,
                 isUpdateOpen,
+                isDeleteOpen,
             }),
-            [selected, isCreateOpen, isUpdateOpen]
+            [selected, isCreateOpen, isUpdateOpen, isDeleteOpen]
         );
 
         const actions: Actions<T> = useMemo(
@@ -53,8 +59,10 @@ export function createInventoryContext<T>() {
                 closeCreate,
                 openUpdate,
                 closeUpdate: handleCloseUpdate,
+                openDelete,
+                closeDelete: handleCloseDelete,
             }),
-            [select, openCreate, closeCreate, openUpdate, handleCloseUpdate]
+            [select, openCreate, closeCreate, openUpdate, handleCloseUpdate, openDelete, handleCloseDelete]
         );
 
         return (

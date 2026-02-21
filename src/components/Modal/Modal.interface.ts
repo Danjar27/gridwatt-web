@@ -30,6 +30,7 @@ export interface WindowProps {
     title: string;
     icon?: Icon;
     className?: string;
+    hideTitle?: boolean;
 }
 
 export interface EscapeProps {

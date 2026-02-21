@@ -601,11 +601,11 @@ class ApiClient {
         );
     }
 
-    async toggleActivityActive(id: string) {
-        return this.mutationRequest<Activity>(
-            `/activities/${id}/toggle-active`,
-            { method: 'PATCH' },
-            { type: 'activity', action: 'toggle-active', optimisticData: { id } }
+    async deleteActivity(id: string) {
+        return this.mutationRequest<void>(
+            `/activities/${id}`,
+            { method: 'DELETE' },
+            { type: 'activity', action: 'delete', optimisticData: { id } }
         );
     }
 

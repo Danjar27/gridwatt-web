@@ -53,7 +53,11 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="update-activity" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
-            <Window title={i18n('pages.activities.modal.title')} className="w-full max-w-150 px-4" icon={ClipboardIcon}>
+            <Window
+                title={i18n('pages.activities.form.update.title')}
+                className="w-full max-w-150 px-4"
+                icon={ClipboardIcon}
+            >
                 <FormError message={error} />
                 <Form key={selected.id} onSubmit={handleSubmit} defaultValues={selected}>
                     <Field name="name" label={i18n('pages.activities.form.name')} required>

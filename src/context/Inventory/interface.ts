@@ -1,6 +1,6 @@
 export interface Context<T> {
     /**
-     * The selected record. Used as default values for the update form.
+     * The selected record. Used as default values for the update and delete forms.
      */
     selected: T | null;
     /**
@@ -11,6 +11,10 @@ export interface Context<T> {
      * Whether the update modal is currently open.
      */
     isUpdateOpen: boolean;
+    /**
+     * Whether the delete modal is currently open.
+     */
+    isDeleteOpen: boolean;
 }
 
 export interface Actions<T> {
@@ -34,4 +38,12 @@ export interface Actions<T> {
      * Closes the update modal and clears the selection.
      */
     closeUpdate: () => void;
+    /**
+     * Opens the delete modal.
+     */
+    openDelete: () => void;
+    /**
+     * Closes the delete modal and clears the selection.
+     */
+    closeDelete: () => void;
 }

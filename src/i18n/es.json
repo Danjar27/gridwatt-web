@@ -1,4 +1,13 @@
 {
+    "literal": {
+        "cancel": "Cancelar",
+        "create": "Crear",
+        "update": "Actualizar",
+        "delete": "Eliminar"
+    },
+    "common": {
+        "confirmation": "Esta acción no se puede deshacer. ¿Deseas continuar?"
+    },
     "brand": "Grid Watt",
     "routes": {
         "dashboard": "Tablero",
@@ -45,10 +54,16 @@
             "title": "Actividades",
             "subtitle": "Administra las actividades y tareas de tu empresa",
             "action": "Agregar actividad",
-            "modal": {
-                "title": "Nueva Actividad"
-            },
             "form": {
+                "create": {
+                    "title": "Nueva Actividad"
+                },
+                "update": {
+                    "title": "Actualizar Actividad"
+                },
+                "delete": {
+                    "title": "Eliminar Actividad"
+                },
                 "id": "Identificador",
                 "name": "Nombre",
                 "description": "Descripción"

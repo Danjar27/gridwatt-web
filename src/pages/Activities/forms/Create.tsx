@@ -47,7 +47,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="new-activity" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
-            <Window title={i18n('pages.activities.modal.title')} className="w-full max-w-150 px-4" icon={ClipboardIcon}>
+            <Window
+                title={i18n('pages.activities.form.create.title')}
+                className="w-full max-w-150 px-4"
+                icon={ClipboardIcon}
+            >
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit}>
                     <Field name="id" label={i18n('pages.activities.form.id')} required>
@@ -59,7 +63,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                     <Field name="description" label={i18n('pages.activities.form.description')}>
                         <TextArea name="description" rows={3} />
                     </Field>
-                    <Actions submitLabel="Create" onCancel={handleCancel} isLoading={createMutation.isPending} />
+                    <Actions
+                        submitLabel={i18n('literal.create')}
+                        onCancel={handleCancel}
+                        isLoading={createMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>
