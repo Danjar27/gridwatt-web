@@ -1,4 +1,4 @@
-import type { Actions, Context } from './interface.ts';
+import type { Context, Actions } from '../Modal.interface.ts';
 
 import { createContext, useContext } from 'react';
 

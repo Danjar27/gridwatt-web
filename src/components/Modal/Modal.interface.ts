@@ -1,11 +1,40 @@
-import type { ReactNode } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { Icon } from '@phosphor-icons/react';
+
+export interface Context {
+    /**
+     * Whether the modal is open or not
+     */
+    isOpen: boolean;
+}
+
+export interface Actions {
+    /**
+     * Opens the modal
+     */
+    open: () => void;
+    /**
+     * Closes the modal
+     */
+    close: () => void;
+}
 
 export interface ModalProps {
-    open: boolean;
-    onClose: () => void;
+    id: string;
+    isOpen: boolean;
+    close: () => void;
+    open: () => void;
+    className?: string;
+}
+
+export interface WindowProps {
     title: string;
-    children: ReactNode;
-    maxWidth?: string;
-    icon?: LucideIcon;
+    icon?: Icon;
+    className?: string;
+}
+
+export interface EscapeProps {
+    className?: string;
+    theme?: 'light' | 'dark';
+    icon: Icon;
+    background?: boolean;
 }

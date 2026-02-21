@@ -21,9 +21,13 @@ function Body<T>({ rows }: BodyProps<T>) {
     return (
         <tbody>
             {rows.map((row) => (
-                <tr key={row.id} className="border-b border-neutral-200">
+                <tr
+                    key={row.id}
+                    className="grid border-b border-neutral-200"
+                    style={{ gridTemplateColumns: `repeat(${row.getVisibleCells().length}, minmax(0, 1fr))` }}
+                >
                     {row.getVisibleCells().map((cell) => (
-                        <td key={cell.id} className="px-6 py-4 text-sm">
+                        <td key={cell.id} className="flex items-center justify-center px-6 py-4 text-sm">
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                     ))}

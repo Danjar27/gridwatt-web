@@ -44,6 +44,15 @@
         "activities": {
             "title": "Actividades",
             "subtitle": "Administra las actividades y tareas de tu empresa",
+            "action": "Agregar actividad",
+            "modal": {
+                "title": "Nueva Actividad"
+            },
+            "form": {
+                "id": "Identificador",
+                "name": "Nombre",
+                "description": "Descripción"
+            },
             "summary": {
                 "title": "Todas las actividades",
                 "subtitle": "Lista de acciones registradas en el sistema",
@@ -111,6 +120,9 @@
                 "subtitle": "Descarga información en formato CSV"
             }
         }
+    },
+    "table": {
+        "pagination": "Registros del {from} al {to} de un total de {total}"
     },
     "connection": {
         "offline": "Sin conexión a internet",

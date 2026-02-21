@@ -1,9 +1,11 @@
 import type { TableProps } from './Table.interface';
+
 import Header from './blocks/Header';
 import Body from './blocks/Body';
 import Pagination from './blocks/Pagination';
+import type { FC } from 'react';
 
-function Table<T>({ table, isLoading, ...rest }: TableProps<T> & { total?: number }) {
+const Table: FC<TableProps> = ({ table, isLoading, total }) => {
     if (isLoading) {
         return (
             <div className="flex h-32 items-center justify-center">
@@ -11,8 +13,6 @@ function Table<T>({ table, isLoading, ...rest }: TableProps<T> & { total?: numbe
             </div>
         );
     }
-
-    const total = rest.total ?? table.getRowCount();
 
     return (
         <div className="overflow-x-auto">
@@ -23,6 +23,6 @@ function Table<T>({ table, isLoading, ...rest }: TableProps<T> & { total?: numbe
             <Pagination table={table} total={total} />
         </div>
     );
-}
+};
 
 export default Table;

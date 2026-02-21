@@ -1,26 +1,34 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, type Activity } from '@/lib/api-client';
-import { useState, useEffect, useMemo } from 'react';
-import { Plus, Clipboard, Clock } from 'lucide-react';
-import { formatEntityId } from '@/utils/format-id';
 import type { ColumnDef } from '@tanstack/react-table';
-import { getPendingMutationsByType, type OfflineMutation } from '@/lib/offline-store';
+import type { OfflineMutation } from '@lib/offline-store';
+import type { Activity } from '@lib/api-client';
+
 import { useServerPagination } from '@components/Table/hooks/useServerPagination';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getPendingMutationsByType } from '@/lib/offline-store';
+import { ClipboardIcon, PlusCircleIcon } from '@phosphor-icons/react';
 import { useAuthContext } from '@context/auth/context';
+import { useState, useEffect, useMemo } from 'react';
+import { formatEntityId } from '@/utils/format-id';
+import { useModal } from '@hooks/useModal.ts';
+import { apiClient } from '@lib/api-client';
 import { Navigate } from 'react-router-dom';
-import Page from '@layouts/Page.tsx';
 import { useTranslations } from 'use-intl';
+import { Clock } from 'lucide-react';
+
+import PrefixedIdInput from '@components/Form/blocks/PrefixedIdInput';
+import TextInput from '@components/Form/blocks/TextInput';
+import Window from '@components/Modal/blocks/Window.tsx';
+import TextArea from '@components/Form/blocks/TextArea';
+import FormError from '@components/Form/blocks/Error';
 import Summary from '@components/Summary/Summary.tsx';
+import Actions from '@components/Form/blocks/Actions';
+import Select from '@components/Form/blocks/Select';
+import Button from '@components/Button/Button.tsx';
+import Field from '@components/Form/blocks/Field';
 import Table from '@components/Table/Table.tsx';
 import Modal from '@components/Modal/Modal';
 import Form from '@components/Form/Form';
-import Field from '@components/Form/blocks/Field';
-import TextInput from '@components/Form/blocks/TextInput';
-import PrefixedIdInput from '@components/Form/blocks/PrefixedIdInput';
-import TextArea from '@components/Form/blocks/TextArea';
-import Select from '@components/Form/blocks/Select';
-import Actions from '@components/Form/blocks/Actions';
-import FormError from '@components/Form/blocks/Error';
+import Page from '@layouts/Page.tsx';
 
 const ActivitiesPage = () => {
     const i18n = useTranslations();
@@ -31,7 +39,8 @@ const ActivitiesPage = () => {
         return <Navigate to="/dashboard" replace />;
     }
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen, openModal, closeModal] = useModal();
+
     const [editingActivity, setEditingActivity] = useState<Activity | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [pendingMutations, setPendingMutations] = useState<Array<OfflineMutation>>([]);
@@ -41,6 +50,7 @@ const ActivitiesPage = () => {
             const pending = await getPendingMutationsByType('activity');
             setPendingMutations(pending);
         };
+
         fetchPending();
         const interval = setInterval(fetchPending, 2000);
 
@@ -125,8 +135,8 @@ const ActivitiesPage = () => {
         columns,
     });
 
-    const closeModal = () => {
-        setIsModalOpen(false);
+    const closeSession = () => {
+        closeModal();
         setEditingActivity(null);
         setError(null);
     };
@@ -135,7 +145,7 @@ const ActivitiesPage = () => {
         mutationFn: (data: Partial<Activity>) => apiClient.createActivity(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['activities'] });
-            closeModal();
+            closeSession();
         },
         onError: (err: any) => setError(err.message || 'Failed to create activity'),
     });
@@ -144,7 +154,7 @@ const ActivitiesPage = () => {
         mutationFn: ({ id, data }: { id: string; data: Partial<Activity> }) => apiClient.updateActivity(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['activities'] });
-            closeModal();
+            closeSession();
         },
         onError: (err: any) => setError(err.message || 'Failed to update activity'),
     });
@@ -167,70 +177,57 @@ const ActivitiesPage = () => {
         <Page id="activities" title={i18n('pages.activities.title')} subtitle={i18n('pages.activities.subtitle')}>
             <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-                    >
-                        <Plus className="h-4 w-4" />
-                        Add Activity
-                    </button>
+                    <Button icon={PlusCircleIcon} onClick={openModal}>
+                        {i18n('pages.activities.action')}
+                    </Button>
                 </div>
 
                 <Summary
-                    icon={Clipboard}
+                    icon={ClipboardIcon}
                     title={i18n('pages.activities.summary.title')}
                     subtitle={i18n('pages.activities.summary.subtitle')}
-                    legend={i18n('pages.activities.summary.total', { count: total })}
                 >
                     <Table table={table} isLoading={isLoading} total={total} />
                 </Summary>
 
-                <Modal
-                    open={isModalOpen || !!editingActivity}
-                    onClose={closeModal}
-                    title={editingActivity ? 'Edit Activity' : 'Add Activity'}
-                    icon={Clipboard}
-                >
-                    <FormError message={error} />
-                    <Form
-                        key={editingActivity?.id || 'new'}
-                        onSubmit={handleFormSubmit}
-                        defaultValues={
-                            editingActivity
-                                ? {
-                                      name: editingActivity.name,
-                                      description: editingActivity.description || '',
-                                      isActive: String(editingActivity.isActive),
-                                  }
-                                : { isActive: 'true' }
-                        }
+                <Modal id="add-activity" isOpen={isModalOpen} open={openModal} close={closeSession}>
+                    <Window
+                        title={i18n('pages.activities.modal.title')}
+                        className="w-full max-w-150 px-4"
+                        icon={ClipboardIcon}
                     >
-                        {!editingActivity && (
-                            <Field name="id" label="ID" required>
-                                <PrefixedIdInput name="id" prefix="ACT" rules={{ required: 'ID is required' }} />
+                        <FormError message={error} />
+                        <Form
+                            key={editingActivity?.id || 'new'}
+                            onSubmit={handleFormSubmit}
+                            defaultValues={
+                                editingActivity
+                                    ? {
+                                          name: editingActivity.name,
+                                          description: editingActivity.description || '',
+                                          isActive: String(editingActivity.isActive),
+                                      }
+                                    : { isActive: 'true' }
+                            }
+                        >
+                            {!editingActivity && (
+                                <Field name="id" label={i18n('pages.activities.form.id')} required>
+                                    <PrefixedIdInput name="id" prefix="ACT" rules={{ required: 'ID is required' }} />
+                                </Field>
+                            )}
+                            <Field name="name" label={i18n('pages.activities.form.name')} required>
+                                <TextInput name="name" rules={{ required: 'Name is required' }} />
                             </Field>
-                        )}
-                        <Field name="name" label="Name" required>
-                            <TextInput name="name" rules={{ required: 'Name is required' }} />
-                        </Field>
-                        <Field name="description" label="Description">
-                            <TextArea name="description" rows={3} />
-                        </Field>
-                        <Field name="isActive" label="Status">
-                            <Select
-                                name="isActive"
-                                options={[
-                                    { label: 'Active', value: 'true' },
-                                    { label: 'Inactive', value: 'false' },
-                                ]}
+                            <Field name="description" label={i18n('pages.activities.form.description')}>
+                                <TextArea name="description" rows={3} />
+                            </Field>
+                            <Actions
+                                submitLabel={editingActivity ? 'Update' : 'Create'}
+                                onCancel={closeSession}
+                                isLoading={createMutation.isPending || updateMutation.isPending}
                             />
-                        </Field>
-                        <Actions
-                            submitLabel={editingActivity ? 'Update' : 'Create'}
-                            onCancel={closeModal}
-                            isLoading={createMutation.isPending || updateMutation.isPending}
-                        />
-                    </Form>
+                        </Form>
+                    </Window>
                 </Modal>
             </div>
         </Page>
