@@ -78,7 +78,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="new-user" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
-            <Window title={i18n('pages.users.form.create.title')} className="w-full max-w-150 px-4" icon={UsersIcon}>
+            <Window title={i18n('pages.users.form.create')} className="w-full max-w-150 px-4" icon={UsersIcon}>
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit}>
                     <div className="grid grid-cols-2 gap-4">

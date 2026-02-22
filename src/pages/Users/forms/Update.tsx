@@ -70,7 +70,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="update-user" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
-            <Window title={i18n('pages.users.form.update.title')} className="w-full max-w-150 px-4" icon={UsersIcon}>
+            <Window title={i18n('pages.users.form.update')} className="w-full max-w-150 px-4" icon={UsersIcon}>
                 <FormError message={error} />
                 <Form
                     key={selected.id}

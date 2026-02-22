@@ -75,9 +75,9 @@
             "subtitle": "Administra los materiales de inventario y proveedores",
             "action": "Agregar material",
             "form": {
-                "create": { "title": "Nuevo Material" },
-                "update": { "title": "Actualizar Material" },
-                "delete": { "title": "Eliminar Material" },
+                "create": "Nuevo Material",
+                "update": "Actualizar Material",
+                "delete": "Eliminar Material",
                 "id": "Identificador",
                 "name": "Nombre",
                 "type": "Tipo",

@@ -53,7 +53,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="update-seal" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
-            <Window title={i18n('pages.seals.form.update.title')} className="w-full max-w-150 px-4" icon={SealIcon}>
+            <Window title={i18n('pages.seals.form.update')} className="w-full max-w-150 px-4" icon={SealIcon}>
                 <FormError message={error} />
                 <Form
                     key={selected.id}

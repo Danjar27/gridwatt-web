@@ -50,7 +50,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="delete-seal" isOpen={isDeleteOpen} onOpen={openDelete} onClose={handleCancel}>
-            <Window title={i18n('pages.seals.form.delete.title')} className="w-full max-w-120 px-4" icon={SealIcon}>
+            <Window title={i18n('pages.seals.form.delete')} className="w-full max-w-120 px-4" icon={SealIcon}>
                 <FormError message={error} />
                 <Form key={selected.id} onSubmit={handleConfirm}>
                     <div className="flex flex-col items-center gap-3 py-4 text-center">

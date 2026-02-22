@@ -28,10 +28,6 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const { openUpdate, closeUpdate } = useInventoryActions();
     const [error, setError] = useState<string | null>(null);
 
-    if (!selected) {
-        return null;
-    }
-
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: UpdateQuery<Material>) => apiClient.updateMaterial(id, data),
         onSuccess: async () => {
@@ -42,20 +38,8 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         onError: (err: Error) => setError(err.message || 'Failed to update material'),
     });
 
-    const handleSubmit = ({
-        id,
-        allowsDecimals,
-        isActive,
-        ...rest
-    }: Material & { allowsDecimals: string; isActive: string }) => {
-        updateMutation.mutate({
-            id,
-            data: {
-                ...rest,
-                allowsDecimals: String(allowsDecimals) === 'true',
-                isActive: String(isActive) === 'true',
-            },
-        });
+    const handleSubmit = ({ id, ...data }: Material) => {
+        updateMutation.mutate({ id, data });
     };
 
     const handleCancel = () => {
@@ -70,7 +54,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     return (
         <Modal id="update-material" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
             <Window
-                title={i18n('pages.materials.form.update.title')}
+                title={i18n('pages.materials.form.update')}
                 className="w-full max-w-150 px-4"
                 icon={PackageIcon}
             >
@@ -97,15 +81,6 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                                 options={[
                                     { label: 'Sí', value: 'true' },
                                     { label: 'No', value: 'false' },
-                                ]}
-                            />
-                        </Field>
-                        <Field name="isActive" label={i18n('pages.materials.form.isActive')}>
-                            <Select
-                                name="isActive"
-                                options={[
-                                    { label: 'Activo', value: 'true' },
-                                    { label: 'Inactivo', value: 'false' },
                                 ]}
                             />
                         </Field>

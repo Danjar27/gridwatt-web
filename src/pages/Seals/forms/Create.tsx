@@ -47,7 +47,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="new-seal" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
-            <Window title={i18n('pages.seals.form.create.title')} className="w-full max-w-150 px-4" icon={SealIcon}>
+            <Window title={i18n('pages.seals.form.create')} className="w-full max-w-150 px-4" icon={SealIcon}>
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit}>
                     <Field name="id" label={i18n('pages.seals.form.id')} required>

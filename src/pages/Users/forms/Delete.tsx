@@ -49,7 +49,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="delete-user" isOpen={isDeleteOpen} onOpen={openDelete} onClose={handleCancel}>
-            <Window title={i18n('pages.users.form.delete.title')} className="w-full max-w-120 px-4" icon={UsersIcon}>
+            <Window title={i18n('pages.users.form.delete')} className="w-full max-w-120 px-4" icon={UsersIcon}>
                 <FormError message={error} />
                 <Form key={selected.id} onSubmit={handleConfirm}>
                     <div className="flex flex-col items-center gap-3 py-4 text-center">

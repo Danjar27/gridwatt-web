@@ -49,7 +49,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     return (
         <Modal id="new-material" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
             <Window
-                title={i18n('pages.materials.form.create.title')}
+                title={i18n('pages.materials.form.create')}
                 className="w-full max-w-150 px-4"
                 icon={PackageIcon}
             >
