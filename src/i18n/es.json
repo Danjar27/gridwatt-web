@@ -115,10 +115,59 @@
         "orders": {
             "title": "Órdenes",
             "subtitle": "Administra todas las órdenes de servicio",
+            "action": "Crear orden",
+            "import": "Importar órdenes",
+            "viewMode": {
+                "table": "Tabla",
+                "map": "Mapa"
+            },
+            "filter": {
+                "allTechnicians": "Todos los técnicos"
+            },
+            "form": {
+                "create": "Nueva Orden"
+            },
+            "table": {
+                "order": "Orden",
+                "customer": "Cliente",
+                "service": "Servicio",
+                "status": "Estado",
+                "technician": "Técnico",
+                "date": "Fecha",
+                "unassigned": "Sin asignar",
+                "hasLocation": "Con ubicación",
+                "view": "Ver"
+            },
+            "empty": "No se encontraron órdenes",
             "summary": {
                 "title": "Todas las órdenes",
                 "subtitle": "Lista de órdenes registradas",
                 "total": "Total de órdenes: {count}"
+            }
+        },
+        "jobs": {
+            "title": "Trabajos",
+            "subtitle": "Administra los trabajos asignados",
+            "subtitleTechnician": "Tus trabajos asignados",
+            "filter": {
+                "allTechnicians": "Todos los técnicos"
+            },
+            "card": {
+                "customer": "Cliente",
+                "meter": "Medidor",
+                "hasLocation": "Con ubicación",
+                "pending": "pendiente",
+                "view": "Ver"
+            },
+            "empty": {
+                "title": "No se encontraron trabajos",
+                "technician": "No tienes trabajos asignados",
+                "admin": "Aún no hay trabajos en el sistema"
+            },
+            "summary": {
+                "title": "Todos los trabajos",
+                "subtitle": "Lista de trabajos registrados",
+                "total": "Total de trabajos: {count}"
             }
         },
         "users": {

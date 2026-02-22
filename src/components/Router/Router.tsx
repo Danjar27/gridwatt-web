@@ -1,5 +1,4 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { JobsPage } from '@pages/jobs.tsx';
 import { JobDetailPage } from '@pages/job-detail.tsx';
 
 import { OrderDetailPage } from '@pages/order-detail.tsx';
@@ -16,7 +15,8 @@ import SealsPage from '@pages/Seals/Page.tsx';
 import ProfilePage from '@pages/Profile.tsx';
 import UsersPage from '@pages/Users/Page.tsx';
 import TenantsPage from '@pages/Tenants.tsx';
-import OrdersPage from '@pages/Orders.tsx';
+import OrdersPage from '@pages/Orders/Page.tsx';
+import JobsPage from '@pages/Jobs/Page.tsx';
 
 const Router = createBrowserRouter([
     {

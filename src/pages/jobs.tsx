@@ -34,6 +34,7 @@ export function JobsPage() {
                     limit: 10000,
                     ...(filterTechnicianId ? { technicianId: filterTechnicianId } : {}),
                 });
+
                 return res.data;
             }
         },
@@ -91,10 +92,7 @@ export function JobsPage() {
             ) : (
                 <div className="grid gap-4 grid-cols-1 s425:grid-cols-2 s992:grid-cols-3">
                     {jobs.map((job) => (
-                        <PendingSyncWrapper
-                            key={job.id}
-                            pending={!!job._pendingSync}
-                        >
+                        <PendingSyncWrapper key={job.id} pending={!!job._pendingSync}>
                             <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 shadow-sm transition-shadow hover:shadow-md">
                                 <div className="mb-3 flex items-start justify-between">
                                     <div>

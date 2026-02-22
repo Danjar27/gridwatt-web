@@ -31,6 +31,7 @@ export interface WindowProps {
     icon?: Icon;
     className?: string;
     hideTitle?: boolean;
+    scrollable?: boolean;
 }
 
 export interface EscapeProps {
