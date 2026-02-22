@@ -23,6 +23,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
                 if (me?.role?.name === 'technician') {
                     prefetchTechnicianData().catch(() => {});
                 }
+
                 return me;
             } catch (error) {
                 // Only clear tokens if we are sure the session is invalid (401)
@@ -95,6 +96,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
                 }
             }, 10 * 60 * 1000);
         }
+
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);

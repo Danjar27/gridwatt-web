@@ -1,4 +1,4 @@
-import type { ColumnDef, PaginationState } from '@tanstack/react-table';
+import type { ColumnDef, InitialTableState, PaginationState } from '@tanstack/react-table';
 import type { PaginatedResponse } from '@/lib/api-client';
 
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
 
 interface UseServerPaginationOptions<T> {
+    initialState?: InitialTableState;
     queryKey: Array<string>;
     fetchFn: (params: { limit: number; offset: number } & Record<string, any>) => Promise<PaginatedResponse<T>>;
     columns: Array<ColumnDef<T, any>>;
@@ -21,6 +22,7 @@ export function useServerPagination<T>({
     defaultPageSize = 10,
     enabled = true,
     extraParams,
+    initialState,
 }: UseServerPaginationOptions<T>) {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
@@ -42,6 +44,7 @@ export function useServerPagination<T>({
     const total = response?.total ?? 0;
 
     const table = useReactTable({
+        initialState,
         data,
         columns,
         pageCount: Math.ceil(total / pagination.pageSize),

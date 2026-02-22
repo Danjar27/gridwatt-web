@@ -6,12 +6,12 @@ import { useAuthContext } from '@context/auth/context.ts';
 import { classnames } from '@utils/classnames.ts';
 import { useTranslations } from 'use-intl';
 
-import Surface from '@components/Sidebar/blocks/Surface.tsx';
-import User from '@components/Sidebar/blocks/User.tsx';
-import Toolbar from '@components/Toolbar/Toolbar.tsx';
-import SidebarSection from './blocks/Section.tsx';
-import Logo from '@components/atoms/Logo.tsx';
-import Item from './blocks/Item.tsx';
+import Surface from '@components/Sidebar/blocks/Surface';
+import User from '@components/Sidebar/blocks/User';
+import Toolbar from '@components/Toolbar/Toolbar';
+import SidebarSection from './blocks/Section';
+import Logo from '@components/atoms/Logo';
+import Item from './blocks/Item';
 
 const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
     const i18n = useTranslations();

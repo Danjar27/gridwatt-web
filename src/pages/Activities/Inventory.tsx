@@ -4,12 +4,12 @@ import { useInventoryActions } from './utils/context.ts';
 import { Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 
-import ViewTable from '@pages/Activities/tables/View.tsx';
-import Create from '@pages/Activities/forms/Create.tsx';
-import Update from '@pages/Activities/forms/Update.tsx';
-import Delete from '@pages/Activities/forms/Delete.tsx';
-import Summary from '@components/Summary/Summary.tsx';
-import Button from '@components/Button/Button.tsx';
+import ViewTable from '@pages/Activities/tables/View';
+import Create from '@pages/Activities/forms/Create';
+import Update from '@pages/Activities/forms/Update';
+import Delete from '@pages/Activities/forms/Delete';
+import Summary from '@components/Summary/Summary';
+import Button from '@components/Button/Button';
 
 const Inventory = () => {
     const i18n = useTranslations();

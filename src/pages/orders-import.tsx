@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { AlertTriangle, CheckCircle, UploadCloud } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { apiClient, OrdersImportPreviewResponse, OrderImportPreviewItem, OrderImportData } from '@/lib/api-client';
+import type { OrdersImportPreviewResponse, OrderImportPreviewItem, OrderImportData } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import { classnames } from '@utils/classnames.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 
@@ -11,7 +12,7 @@ export function OrdersImportPage() {
     const userRole = user?.role?.name;
     const isRestricted = userRole === 'technician' || userRole === 'admin';
 
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<Array<File>>([]);
     const [preview, setPreview] = useState<OrdersImportPreviewResponse | null>(null);
     // Track edits for each order (by index)
     const [edits, setEdits] = useState<Record<number, Partial<OrderImportPreviewItem['data']>>>({});
@@ -31,6 +32,7 @@ export function OrdersImportPage() {
     const parseFiles = async () => {
         if (files.length === 0) {
             setError('Select at least one file to parse.');
+
             return;
         }
 
@@ -60,6 +62,7 @@ export function OrdersImportPage() {
         const validOrders = editedOrders.filter((order) => !order.errors || order.errors.length === 0);
         if (validOrders.length === 0) {
             setError('No valid orders to import.');
+
             return;
         }
         setError(null);
@@ -245,8 +248,10 @@ function ImportRow({
         if (dataValue !== undefined && dataValue !== null) {
             return String(dataValue);
         }
+
         return '';
     };
+
     return (
         <tr
             className={classnames('transition', {

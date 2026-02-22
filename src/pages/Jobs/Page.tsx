@@ -1,7 +1,7 @@
 import { useTranslations } from 'use-intl';
 
-import Inventory from '@pages/Jobs/Inventory.tsx';
-import Page from '@layouts/Page.tsx';
+import Inventory from '@pages/Jobs/Inventory';
+import Page from '@layouts/Page';
 
 const JobsPage = () => {
     const i18n = useTranslations();

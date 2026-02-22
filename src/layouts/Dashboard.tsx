@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
 
-import MobileNav from '@components/MobileNav/MobileNav.tsx';
+import MobileNav from '@components/MobileNav/MobileNav';
 import Sidebar from '@components/Sidebar/Sidebar';
 
 const Dashboard = () => {

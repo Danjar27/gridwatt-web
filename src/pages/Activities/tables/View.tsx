@@ -7,7 +7,7 @@ import { useInventoryActions } from '../utils/context.ts';
 import { apiClient } from '@lib/api-client.ts';
 import { useTranslations } from 'use-intl';
 
-import Table from '@components/Table/Table.tsx';
+import Table from '@components/Table/Table';
 
 const ViewTable = () => {
     const i18n = useTranslations();

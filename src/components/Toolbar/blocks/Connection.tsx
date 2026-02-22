@@ -3,7 +3,7 @@ import { useOfflineContext } from '@context/offline/context.ts';
 import { useTranslations } from 'use-intl';
 import { classnames } from '@utils/classnames.ts';
 
-import Visible from '@components/atoms/Visible.tsx';
+import Visible from '@components/atoms/Visible';
 
 const Connection = () => {
     const i18n = useTranslations();

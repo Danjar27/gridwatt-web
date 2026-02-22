@@ -5,9 +5,9 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { ModalActions, ModalContext } from '@components/Modal/utils/context.ts';
 import { classnames } from '@utils/classnames.ts';
 
-import Backdrop from '@components/Backdrop/Backdrop.tsx';
-import Visible from '@components/atoms/Visible.tsx';
-import Portal from '@components/atoms/Portal.tsx';
+import Backdrop from '@components/Backdrop/Backdrop';
+import Visible from '@components/atoms/Visible';
+import Portal from '@components/atoms/Portal';
 
 const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen, onClose, onOpen }) => {
     const handleKeyDown = useCallback((event: KeyboardEvent) => {

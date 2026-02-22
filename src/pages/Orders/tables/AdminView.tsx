@@ -8,7 +8,7 @@ import { useTranslations } from 'use-intl';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 
-import Table from '@components/Table/Table.tsx';
+import Table from '@components/Table/Table';
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -69,13 +69,13 @@ const AdminView = ({ filterTechnicianId }: AdminViewProps) => {
                 ),
             },
             {
-                accessorKey: 'orderStatus',
+                accessorKey: 'status',
                 header: i18n('pages.orders.table.status'),
                 cell: ({ row }) => (
                     <span
-                        className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(row.original.orderStatus)}`}
+                        className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(row.original.status)}`}
                     >
-                        {row.original.orderStatus}
+                        {row.original.status}
                     </span>
                 ),
             },

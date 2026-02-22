@@ -2,7 +2,7 @@ import type { WindowProps } from '@components/Modal/Modal.interface.ts';
 import type { FC, PropsWithChildren } from 'react';
 
 import { classnames } from '@utils/classnames.ts';
-import Visible from '@components/atoms/Visible.tsx';
+import Visible from '@components/atoms/Visible';
 
 const Window: FC<PropsWithChildren<WindowProps>> = ({ children, className, icon: Icon, title, hideTitle = false, scrollable = false }) => (
     <div

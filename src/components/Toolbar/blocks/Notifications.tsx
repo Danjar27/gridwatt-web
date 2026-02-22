@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { useAuthContext } from '@context/auth/context.ts';
-import Visible from '@components/atoms/Visible.tsx';
+import Visible from '@components/atoms/Visible';
 import { classnames } from '@utils/classnames.ts';
 
 interface LocalNotification {

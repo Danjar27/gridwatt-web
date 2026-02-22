@@ -12,7 +12,7 @@ import Field from '@components/Form/blocks/Field';
 import Modal from '@components/Modal/Modal';
 import Form from '@components/Form/Form';
 
-import { useUsersActions, useUsersContext } from '../utils/context.tsx';
+import { useUsersActions, useUsersContext } from '../utils/context';
 import { UsersIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthContext } from '@context/auth/context.ts';

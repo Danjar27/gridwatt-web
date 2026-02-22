@@ -66,9 +66,9 @@ const TechnicianView = ({ orders }: TechnicianViewProps) => {
                             <td className="px-6 py-4 text-sm">{order.serviceType}</td>
                             <td className="px-6 py-4 text-sm">
                                 <span
-                                    className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.orderStatus)}`}
+                                    className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status)}`}
                                 >
-                                    {order.orderStatus}
+                                    {order.status}
                                 </span>
                             </td>
                             <td className="px-6 py-4 text-sm text-neutral-900">

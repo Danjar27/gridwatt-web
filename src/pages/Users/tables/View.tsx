@@ -3,14 +3,17 @@ import type { User } from '@lib/api-client.ts';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
 import { PencilSimpleIcon, TrashIcon, KeyIcon, ShieldIcon } from '@phosphor-icons/react';
-import { useUsersActions } from '../utils/context.tsx';
+import { useUsersActions } from '../utils/context';
 import { useAuthContext } from '@context/auth/context.ts';
 import { apiClient } from '@lib/api-client.ts';
 
-import Table from '@components/Table/Table.tsx';
+import Table from '@components/Table/Table';
+import { useTranslations } from 'use-intl';
 
 const formatDate = (dateString?: string) => {
-    if (!dateString) {return 'Never';}
+    if (!dateString) {
+        return 'Never';
+    }
 
     return new Date(dateString).toLocaleDateString('es-MX', {
         month: 'numeric',
@@ -23,32 +26,41 @@ const formatDate = (dateString?: string) => {
 };
 
 const ViewTable = () => {
-    const { select, selectForDelete, selectForPasswordReset, selectForRoleChange } = useUsersActions();
-    const { user: currentUser } = useAuthContext();
+    const i18n = useTranslations();
 
-    const isAuthorized = currentUser?.role?.name === 'admin' || currentUser?.role?.name === 'manager';
+    const { select, selectForDelete, selectForPasswordReset, selectForRoleChange } = useUsersActions();
+    const { user } = useAuthContext();
+
+    const isAdmin = user?.role?.name === 'admin';
+    const isAuthorized = isAdmin || user?.role?.name === 'manager';
 
     const columns: Array<ColumnDef<User>> = [
         {
+            id: 'name',
             accessorKey: 'name',
-            header: 'Name',
+            header: i18n('pages.users.table.name'),
             cell: ({ row }) => (
-                <div className="whitespace-nowrap">
-                    <div className="font-medium">{row.original.name} {row.original.lastName}</div>
-                    {row.original.phone && (
-                        <div className="text-sm text-muted-foreground">{row.original.phone}</div>
-                    )}
+                <div className="font-medium">
+                    {row.original.name} {row.original.lastName}
                 </div>
             ),
         },
         {
+            id: 'email',
             accessorKey: 'email',
-            header: 'Email',
+            header: i18n('pages.users.table.email'),
             cell: ({ row }) => <div className="whitespace-nowrap text-sm">{row.original.email}</div>,
         },
         {
+            id: 'phone',
+            accessorKey: 'phone',
+            header: i18n('pages.users.table.phone'),
+            cell: ({ row }) => <div className="text-sm text-muted-foreground">{row.original.phone ?? '-'}</div>,
+        },
+        {
+            id: 'role',
             accessorKey: 'role',
-            header: 'Role',
+            header: i18n('pages.users.table.role'),
             cell: ({ row }) => (
                 <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-600 border border-blue-200">
                     {row.original.role?.name}
@@ -56,8 +68,9 @@ const ViewTable = () => {
             ),
         },
         {
+            id: 'status',
             accessorKey: 'isActive',
-            header: 'Status',
+            header: i18n('pages.users.table.status'),
             cell: ({ row }) => (
                 <span
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -71,26 +84,38 @@ const ViewTable = () => {
             ),
         },
         {
-            id: 'lastLogin',
-            header: 'Last Login',
+            id: 'tenant',
+            header: i18n('pages.users.table.tenant'),
+            accessorKey: 'tenant',
             cell: ({ row }) => (
-                <div className="whitespace-nowrap text-sm text-muted-foreground">
-                    {formatDate((row.original as any).lastLogin)}
-                </div>
+                <div className="whitespace-nowrap text-sm text-muted-foreground">{row.original?.tenant?.name}</div>
             ),
         },
         {
             id: 'actions',
-            header: 'Actions',
+            header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
                     <button onClick={() => select(row.original)} className="cursor-pointer" title="Edit">
-                        <PencilSimpleIcon weight="duotone" className="text-primary-500 dark:text-white" width={20} height={20} />
+                        <PencilSimpleIcon
+                            weight="duotone"
+                            className="text-primary-500 dark:text-white"
+                            width={20}
+                            height={20}
+                        />
                     </button>
-                    <button onClick={() => selectForRoleChange(row.original)} className="cursor-pointer" title="Change Role">
+                    <button
+                        onClick={() => selectForRoleChange(row.original)}
+                        className="cursor-pointer"
+                        title="Change Role"
+                    >
                         <ShieldIcon weight="duotone" className="text-blue-500" width={20} height={20} />
                     </button>
-                    <button onClick={() => selectForPasswordReset(row.original)} className="cursor-pointer" title="Reset Password">
+                    <button
+                        onClick={() => selectForPasswordReset(row.original)}
+                        className="cursor-pointer"
+                        title="Reset Password"
+                    >
                         <KeyIcon weight="duotone" className="text-amber-500" width={20} height={20} />
                     </button>
                     <button onClick={() => selectForDelete(row.original)} className="cursor-pointer" title="Delete">
@@ -102,6 +127,11 @@ const ViewTable = () => {
     ];
 
     const { table, isLoading, total } = useServerPagination<User>({
+        initialState: {
+            columnVisibility: {
+                tenant: isAdmin,
+            },
+        },
         queryKey: ['users'],
         fetchFn: (params) => apiClient.getUsers(params),
         columns,

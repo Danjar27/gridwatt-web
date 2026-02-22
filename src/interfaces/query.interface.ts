@@ -1,4 +1,4 @@
 export interface UpdateQuery<T> {
-    id: string;
+    id: string | number;
     data: Partial<Omit<T, 'id'>>;
 }

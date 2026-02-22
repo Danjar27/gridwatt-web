@@ -3,8 +3,8 @@ import type { FC } from 'react';
 
 import { classnames } from '@utils/classnames.ts';
 
-import Theme from './blocks/Theme.tsx';
-import Logout from '@components/Toolbar/blocks/Logout.tsx';
+import Theme from './blocks/Theme';
+import Logout from '@components/Toolbar/blocks/Logout';
 
 const Toolbar: FC<ToolbarProps> = ({ className }) => (
     <div className={classnames('flex gap-2', className)}>

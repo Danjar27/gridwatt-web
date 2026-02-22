@@ -25,11 +25,14 @@ export function OrderDetailPage() {
         enabled: !!id,
     });
 
-    const { data: technicians = [] } = useQuery({
+    const { data: techniciansResponse } = useQuery({
         queryKey: ['technicians'],
         queryFn: () => apiClient.getTechnicians(),
         enabled: canAssign,
     });
+    const technicians = Array.isArray(techniciansResponse)
+        ? techniciansResponse
+        : ((techniciansResponse as any)?.data ?? []);
 
     const assignMutation = useMutation({
         mutationFn: (technicianId: number | null) => apiClient.assignOrder(Number(id), technicianId),
@@ -132,7 +135,7 @@ export function OrderDetailPage() {
                         <p>
                             <span className="text-neutral-900">Status:</span>{' '}
                             <span className="rounded-full bg-secondary-500/20 px-2 py-1 text-xs text-secondary-500">
-                                {order.orderStatus}
+                                {order.status}
                             </span>
                         </p>
                         <p>

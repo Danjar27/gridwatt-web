@@ -2,12 +2,12 @@ import { PackageIcon, PlusCircleIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from './utils/context.ts';
 import { useTranslations } from 'use-intl';
 
-import ViewTable from '@pages/Materials/tables/View.tsx';
-import Create from '@pages/Materials/forms/Create.tsx';
-import Update from '@pages/Materials/forms/Update.tsx';
-import Delete from '@pages/Materials/forms/Delete.tsx';
-import Summary from '@components/Summary/Summary.tsx';
-import Button from '@components/Button/Button.tsx';
+import ViewTable from '@pages/Materials/tables/View';
+import Create from '@pages/Materials/forms/Create';
+import Update from '@pages/Materials/forms/Update';
+import Delete from '@pages/Materials/forms/Delete';
+import Summary from '@components/Summary/Summary';
+import Button from '@components/Button/Button';
 
 const Inventory = () => {
     const i18n = useTranslations();

@@ -8,7 +8,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
-import Summary from '@components/Summary/Summary.tsx';
+import Summary from '@components/Summary/Summary';
 
 const getStatusColor = (status?: string) => {
     switch (status) {
@@ -47,6 +47,7 @@ const Inventory = () => {
                     limit: 10000,
                     ...(filterTechnicianId ? { technicianId: filterTechnicianId } : {}),
                 });
+
                 return res.data;
             }
         },

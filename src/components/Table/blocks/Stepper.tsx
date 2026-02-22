@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { calculateVisibleSteps } from '@components/Table/utils/pagination.ts';
 import { CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 
-import Step from '@components/Table/blocks/Step.tsx';
+import Step from '@components/Table/blocks/Step';
 
 const Stepper: FC<StepperProps> = ({ selected, total, onSelect, onNext, onPrevious, hasNext, hasPrevious }) => {
     const steps = calculateVisibleSteps(selected, total);

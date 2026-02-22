@@ -1,4 +1,4 @@
-import type { Activity } from '@lib/api-client.ts';
+import type { Tenant } from '@lib/api-client.ts';
 
 import { createInventoryContext } from '@context/Inventory/context';
 
@@ -6,4 +6,4 @@ export const {
     Provider,
     useContext: useInventoryContext,
     useActions: useInventoryActions,
-} = createInventoryContext<Activity>();
+} = createInventoryContext<Tenant>();

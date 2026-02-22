@@ -1,6 +1,6 @@
 import type { Material } from '@lib/api-client.ts';
 
-import { createInventoryContext } from '@context/Inventory/context.tsx';
+import { createInventoryContext } from '@context/Inventory/context';
 
 export const {
     Provider,

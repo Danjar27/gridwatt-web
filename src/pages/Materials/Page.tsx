@@ -1,8 +1,8 @@
 import { Provider } from './utils/context.ts';
 import { useTranslations } from 'use-intl';
 
-import Inventory from '@pages/Materials/Inventory.tsx';
-import Page from '@layouts/Page.tsx';
+import Inventory from '@pages/Materials/Inventory';
+import Page from '@layouts/Page';
 
 const MaterialsPage = () => {
     const i18n = useTranslations();

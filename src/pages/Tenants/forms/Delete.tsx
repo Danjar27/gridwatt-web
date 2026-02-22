@@ -7,7 +7,7 @@ import Window from '@components/Modal/blocks/Window';
 import Modal from '@components/Modal/Modal';
 import Form from '@components/Form/Form';
 
-import { useUsersActions, useUsersContext } from '../utils/context';
+import { useInventoryActions, useInventoryContext } from '../utils/context';
 import { UsersIcon, SealWarningIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
@@ -18,8 +18,8 @@ import { useState } from 'react';
 const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
 
-    const { selected, isDeleteOpen } = useUsersContext();
-    const { openDelete, closeDelete } = useUsersActions();
+    const { selected, isDeleteOpen } = useInventoryContext();
+    const { openDelete, closeDelete } = useInventoryActions();
     const [error, setError] = useState<string | null>(null);
 
     const deleteMutation = useMutation({

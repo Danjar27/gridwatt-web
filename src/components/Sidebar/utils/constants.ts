@@ -8,7 +8,7 @@ import {
     ToolboxIcon,
     StampIcon,
     UsersIcon,
-    BuildingOfficeIcon,
+    AddressBookIcon,
 } from '@phosphor-icons/react';
 
 export const NAVIGATION_ITEMS: Array<Section> = [
@@ -41,7 +41,7 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 label: 'routes.jobs',
                 href: '/jobs',
                 icon: BagSimpleIcon,
-                roles: ['technician', 'manager'],
+                roles: ['technician'],
             },
         ],
     },
@@ -70,6 +70,7 @@ export const NAVIGATION_ITEMS: Array<Section> = [
         name: 'settings',
         label: 'sidebar.sections.settings',
         routes: [
+            { name: 'tenants', label: 'routes.tenants', href: '/tenants', icon: AddressBookIcon, roles: ['admin'] },
             {
                 name: 'users',
                 label: 'routes.users',
@@ -77,7 +78,6 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 icon: UsersIcon,
                 roles: ['admin', 'manager'],
             },
-            { name: 'tenants', label: 'routes.tenants', href: '/tenants', icon: BuildingOfficeIcon, roles: ['admin'] },
         ],
     },
 ];

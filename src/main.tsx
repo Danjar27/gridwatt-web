@@ -8,7 +8,7 @@ import { IntlProvider } from 'use-intl';
 import { StrictMode } from 'react';
 
 import AuthProvider from '@context/auth/provider';
-import Router from '@components/Router/Router.tsx';
+import Router from '@components/Router/Router';
 import spanish from '@i18n/es.json';
 
 createRoot(document.getElementById('root')!).render(

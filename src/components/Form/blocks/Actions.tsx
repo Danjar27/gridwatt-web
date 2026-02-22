@@ -2,7 +2,7 @@ import type { ActionsProps } from '../Form.interface';
 import type { FC } from 'react';
 
 import { Loader2 } from 'lucide-react';
-import Button from '@components/Button/Button.tsx';
+import Button from '@components/Button/Button';
 import { useTranslations } from 'use-intl';
 
 const Actions: FC<ActionsProps> = ({ submitLabel, onCancel, isLoading }) => {

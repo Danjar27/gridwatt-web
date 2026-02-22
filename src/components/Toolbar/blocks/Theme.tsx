@@ -1,7 +1,7 @@
 import { MoonStarsIcon, SunIcon } from '@phosphor-icons/react';
 import { useTheme } from '@hooks/useTheme.ts';
 
-import Visible from '@components/atoms/Visible.tsx';
+import Visible from '@components/atoms/Visible';
 
 const Theme = () => {
     const [theme, toggleTheme] = useTheme();

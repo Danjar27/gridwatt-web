@@ -18,7 +18,7 @@ const OfflineProvider: FC<PropsWithChildren> = ({ children }) => {
     const [online, setOnline] = useState(isOnline());
     const [pendingCount, setPendingCount] = useState(0);
     const [isSyncing, setIsSyncing] = useState(false);
-    const [failedMutations, setFailedMutations] = useState<OfflineMutation[]>([]);
+    const [failedMutations, setFailedMutations] = useState<Array<OfflineMutation>>([]);
     const [lastSyncResult, setLastSyncResult] = useState<{
         synced: number;
         failed: number;

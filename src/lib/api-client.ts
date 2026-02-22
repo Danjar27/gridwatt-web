@@ -1,5 +1,5 @@
 import { addOfflineMutation, isOnline, type MutationType } from './offline-store';
-import type { Role, Tenant } from '@interfaces/user.interface.ts';
+import type { Role } from '@interfaces/user.interface.ts';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -764,25 +764,25 @@ class ApiClient {
     async getTenants(params?: { limit?: number; offset?: number }) {
         const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
 
-        return this.request<PaginatedResponse<TenantWithCounts>>(`/tenants${qs}`);
+        return this.request<PaginatedResponse<Tenant>>(`/tenants${qs}`);
     }
 
     async createTenant(data: { name: string; slug: string }) {
-        return this.request<TenantWithCounts>('/tenants', {
+        return this.request<Tenant>('/tenants', {
             method: 'POST',
             body: JSON.stringify(data),
         });
     }
 
     async updateTenant(id: number, data: { name?: string; slug?: string; isActive?: boolean }) {
-        return this.request<TenantWithCounts>(`/tenants/${id}`, {
+        return this.request<Tenant>(`/tenants/${id}`, {
             method: 'PUT',
             body: JSON.stringify(data),
         });
     }
 
     async deactivateTenant(id: number) {
-        return this.request<TenantWithCounts>(`/tenants/${id}`, {
+        return this.request<Tenant>(`/tenants/${id}`, {
             method: 'DELETE',
         });
     }
@@ -791,22 +791,10 @@ class ApiClient {
 export const apiClient = new ApiClient();
 
 // Types
-export interface User {
+export interface Tenant {
     id: number;
     name: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-    isActive?: boolean;
-    role: { id: number; name: Role };
-    tenantId: number;
-    tenant: Tenant;
-}
-
-export interface TenantWithCounts {
-    id: number;
-    name: string;
-    slug: string;
+    code: string;
     isActive: boolean;
     createdAt: string;
     updatedAt: string;
@@ -820,12 +808,24 @@ export interface TenantWithCounts {
     };
 }
 
+export interface User {
+    id: number;
+    name: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    isActive?: boolean;
+    role: { id: number; name: Role };
+    tenantId: number;
+    tenant: Tenant;
+}
+
 export interface Order {
     id: number;
     technicianId?: number;
     serviceType: string;
     meterNumber: string;
-    orderStatus: string;
+    status: string;
     issueDate: string;
     issueTime: string;
     accountNumber: string;

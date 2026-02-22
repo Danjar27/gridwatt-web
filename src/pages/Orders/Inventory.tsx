@@ -1,7 +1,6 @@
 import { ClipboardTextIcon, PlusCircleIcon, UploadSimpleIcon } from '@phosphor-icons/react';
 import { useAuthContext } from '@context/auth/context.ts';
-import { useInventoryActions } from './utils/context.ts';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useMemo, useState } from 'react';
 
@@ -12,16 +11,15 @@ import { OrdersMap } from '@/components/orders/OrdersMap';
 import { queryClient } from '@lib/query-client';
 import { isOnline } from '@/lib/offline-store';
 
-import TechnicianView from '@pages/Orders/tables/TechnicianView.tsx';
-import AdminView from '@pages/Orders/tables/AdminView.tsx';
-import Create from '@pages/Orders/forms/Create.tsx';
-import Summary from '@components/Summary/Summary.tsx';
-import Button from '@components/Button/Button.tsx';
+import TechnicianView from '@pages/Orders/tables/TechnicianView';
+import AdminView from '@pages/Orders/tables/AdminView';
+import Summary from '@components/Summary/Summary';
+import Button from '@components/Button/Button';
 
 const Inventory = () => {
     const i18n = useTranslations();
 
-    const { openCreate } = useInventoryActions();
+    const navigate = useNavigate();
     const { user } = useAuthContext();
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
@@ -127,7 +125,7 @@ const Inventory = () => {
                 <div className="flex flex-wrap gap-2">
                     {!isTechnician && (
                         <>
-                            <Button icon={PlusCircleIcon} onClick={openCreate}>
+                            <Button icon={PlusCircleIcon} onClick={() => navigate('/orders/new')}>
                                 {i18n('pages.orders.action')}
                             </Button>
                             <Link
@@ -196,7 +194,6 @@ const Inventory = () => {
                 />
             )}
 
-            <Create />
         </div>
     );
 };

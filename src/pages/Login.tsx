@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
-import Logo from '@components/atoms/Logo.tsx';
+import Logo from '@components/atoms/Logo';
 import { useAuthActions, useAuthContext } from '@context/auth/context.ts';
 
 const LoginPage = () => {

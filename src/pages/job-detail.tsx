@@ -47,7 +47,7 @@ export function JobDetailPage() {
             // (covers ['jobs', 'my'], ['jobs', 'all', ...], etc.)
             const previousJobsCache = queryClient.getQueriesData<Array<Job>>({ queryKey: ['jobs'] });
             for (const [queryKey, cachedJobs] of previousJobsCache) {
-                if (!Array.isArray(cachedJobs)) continue;
+                if (!Array.isArray(cachedJobs)) {continue;}
                 queryClient.setQueryData<Array<Job>>(queryKey, (jobs) =>
                     jobs?.map((j) =>
                         j.id === Number(id) ? { ...j, ...patchedData } : j

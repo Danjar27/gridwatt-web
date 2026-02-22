@@ -9,9 +9,9 @@ import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
 import DatePicker from '@components/DatePicker/DatePicker';
-import Summary from '@components/Summary/Summary.tsx';
+import Summary from '@components/Summary/Summary';
 import Papa from 'papaparse';
-import Page from '@layouts/Page.tsx';
+import Page from '@layouts/Page';
 
 const DashboardPage = () => {
     const i18n = useTranslations();
@@ -50,9 +50,14 @@ const DashboardPage = () => {
         enabled: !isAdminRole,
     });
 
-    const pendingJobs = jobs.filter((j: Job) => j.jobStatus !== 'completed');
-    const completedJobs = jobs.filter((j: Job) => j.jobStatus === 'completed');
-    const pendingOrders = orders.filter((o: Order) => o.orderStatus === 'pending');
+    // const pendingJobs = jobs.filter((j: Job) => j.jobStatus !== 'completed');
+    // const completedJobs = jobs.filter((j: Job) => j.jobStatus === 'completed');
+    // const pendingOrders = orders.filter((o: Order) => o.status === 'pending');
+
+    // TODO: FIX THIS
+    const pendingJobs = [];
+    const completedJobs = [];
+    const pendingOrders = [];
 
     const exportTargets = [
         { value: 'orders', label: 'Orders' },
@@ -216,64 +221,64 @@ const DashboardPage = () => {
 
                         <div className="grid gap-4 s768:gap-6 s992:grid-cols-2">
                             <Summary
-                        icon={Briefcase}
-                        title={i18n('pages.dashboard.recentJobs.title')}
-                        subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
-                    >
-                        {pendingJobs.length === 0 ? (
-                            <p className="text-sm text-neutral-900 py-2">No pending jobs</p>
-                        ) : (
-                            <div className="flex flex-col gap-2">
-                                {pendingJobs.slice(0, 5).map((job: Job) => (
-                                    <div
-                                        key={job.id}
-                                        className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
-                                    >
-                                        <div>
-                                            <p className="text-sm font-medium">Job #{job.id}</p>
-                                            <p className="text-xs text-neutral-900">
-                                                {job.order?.serviceType} - {job.order?.meterNumber}
-                                            </p>
-                                        </div>
-                                        <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
-                                            {job.jobStatus || 'In Progress'}
-                                        </span>
+                                icon={Briefcase}
+                                title={i18n('pages.dashboard.recentJobs.title')}
+                                subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
+                            >
+                                {pendingJobs.length === 0 ? (
+                                    <p className="text-sm text-neutral-900 py-2">No pending jobs</p>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        {pendingJobs.slice(0, 5).map((job: Job) => (
+                                            <div
+                                                key={job.id}
+                                                className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-medium">Job #{job.id}</p>
+                                                    <p className="text-xs text-neutral-900">
+                                                        {job.order?.serviceType} - {job.order?.meterNumber}
+                                                    </p>
+                                                </div>
+                                                <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                                    {job.jobStatus || 'In Progress'}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </Summary>
+                                )}
+                            </Summary>
 
-                    <Summary
-                        icon={ClipboardList}
-                        title={i18n('pages.dashboard.pendingOrders.title')}
-                        subtitle={i18n('pages.dashboard.pendingOrders.subtitle')}
-                    >
-                        {pendingOrders.length === 0 ? (
-                            <p className="text-sm text-neutral-900 py-2">No pending orders</p>
-                        ) : (
-                            <div className="flex flex-col gap-2">
-                                {pendingOrders.slice(0, 5).map((order: Order) => (
-                                    <div
-                                        key={order.id}
-                                        className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
-                                    >
-                                        <div>
-                                            <p className="text-sm font-medium">
-                                                {order.firstName} {order.lastName}
-                                            </p>
-                                            <p className="text-xs text-neutral-900">
-                                                {order.serviceType} - {order.meterNumber}
-                                            </p>
-                                        </div>
-                                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                                            {order.orderStatus}
-                                        </span>
+                            <Summary
+                                icon={ClipboardList}
+                                title={i18n('pages.dashboard.pendingOrders.title')}
+                                subtitle={i18n('pages.dashboard.pendingOrders.subtitle')}
+                            >
+                                {pendingOrders.length === 0 ? (
+                                    <p className="text-sm text-neutral-900 py-2">No pending orders</p>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        {pendingOrders.slice(0, 5).map((order: Order) => (
+                                            <div
+                                                key={order.id}
+                                                className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        {order.firstName} {order.lastName}
+                                                    </p>
+                                                    <p className="text-xs text-neutral-900">
+                                                        {order.serviceType} - {order.meterNumber}
+                                                    </p>
+                                                </div>
+                                                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                                                    {order.status}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </Summary>
+                                )}
+                            </Summary>
                         </div>
                     </>
                 )}

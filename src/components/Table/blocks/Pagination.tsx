@@ -3,7 +3,7 @@ import type { FC } from 'react';
 
 import { useTranslations } from 'use-intl';
 
-import Stepper from '@components/Table/blocks/Stepper.tsx';
+import Stepper from '@components/Table/blocks/Stepper';
 
 const Pagination: FC<PaginationProps> = ({ table, total }) => {
     const i18n = useTranslations();

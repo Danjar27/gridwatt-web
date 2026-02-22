@@ -6,7 +6,7 @@ import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from '../utils/context.ts';
 import { apiClient } from '@lib/api-client.ts';
 
-import Table from '@components/Table/Table.tsx';
+import Table from '@components/Table/Table';
 
 const ViewTable = () => {
     const { select, openUpdate, openDelete } = useInventoryActions();

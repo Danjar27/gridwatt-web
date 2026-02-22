@@ -18,7 +18,7 @@
         "seals": "Sellos",
         "users": "Usuarios",
         "jobs": "Trabajos",
-        "tenants": "Empresas"
+        "tenants": "Contratos"
     },
     "sidebar": {
         "sections": {
@@ -125,7 +125,14 @@
                 "allTechnicians": "Todos los técnicos"
             },
             "form": {
-                "create": "Nueva Orden"
+                "create": "Nueva Orden",
+                "createSubtitle": "Completa la información para registrar una nueva orden de servicio",
+                "section": {
+                    "details": "Datos de la orden",
+                    "detailsSubtitle": "Información del servicio, medidor y cliente",
+                    "location": "Ubicación",
+                    "locationSubtitle": "Selecciona la ubicación en el mapa o ingresa las coordenadas"
+                }
             },
             "table": {
                 "order": "Orden",
@@ -179,7 +186,9 @@
                 "update": { "title": "Actualizar Usuario" },
                 "delete": { "title": "Eliminar Usuario" },
                 "passwordReset": { "title": "Restablecer contraseña" },
-                "changeRole": { "title": "Cambiar rol" },
+                "changeRole": { "title": "Cambiar rol" }
+            },
+            "table": {
                 "name": "Nombre",
                 "lastName": "Apellido",
                 "email": "Correo electrónico",
@@ -187,7 +196,7 @@
                 "phone": "Teléfono",
                 "role": "Rol",
                 "tenant": "Empresa",
-                "isActive": "Estado"
+                "status": "Estado"
             },
             "summary": {
                 "title": "Todos los usuarios",
@@ -196,12 +205,24 @@
             }
         },
         "tenants": {
-            "title": "Empresas",
-            "subtitle": "Administra las empresas registradas",
+            "title": "Contratos",
+            "subtitle": "Administra las contratos registrados",
+            "action": "Agregar contrato",
+            "form": {
+                "create": "Agregar nuevo contrato",
+                "update": "Actualizar contrato",
+                "delete": "Eliminar contrato"
+            },
+            "table": {
+                "name": "Nombre",
+                "code": "Código",
+                "users": "Usuarios",
+                "orders": "Órdenes"
+            },
             "summary": {
-                "title": "Todas las empresas",
-                "subtitle": "Lista de empresas registradas en el sistema",
-                "total": "Total de empresas: {count}"
+                "title": "Todos los contratos",
+                "subtitle": "Lista de contratos activos en el sistema",
+                "total": "Total de contratos activos: {count}"
             }
         },
         "dashboard": {

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { User, Save } from 'lucide-react';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
-import Page from '@layouts/Page.tsx';
+import Page from '@layouts/Page';
 import Summary from '@components/Summary/Summary';
 import Form from '@components/Form/Form';
 import Field from '@components/Form/blocks/Field';
@@ -38,6 +38,7 @@ const ProfilePage = () => {
 
         if (data.password && data.password !== data.confirmPassword) {
             setError('Passwords do not match');
+
             return;
         }
 
