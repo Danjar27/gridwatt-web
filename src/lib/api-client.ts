@@ -767,7 +767,7 @@ class ApiClient {
         return this.request<PaginatedResponse<Tenant>>(`/tenants${qs}`);
     }
 
-    async createTenant(data: { name: string; slug: string }) {
+    async createTenant(data: { name: string; code: string }) {
         return this.request<Tenant>('/tenants', {
             method: 'POST',
             body: JSON.stringify(data),

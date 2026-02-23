@@ -48,7 +48,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             closeUpdate();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to update user'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = (data: any) => {
@@ -86,23 +86,23 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 >
                     <div className="grid grid-cols-2 gap-4">
                         <Field name="name" label={i18n('pages.users.form.name')} required>
-                            <TextInput name="name" rules={{ required: 'Name is required' }} />
+                            <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                         </Field>
                         <Field name="lastName" label={i18n('pages.users.form.lastName')} required>
-                            <TextInput name="lastName" rules={{ required: 'Last name is required' }} />
+                            <TextInput name="lastName" rules={{ required: i18n('errors.required') }} />
                         </Field>
                     </div>
                     <Field name="email" label={i18n('pages.users.form.email')} required>
-                        <EmailInput name="email" rules={{ required: 'Email is required' }} />
+                        <EmailInput name="email" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="phone" label={i18n('pages.users.form.phone')}>
                         <PhoneInput name="phone" />
                     </Field>
                     <Field name="roleId" label={i18n('pages.users.form.role')} required>
-                        <Select name="roleId" rules={{ required: 'Role is required' }} options={roleOptions} />
+                        <Select name="roleId" rules={{ required: i18n('errors.required') }} options={roleOptions} />
                     </Field>
                     <Field name="isActive" label={i18n('pages.users.form.isActive')}>
-                        <Select name="isActive" options={[{ label: 'Activo', value: 'true' }, { label: 'Inactivo', value: 'false' }]} />
+                        <Select name="isActive" options={[{ label: i18n('literal.active'), value: 'true' }, { label: i18n('literal.inactive'), value: 'false' }]} />
                     </Field>
                     <Actions submitLabel={i18n('literal.update')} onCancel={handleCancel} isLoading={updateMutation.isPending} />
                 </Form>

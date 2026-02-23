@@ -5,6 +5,7 @@ import { addPendingPhoto, getPendingPhotos, isOnline, type PendingPhoto } from '
 import { useOfflineContext } from '@context/offline/context.ts';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { Camera, X } from 'lucide-react';
+import { useTranslations } from 'use-intl';
 
 interface Props {
     jobId: number;
@@ -16,6 +17,7 @@ type SlotType = 'antes' | 'despues';
 export function JobPhotosSection({ jobId, photos }: Props) {
     const queryClient = useQueryClient();
     const { online } = useOfflineContext();
+    const i18n = useTranslations();
     const [pendingPhotos, setPendingPhotos] = useState<Record<string, Blob>>({});
     const [objectUrls, setObjectUrls] = useState<Record<string, string>>({});
 
@@ -119,7 +121,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                     </PendingSyncWrapper>
                 ) : (
                     <div className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-neutral-800 text-neutral-900">
-                        No photo
+                        {i18n('pages.jobDetail.photos.empty')}
                     </div>
                 )}
 
@@ -130,7 +132,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
                         >
                             <Camera className="h-4 w-4" />
-                            {online ? 'Create Photo' : 'Select from Library'}
+                            {online ? i18n('pages.jobDetail.photos.capture') : i18n('pages.jobDetail.photos.selectLibrary')}
                         </button>
                         <input
                             ref={fileInputRef}
@@ -151,10 +153,10 @@ export function JobPhotosSection({ jobId, photos }: Props) {
 
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-            <h2 className="mb-4 text-lg font-semibold">Fotos</h2>
+            <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.photos.title')}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                {renderSlot('antes', 'Antes')}
-                {renderSlot('despues', 'Despues')}
+                {renderSlot('antes', i18n('pages.jobDetail.photos.before'))}
+                {renderSlot('despues', i18n('pages.jobDetail.photos.after'))}
             </div>
         </div>
     );

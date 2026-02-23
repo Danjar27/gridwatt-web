@@ -27,7 +27,7 @@ const LoginPage = () => {
             await login(email, password);
             navigate('/dashboard', { replace: true });
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Login failed');
+            setError(err instanceof Error ? err.message : i18n('errors.common'));
         }
     };
 

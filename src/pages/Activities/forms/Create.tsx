@@ -34,7 +34,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             setError(null);
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to create activity'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = (data: Partial<Activity>) => {
@@ -53,10 +53,10 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit}>
                     <Field name="id" label={i18n('pages.activities.form.id')} required>
-                        <PrefixedIdInput name="id" prefix="ACT" rules={{ required: 'ID is required' }} />
+                        <PrefixedIdInput name="id" prefix="ACT" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="name" label={i18n('pages.activities.form.name')} required>
-                        <TextInput name="name" rules={{ required: 'Name is required' }} />
+                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="description" label={i18n('pages.activities.form.description')}>
                         <TextArea name="description" rows={3} />

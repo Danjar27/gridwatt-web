@@ -24,11 +24,11 @@ const ProfilePage = () => {
         mutationFn: (data: { name?: string; lastName?: string; phone?: string; password?: string }) =>
             apiClient.updateProfile(data),
         onSuccess: () => {
-            setSuccess('Profile updated successfully');
+            setSuccess(i18n('pages.profile.success'));
             queryClient.invalidateQueries({ queryKey: ['profile'] });
         },
         onError: (err) => {
-            setError(err instanceof Error ? err.message : 'Update failed');
+            setError(err instanceof Error ? err.message : i18n('errors.common'));
         },
     });
 
@@ -37,7 +37,7 @@ const ProfilePage = () => {
         setSuccess('');
 
         if (data.password && data.password !== data.confirmPassword) {
-            setError('Passwords do not match');
+            setError(i18n('pages.profile.errors.passwordMismatch'));
 
             return;
         }
@@ -87,28 +87,28 @@ const ProfilePage = () => {
                     {success && <div className="rounded-lg bg-green-50 p-3 text-sm text-green-600">{success}</div>}
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <Field name="name" label="First Name">
+                        <Field name="name" label={i18n('pages.profile.form.firstName')}>
                             <TextInput name="name" />
                         </Field>
-                        <Field name="lastName" label="Last Name">
+                        <Field name="lastName" label={i18n('pages.profile.form.lastName')}>
                             <TextInput name="lastName" />
                         </Field>
                     </div>
 
-                    <Field name="phone" label="Phone">
+                    <Field name="phone" label={i18n('pages.profile.form.phone')}>
                         <PhoneInput name="phone" />
                     </Field>
 
                     <hr className="my-6" />
 
-                    <h3 className="font-medium">Change Password</h3>
-                    <p className="text-sm text-muted-foreground">Leave blank to keep current password</p>
+                    <h3 className="font-medium">{i18n('pages.profile.form.changePassword')}</h3>
+                    <p className="text-sm text-muted-foreground">{i18n('pages.profile.form.passwordHint')}</p>
 
                     <div className="grid gap-4 sm:grid-cols-2">
-                        <Field name="password" label="New Password">
+                        <Field name="password" label={i18n('pages.profile.form.newPassword')}>
                             <PasswordInput name="password" />
                         </Field>
-                        <Field name="confirmPassword" label="Confirm Password">
+                        <Field name="confirmPassword" label={i18n('pages.profile.form.confirmPassword')}>
                             <PasswordInput name="confirmPassword" />
                         </Field>
                     </div>
@@ -120,7 +120,7 @@ const ProfilePage = () => {
                             className="flex items-center gap-2 rounded-lg bg-main-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
                         >
                             <Save className="h-4 w-4" />
-                            {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+                            {updateMutation.isPending ? i18n('pages.profile.saving') : i18n('pages.profile.save')}
                         </button>
                     </div>
                 </Form>

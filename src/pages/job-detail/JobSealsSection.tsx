@@ -6,6 +6,7 @@ import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { markJobPendingInLists } from './utils';
+import { useTranslations } from 'use-intl';
 
 interface Props {
     jobId: number;
@@ -14,6 +15,7 @@ interface Props {
 
 export function JobSealsSection({ jobId, jobSeals }: Props) {
     const queryClient = useQueryClient();
+    const i18n = useTranslations();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSealId, setSelectedSealId] = useState('');
 
@@ -93,13 +95,13 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
             <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Seals</h2>
+                <h2 className="text-lg font-semibold">{i18n('pages.jobDetail.seals.title')}</h2>
                 <button
                     onClick={() => setModalOpen(true)}
                     className="flex items-center gap-1 rounded-lg bg-primary-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-600"
                 >
                     <Plus className="h-4 w-4" />
-                    Create
+                    {i18n('literal.add')}
                 </button>
             </div>
 
@@ -122,17 +124,17 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-neutral-900">No seals added</p>
+                <p className="text-center text-neutral-900">{i18n('pages.jobDetail.seals.empty')}</p>
             )}
 
-            <Modal onOpen={modalOpen} onClose={() => setModalOpen(false)} title="Create Seal">
+            <Modal onOpen={modalOpen} onClose={() => setModalOpen(false)} title={i18n('pages.jobDetail.seals.modal')}>
                 <div className="space-y-4">
                     <select
                         value={selectedSealId}
                         onChange={(e) => setSelectedSealId(e.target.value)}
                         className={INPUT_CLASS}
                     >
-                        <option value="">Select a seal...</option>
+                        <option value="">{i18n('pages.jobDetail.seals.select')}</option>
                         {availableSeals.map((s) => (
                             <option key={s.id} value={s.id}>
                                 {s.name}
@@ -144,7 +146,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                         disabled={!selectedSealId || addMutation.isPending}
                         className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
-                        Create
+                        {i18n('literal.add')}
                     </button>
                 </div>
             </Modal>

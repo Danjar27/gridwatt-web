@@ -59,109 +59,109 @@ const CreateOrderPage = () => {
                                 >
                                     <div className="p-4 s768:p-6 space-y-4">
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="id" label="Identificador" required>
-                                                <TextInput name="id" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="id" label={i18n('pages.orders.form.fields.id')} required>
+                                                <TextInput name="id" rules={{ required: i18n('errors.required') }} />
                                             </Field>
-                                            <Field name="serviceType" label="Tipo de servicio" required>
-                                                <TextInput name="serviceType" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="serviceType" label={i18n('pages.orders.form.fields.serviceType')} required>
+                                                <TextInput name="serviceType" rules={{ required: i18n('errors.required') }} />
                                             </Field>
-                                            <Field name="accountNumber" label="Número de cuenta" required>
+                                            <Field name="accountNumber" label={i18n('pages.orders.form.fields.accountNumber')} required>
                                                 <TextInput
                                                     name="accountNumber"
-                                                    rules={{ required: 'Campo requerido' }}
+                                                    rules={{ required: i18n('errors.required') }}
                                                 />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="meterNumber" label="Número de medidor" required>
-                                                <TextInput name="meterNumber" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="meterNumber" label={i18n('pages.orders.form.fields.meterNumber')} required>
+                                                <TextInput name="meterNumber" rules={{ required: i18n('errors.required') }} />
                                             </Field>
-                                            <Field name="issueDate" label="Fecha de emisión" required>
-                                                <DateInput name="issueDate" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="issueDate" label={i18n('pages.orders.form.fields.issueDate')} required>
+                                                <DateInput name="issueDate" rules={{ required: i18n('errors.required') }} />
                                             </Field>
                                         </div>
 
                                         <hr className="my-8 text-neutral-700" />
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="firstName" label="Nombre" required>
-                                                <TextInput name="firstName" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="firstName" label={i18n('pages.orders.form.fields.firstName')} required>
+                                                <TextInput name="firstName" rules={{ required: i18n('errors.required') }} />
                                             </Field>
-                                            <Field name="lastName" label="Apellido" required>
-                                                <TextInput name="lastName" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="lastName" label={i18n('pages.orders.form.fields.lastName')} required>
+                                                <TextInput name="lastName" rules={{ required: i18n('errors.required') }} />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="idNumber" label="Número de cédula" required>
-                                                <TextInput name="idNumber" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="idNumber" label={i18n('pages.orders.form.fields.idNumber')} required>
+                                                <TextInput name="idNumber" rules={{ required: i18n('errors.required') }} />
                                             </Field>
-                                            <Field name="phone" label="Teléfono" required>
-                                                <PhoneInput name="phone" rules={{ required: 'Campo requerido' }} />
+                                            <Field name="phone" label={i18n('pages.orders.form.fields.phone')} required>
+                                                <PhoneInput name="phone" rules={{ required: i18n('errors.required') }} />
                                             </Field>
                                         </div>
 
-                                        <Field name="email" label="Correo electrónico" required>
-                                            <EmailInput name="email" rules={{ required: 'Campo requerido' }} />
+                                        <Field name="email" label={i18n('pages.orders.form.fields.email')} required>
+                                            <EmailInput name="email" rules={{ required: i18n('errors.required') }} />
                                         </Field>
 
-                                        <Field name="orderLocation" label="Dirección / Ubicación" required>
-                                            <TextInput name="orderLocation" rules={{ required: 'Campo requerido' }} />
+                                        <Field name="orderLocation" label={i18n('pages.orders.form.fields.orderLocation')} required>
+                                            <TextInput name="orderLocation" rules={{ required: i18n('errors.required') }} />
                                         </Field>
 
                                         <hr className="my-8 text-neutral-700" />
 
-                                        <Field name="panelTowerBlock" label="Panel / Torre / Bloque">
+                                        <Field name="panelTowerBlock" label={i18n('pages.orders.form.fields.panelTowerBlock')}>
                                             <TextInput name="panelTowerBlock" />
                                         </Field>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="appliedTariff" label="Tarifa aplicada">
+                                            <Field name="appliedTariff" label={i18n('pages.orders.form.fields.appliedTariff')}>
                                                 <TextInput name="appliedTariff" />
                                             </Field>
-                                            <Field name="transformerNumber" label="Número de transformador">
+                                            <Field name="transformerNumber" label={i18n('pages.orders.form.fields.transformerNumber')}>
                                                 <TextInput name="transformerNumber" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="distributionNetwork" label="Red de distribución">
+                                            <Field name="distributionNetwork" label={i18n('pages.orders.form.fields.distributionNetwork')}>
                                                 <TextInput name="distributionNetwork" />
                                             </Field>
-                                            <Field name="transformerOwnership" label="Propiedad del transformador">
+                                            <Field name="transformerOwnership" label={i18n('pages.orders.form.fields.transformerOwnership')}>
                                                 <TextInput name="transformerOwnership" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="sharedSubstation" label="Subestación compartida">
+                                            <Field name="sharedSubstation" label={i18n('pages.orders.form.fields.sharedSubstation')}>
                                                 <TextInput name="sharedSubstation" />
                                             </Field>
-                                            <Field name="normalLoad" label="Carga normal">
+                                            <Field name="normalLoad" label={i18n('pages.orders.form.fields.normalLoad')}>
                                                 <TextInput name="normalLoad" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="fluctuatingLoad" label="Carga fluctuante">
+                                            <Field name="fluctuatingLoad" label={i18n('pages.orders.form.fields.fluctuatingLoad')}>
                                                 <TextInput name="fluctuatingLoad" />
                                             </Field>
-                                            <Field name="plannerGroup" label="Grupo planificador">
+                                            <Field name="plannerGroup" label={i18n('pages.orders.form.fields.plannerGroup')}>
                                                 <TextInput name="plannerGroup" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="workPosition" label="Posición de trabajo">
+                                            <Field name="workPosition" label={i18n('pages.orders.form.fields.workPosition')}>
                                                 <TextInput name="workPosition" />
                                             </Field>
-                                            <Field name="lockerSequence" label="Secuencia del casillero">
+                                            <Field name="lockerSequence" label={i18n('pages.orders.form.fields.lockerSequence')}>
                                                 <TextInput name="lockerSequence" />
                                             </Field>
                                         </div>
 
-                                        <Field name="observations" label="Observaciones">
+                                        <Field name="observations" label={i18n('pages.orders.form.fields.observations')}>
                                             <TextInput name="observations" />
                                         </Field>
                                     </div>
@@ -185,19 +185,19 @@ const CreateOrderPage = () => {
                                             />
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <Field name="latitude" label="Latitud">
+                                                <Field name="latitude" label={i18n('pages.orders.form.fields.latitude')}>
                                                     <NumberInput name="latitude" step="any" placeholder="0.000000" />
                                                 </Field>
-                                                <Field name="longitude" label="Longitud">
+                                                <Field name="longitude" label={i18n('pages.orders.form.fields.longitude')}>
                                                     <NumberInput name="longitude" step="any" placeholder="0.000000" />
                                                 </Field>
                                             </div>
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <Field name="coordinateX" label="Coordenada X">
+                                                <Field name="coordinateX" label={i18n('pages.orders.form.fields.coordinateX')}>
                                                     <NumberInput name="coordinateX" />
                                                 </Field>
-                                                <Field name="coordinateY" label="Coordenada Y">
+                                                <Field name="coordinateY" label={i18n('pages.orders.form.fields.coordinateY')}>
                                                     <NumberInput name="coordinateY" />
                                                 </Field>
                                             </div>

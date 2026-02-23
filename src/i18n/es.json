@@ -4,10 +4,26 @@
         "create": "Crear",
         "update": "Actualizar",
         "delete": "Eliminar",
-        "actions": "Acciones"
+        "actions": "Acciones",
+        "save": "Guardar",
+        "back": "Regresar",
+        "assign": "Asignar",
+        "never": "Nunca",
+        "yes": "Sí",
+        "no": "No",
+        "active": "Activo",
+        "inactive": "Inactivo",
+        "add": "Agregar",
+        "edit": "Editar"
     },
     "common": {
         "confirmation": "Esta acción no se puede deshacer. ¿Deseas continuar?"
+    },
+    "errors": {
+        "format": "Sólo está permitido el uso letras minúsculas, números y guiones",
+        "common": "Ocurrió un Error. Por favor, intenta de nuevo",
+        "required": "Este campo es requerido",
+        "minLength": "Mínimo {min} caracteres"
     },
     "brand": "Grid Watt",
     "routes": {
@@ -44,12 +60,53 @@
         }
     },
     "pages": {
+        "tenants": {
+            "title": "Contratos",
+            "subtitle": "Administra las contratos registrados",
+            "action": "Agregar contrato",
+            "form": {
+                "create": "Agregar nuevo contrato",
+                "update": "Actualizar contrato",
+                "delete": "Eliminar contrato"
+            },
+            "errors": {
+                "name": "Todo contrato debe tener un nombre",
+                "code": "Es necesario que el contrato tenga un código asociado"
+            },
+            "fields": {
+                "name": "Nombre",
+                "code": "Código",
+                "users": "Usuarios",
+                "orders": "Órdenes",
+                "slug": "Slug"
+            },
+            "summary": {
+                "title": "Todos los contratos",
+                "subtitle": "Lista de contratos activos en el sistema",
+                "total": "Total de contratos activos: {count}"
+            }
+        },
         "profile": {
             "title": "Mi perfil",
             "subtitle": "Administra tu información personal y datos de acceso",
             "personal": {
                 "title": "Información personal",
                 "subtitle": "Actualiza tus detalles personales"
+            },
+            "form": {
+                "firstName": "Nombre",
+                "lastName": "Apellido",
+                "phone": "Teléfono",
+                "newPassword": "Nueva contraseña",
+                "confirmPassword": "Confirmar contraseña",
+                "changePassword": "Cambiar contraseña",
+                "passwordHint": "Deja en blanco para mantener la contraseña actual"
+            },
+            "save": "Guardar cambios",
+            "saving": "Guardando...",
+            "success": "Perfil actualizado exitosamente",
+            "errors": {
+                "passwordMismatch": "Las contraseñas no coinciden"
             }
         },
         "activities": {
@@ -97,9 +154,9 @@
             "subtitle": "Administra los tipos de sellos y configuraciones",
             "action": "Agregar sello",
             "form": {
-                "create": { "title": "Nuevo Sello" },
-                "update": { "title": "Actualizar Sello" },
-                "delete": { "title": "Eliminar Sello" },
+                "create": "Nuevo Sello",
+                "update": "Actualizar Sello",
+                "delete": "Eliminar Sello",
                 "id": "Identificador",
                 "name": "Nombre",
                 "type": "Tipo",
@@ -132,6 +189,35 @@
                     "detailsSubtitle": "Información del servicio, medidor y cliente",
                     "location": "Ubicación",
                     "locationSubtitle": "Selecciona la ubicación en el mapa o ingresa las coordenadas"
+                },
+                "fields": {
+                    "id": "Identificador",
+                    "serviceType": "Tipo de servicio",
+                    "accountNumber": "Número de cuenta",
+                    "meterNumber": "Número de medidor",
+                    "issueDate": "Fecha de emisión",
+                    "firstName": "Nombre",
+                    "lastName": "Apellido",
+                    "idNumber": "Número de cédula",
+                    "phone": "Teléfono",
+                    "email": "Correo electrónico",
+                    "orderLocation": "Dirección / Ubicación",
+                    "panelTowerBlock": "Panel / Torre / Bloque",
+                    "appliedTariff": "Tarifa aplicada",
+                    "transformerNumber": "Número de transformador",
+                    "distributionNetwork": "Red de distribución",
+                    "transformerOwnership": "Propiedad del transformador",
+                    "sharedSubstation": "Subestación compartida",
+                    "normalLoad": "Carga normal",
+                    "fluctuatingLoad": "Carga fluctuante",
+                    "plannerGroup": "Grupo planificador",
+                    "workPosition": "Posición de trabajo",
+                    "lockerSequence": "Secuencia del casillero",
+                    "observations": "Observaciones",
+                    "latitude": "Latitud",
+                    "longitude": "Longitud",
+                    "coordinateX": "Coordenada X",
+                    "coordinateY": "Coordenada Y"
                 }
             },
             "table": {
@@ -182,11 +268,21 @@
             "subtitle": "Administra las cuentas de usuario y permisos",
             "action": "Agregar usuario",
             "form": {
-                "create": { "title": "Nuevo Usuario" },
-                "update": { "title": "Actualizar Usuario" },
-                "delete": { "title": "Eliminar Usuario" },
+                "create": "Nuevo Usuario",
+                "update": "Actualizar Usuario",
+                "delete": "Eliminar Usuario",
                 "passwordReset": { "title": "Restablecer contraseña" },
-                "changeRole": { "title": "Cambiar rol" }
+                "changeRole": { "title": "Cambiar rol" },
+                "name": "Nombre",
+                "lastName": "Apellido",
+                "email": "Correo electrónico",
+                "password": "Contraseña",
+                "phone": "Teléfono",
+                "role": "Rol",
+                "isActive": "Estado",
+                "tenant": "Empresa",
+                "selectRole": "Seleccionar rol",
+                "selectTenant": "Seleccionar empresa"
             },
             "table": {
                 "name": "Nombre",
@@ -204,27 +300,6 @@
                 "total": "Total de usuarios: {count}"
             }
         },
-        "tenants": {
-            "title": "Contratos",
-            "subtitle": "Administra las contratos registrados",
-            "action": "Agregar contrato",
-            "form": {
-                "create": "Agregar nuevo contrato",
-                "update": "Actualizar contrato",
-                "delete": "Eliminar contrato"
-            },
-            "table": {
-                "name": "Nombre",
-                "code": "Código",
-                "users": "Usuarios",
-                "orders": "Órdenes"
-            },
-            "summary": {
-                "title": "Todos los contratos",
-                "subtitle": "Lista de contratos activos en el sistema",
-                "total": "Total de contratos activos: {count}"
-            }
-        },
         "dashboard": {
             "title": "Tablero",
             "subtitle": "Bienvenido, {name}! Aquí tienes un resumen de tu trabajo.",
@@ -239,6 +314,139 @@
             "dataExport": {
                 "title": "Exportar datos",
                 "subtitle": "Descarga información en formato CSV"
+            },
+            "stats": {
+                "totalJobs": "Total de trabajos",
+                "pendingJobs": "Trabajos pendientes",
+                "completedJobs": "Trabajos completados",
+                "pendingOrders": "Órdenes pendientes"
+            },
+            "empty": {
+                "jobs": "Sin trabajos pendientes",
+                "orders": "Sin órdenes pendientes"
+            },
+            "export": {
+                "from": "Desde",
+                "to": "Hasta",
+                "data": "Datos",
+                "startPlaceholder": "Fecha de inicio",
+                "endPlaceholder": "Fecha de fin",
+                "download": "Descargar CSV",
+                "exporting": "Exportando..."
+            }
+        },
+        "jobDetail": {
+            "notFound": "Trabajo no encontrado",
+            "save": "Guardar",
+            "complete": "Completar trabajo",
+            "offline": "Estás sin conexión",
+            "offlineCamera": "La cámara no está disponible sin conexión. Por favor selecciona imágenes de tu galería.",
+            "orderDetails": "Detalles de la orden",
+            "customer": "Cliente",
+            "serviceType": "Tipo de servicio",
+            "meterNumber": "Número de medidor",
+            "location": "Ubicación",
+            "openInMaps": "Abrir en Mapas",
+            "jobInfo": "Información del trabajo",
+            "meterReading": "Lectura del medidor",
+            "meterReadingPlaceholder": "Ingresa la lectura del medidor",
+            "notes": "Notas",
+            "notesPlaceholder": "Ingresa notas...",
+            "activities": {
+                "title": "Actividades",
+                "empty": "Sin actividades registradas",
+                "modal": "Agregar actividad",
+                "select": "Selecciona una actividad..."
+            },
+            "seals": {
+                "title": "Sellos",
+                "empty": "Sin sellos registrados",
+                "modal": "Agregar sello",
+                "select": "Selecciona un sello..."
+            },
+            "materials": {
+                "title": "Materiales",
+                "empty": "Sin materiales registrados",
+                "modal": "Agregar material",
+                "select": "Selecciona un material...",
+                "material": "Material",
+                "quantity": "Cantidad"
+            },
+            "photos": {
+                "title": "Fotos",
+                "empty": "Sin foto",
+                "capture": "Tomar foto",
+                "selectLibrary": "Seleccionar de galería",
+                "before": "Antes",
+                "after": "Después"
+            }
+        },
+        "orderDetail": {
+            "notFound": "Orden no encontrada",
+            "customerInfo": "Información del cliente",
+            "name": "Nombre",
+            "email": "Correo electrónico",
+            "phone": "Teléfono",
+            "idNumber": "Número de identificación",
+            "account": "Cuenta",
+            "location": "Ubicación",
+            "openInMaps": "Abrir en Mapas",
+            "orderDetails": "Detalles de la orden",
+            "serviceType": "Tipo de servicio",
+            "meterNumber": "Número de medidor",
+            "status": "Estado",
+            "issueDate": "Fecha de emisión",
+            "observations": "Observaciones",
+            "assignment": "Asignación",
+            "notAssigned": "Sin asignar",
+            "selectTechnician": "Seleccionar técnico...",
+            "assign": "Asignar",
+            "jobs": "Trabajos",
+            "started": "Inicio"
+        },
+        "ordersImport": {
+            "title": "Importar órdenes",
+            "subtitle": "Sube archivos CSV, Excel, XML o PDF para crear órdenes en lote.",
+            "restricted": "No tienes acceso para importar órdenes.",
+            "selectFiles": "Seleccionar archivos",
+            "supported": "Admitidos: .csv, .xlsx, .xls, .xml, .pdf",
+            "chooseFiles": "Elegir archivos",
+            "parseFiles": "Procesar archivos",
+            "parsing": "Procesando...",
+            "importValid": "Importar órdenes válidas",
+            "importing": "Importando...",
+            "importedSuccess": "{count} órdenes importadas exitosamente.",
+            "fileWarnings": "Advertencias de archivo",
+            "totalParsed": "Total procesado",
+            "validOrders": "Órdenes válidas",
+            "needsReview": "Requiere revisión",
+            "row": "Fila",
+            "ok": "OK",
+            "table": {
+                "source": "Fuente",
+                "customer": "Cliente",
+                "accountMeter": "Cuenta / Medidor",
+                "service": "Servicio",
+                "issueDate": "Fecha de emisión",
+                "issues": "Problemas"
+            },
+            "placeholders": {
+                "firstName": "Nombre",
+                "lastName": "Apellido",
+                "email": "Correo",
+                "phone": "Teléfono",
+                "accountNumber": "Número de cuenta",
+                "meterNumber": "Número de medidor",
+                "serviceType": "Tipo de servicio",
+                "orderStatus": "Estado de la orden",
+                "issueDate": "Fecha de emisión",
+                "issueTime": "Hora de emisión"
+            },
+            "errors": {
+                "noFiles": "Selecciona al menos un archivo para procesar.",
+                "parseFiles": "Error al procesar los archivos.",
+                "noValidOrders": "No hay órdenes válidas para importar.",
+                "importFailed": "Error al importar las órdenes."
             }
         }
     },

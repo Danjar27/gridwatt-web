@@ -35,7 +35,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             closeUpdate();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to update seal'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = ({ id, isActive, ...rest }: Seal & { isActive: string }) => {
@@ -61,16 +61,16 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                     defaultValues={{ ...selected, isActive: String(selected.isActive) }}
                 >
                     <Field name="name" label={i18n('pages.seals.form.name')} required>
-                        <TextInput name="name" rules={{ required: 'Name is required' }} />
+                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="type" label={i18n('pages.seals.form.type')} required>
-                        <TextInput name="type" rules={{ required: 'Type is required' }} />
+                        <TextInput name="type" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="description" label={i18n('pages.seals.form.description')}>
                         <TextArea name="description" rows={3} />
                     </Field>
                     <Field name="isActive" label={i18n('pages.seals.form.isActive')}>
-                        <Select name="isActive" options={[{ label: 'Activo', value: 'true' }, { label: 'Inactivo', value: 'false' }]} />
+                        <Select name="isActive" options={[{ label: i18n('literal.active'), value: 'true' }, { label: i18n('literal.inactive'), value: 'false' }]} />
                     </Field>
                     <Actions submitLabel={i18n('literal.update')} onCancel={handleCancel} isLoading={updateMutation.isPending} />
                 </Form>

@@ -33,7 +33,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             await queryClient.invalidateQueries({ queryKey: ['seals'] });
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to create seal'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = (data: Partial<Seal>) => {
@@ -51,13 +51,13 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit}>
                     <Field name="id" label={i18n('pages.seals.form.id')} required>
-                        <PrefixedIdInput name="id" prefix="SEL" rules={{ required: 'ID is required' }} />
+                        <PrefixedIdInput name="id" prefix="SEL" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="name" label={i18n('pages.seals.form.name')} required>
-                        <TextInput name="name" rules={{ required: 'Name is required' }} />
+                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="type" label={i18n('pages.seals.form.type')} required>
-                        <TextInput name="type" rules={{ required: 'Type is required' }} />
+                        <TextInput name="type" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="description" label={i18n('pages.seals.form.description')}>
                         <TextArea name="description" rows={3} />

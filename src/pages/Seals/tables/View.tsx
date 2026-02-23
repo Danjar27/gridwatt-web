@@ -5,10 +5,12 @@ import { useServerPagination } from '@components/Table/hooks/useServerPagination
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from '../utils/context.ts';
 import { apiClient } from '@lib/api-client.ts';
+import { useTranslations } from 'use-intl';
 
 import Table from '@components/Table/Table';
 
 const ViewTable = () => {
+    const i18n = useTranslations();
     const { select, openUpdate, openDelete } = useInventoryActions();
 
     const handleEdit = (seal: Seal) => {
@@ -24,17 +26,17 @@ const ViewTable = () => {
     const columns: Array<ColumnDef<Seal>> = [
         {
             accessorKey: 'id',
-            header: 'Id',
+            header: i18n('pages.seals.form.id'),
             cell: ({ row }) => <div className="font-mono text-sm">{row.original.id}</div>,
         },
         {
             accessorKey: 'name',
-            header: 'Name',
+            header: i18n('pages.seals.form.name'),
             cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
         },
         {
             accessorKey: 'type',
-            header: 'Type',
+            header: i18n('pages.seals.form.type'),
             cell: ({ row }) => (
                 <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
                     {row.original.type}
@@ -43,12 +45,12 @@ const ViewTable = () => {
         },
         {
             accessorKey: 'description',
-            header: 'Description',
+            header: i18n('pages.seals.form.description'),
             cell: ({ row }) => <div className="text-sm text-muted-foreground">{row.original.description || '-'}</div>,
         },
         {
             accessorKey: 'isActive',
-            header: 'Status',
+            header: i18n('pages.seals.form.isActive'),
             cell: ({ row }) => (
                 <span
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
@@ -57,13 +59,13 @@ const ViewTable = () => {
                             : 'bg-gray-100 text-gray-600 border border-gray-200'
                     }`}
                 >
-                    {row.original.isActive ? 'Active' : 'Inactive'}
+                    {row.original.isActive ? i18n('literal.active') : i18n('literal.inactive')}
                 </span>
             ),
         },
         {
             id: 'actions',
-            header: 'Actions',
+            header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
                     <button onClick={() => handleEdit(row.original)} className="cursor-pointer">

@@ -13,7 +13,7 @@ import Form from '@components/Form/Form';
 
 import { useInventoryActions, useInventoryContext } from '../utils/context';
 import { useMutation } from '@tanstack/react-query';
-import { UsersIcon } from '@phosphor-icons/react';
+import { AddressBookIcon } from '@phosphor-icons/react';
 import { queryClient } from '@lib/query-client';
 import { apiClient } from '@lib/api-client';
 import { useTranslations } from 'use-intl';
@@ -35,7 +35,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             setError(null);
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to update tenant'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = ({ id, ...data }: Tenant) => {
@@ -50,25 +50,29 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="new-user" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
-            <Window title={i18n('pages.tenants.form.create')} className="w-full max-w-150 px-4" icon={UsersIcon}>
+            <Window title={i18n('pages.tenants.form.update')} className="w-full max-w-150 px-4" icon={AddressBookIcon}>
                 <FormError message={error} />
                 <Form key={'new'} onSubmit={handleSubmit} defaultValues={{ ...selected }}>
-                    <Field name="name" label="Nombre" required>
-                        <TextInput name="name" rules={{ required: 'El nombre es requerido' }} />
-                    </Field>
-                    <Field name="slug" label="Slug" required>
+                    <Field name="code" label={i18n('pages.tenants.fields.code')} required>
                         <TextInput
-                            name="slug"
+                            name="code"
                             rules={{
-                                required: 'El slug es requerido',
+                                required: i18n('pages.tenants.errors.code'),
                                 pattern: {
                                     value: /^[a-z0-9-]+$/,
-                                    message: 'Solo letras minúsculas, números y guiones',
+                                    message: i18n('errors.format'),
                                 },
                             }}
                         />
                     </Field>
-                    <Actions submitLabel="Update" onCancel={handleCancel} isLoading={updateMutation.isPending} />
+                    <Field name="name" label={i18n('pages.tenants.fields.name')} required>
+                        <TextInput name="name" rules={{ required: i18n('pages.tenants.errors.name') }} />
+                    </Field>
+                    <Actions
+                        submitLabel={i18n('literal.update')}
+                        onCancel={handleCancel}
+                        isLoading={updateMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>

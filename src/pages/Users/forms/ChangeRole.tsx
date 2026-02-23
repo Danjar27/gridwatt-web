@@ -46,7 +46,7 @@ const ChangeRole: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             closeRoleChange();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to change role'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = ({ roleId }: { roleId: string }) => {
@@ -73,7 +73,7 @@ const ChangeRole: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 </p>
                 <Form key={selected.id} onSubmit={handleSubmit} defaultValues={{ roleId: selected.role?.id }}>
                     <Field name="roleId" label={i18n('pages.users.form.role')} required>
-                        <Select name="roleId" rules={{ required: 'Role is required' }} options={roleOptions} />
+                        <Select name="roleId" rules={{ required: i18n('errors.required') }} options={roleOptions} />
                     </Field>
                     <Actions submitLabel={i18n('pages.users.form.changeRole.title')} onCancel={handleCancel} isLoading={roleMutation.isPending} />
                 </Form>

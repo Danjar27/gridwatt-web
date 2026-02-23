@@ -10,21 +10,6 @@ import { apiClient } from '@lib/api-client.ts';
 import Table from '@components/Table/Table';
 import { useTranslations } from 'use-intl';
 
-const formatDate = (dateString?: string) => {
-    if (!dateString) {
-        return 'Never';
-    }
-
-    return new Date(dateString).toLocaleDateString('es-MX', {
-        month: 'numeric',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-    });
-};
-
 const ViewTable = () => {
     const i18n = useTranslations();
 
@@ -79,7 +64,7 @@ const ViewTable = () => {
                             : 'bg-gray-100 text-gray-600 border border-gray-200'
                     }`}
                 >
-                    {row.original.isActive ? 'Active' : 'Inactive'}
+                    {row.original.isActive ? i18n('literal.active') : i18n('literal.inactive')}
                 </span>
             ),
         },
@@ -96,7 +81,11 @@ const ViewTable = () => {
             header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    <button onClick={() => select(row.original)} className="cursor-pointer" title="Edit">
+                    <button
+                        onClick={() => select(row.original)}
+                        className="cursor-pointer"
+                        title={i18n('literal.edit')}
+                    >
                         <PencilSimpleIcon
                             weight="duotone"
                             className="text-primary-500 dark:text-white"
@@ -107,18 +96,22 @@ const ViewTable = () => {
                     <button
                         onClick={() => selectForRoleChange(row.original)}
                         className="cursor-pointer"
-                        title="Change Role"
+                        title={i18n('pages.users.form.changeRole.title')}
                     >
                         <ShieldIcon weight="duotone" className="text-blue-500" width={20} height={20} />
                     </button>
                     <button
                         onClick={() => selectForPasswordReset(row.original)}
                         className="cursor-pointer"
-                        title="Reset Password"
+                        title={i18n('pages.users.form.passwordReset.title')}
                     >
                         <KeyIcon weight="duotone" className="text-amber-500" width={20} height={20} />
                     </button>
-                    <button onClick={() => selectForDelete(row.original)} className="cursor-pointer" title="Delete">
+                    <button
+                        onClick={() => selectForDelete(row.original)}
+                        className="cursor-pointer"
+                        title={i18n('literal.delete')}
+                    >
                         <TrashIcon weight="duotone" className="text-secondary-500" width={20} height={20} />
                     </button>
                 </div>

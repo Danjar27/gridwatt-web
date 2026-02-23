@@ -35,7 +35,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             closeUpdate();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to update material'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = ({ id, ...data }: Material) => {
@@ -61,14 +61,14 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <FormError message={error} />
                 <Form key={selected.id} onSubmit={handleSubmit} defaultValues={selected}>
                     <Field name="name" label={i18n('pages.materials.form.name')} required>
-                        <TextInput name="name" rules={{ required: 'Name is required' }} />
+                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <div className="grid grid-cols-2 gap-4">
                         <Field name="type" label={i18n('pages.materials.form.type')} required>
-                            <TextInput name="type" rules={{ required: 'Type is required' }} />
+                            <TextInput name="type" rules={{ required: i18n('errors.required') }} />
                         </Field>
                         <Field name="unit" label={i18n('pages.materials.form.unit')} required>
-                            <TextInput name="unit" rules={{ required: 'Unit is required' }} />
+                            <TextInput name="unit" rules={{ required: i18n('errors.required') }} />
                         </Field>
                     </div>
                     <Field name="description" label={i18n('pages.materials.form.description')}>
@@ -79,8 +79,8 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                             <Select
                                 name="allowsDecimals"
                                 options={[
-                                    { label: 'Sí', value: 'true' },
-                                    { label: 'No', value: 'false' },
+                                    { label: i18n('literal.yes'), value: 'true' },
+                                    { label: i18n('literal.no'), value: 'false' },
                                 ]}
                             />
                         </Field>

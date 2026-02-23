@@ -34,7 +34,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             await queryClient.invalidateQueries({ queryKey: ['materials'] });
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to create material'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = (data: Partial<Material>) => {
@@ -56,17 +56,17 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit} defaultValues={{ allowsDecimals: false, isActive: true }}>
                     <Field name="id" label={i18n('pages.materials.form.id')} required>
-                        <PrefixedIdInput name="id" prefix="MAT" rules={{ required: 'ID is required' }} />
+                        <PrefixedIdInput name="id" prefix="MAT" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="name" label={i18n('pages.materials.form.name')} required>
-                        <TextInput name="name" rules={{ required: 'Name is required' }} />
+                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <div className="grid grid-cols-2 gap-4">
                         <Field name="type" label={i18n('pages.materials.form.type')} required>
-                            <TextInput name="type" rules={{ required: 'Type is required' }} />
+                            <TextInput name="type" rules={{ required: i18n('errors.required') }} />
                         </Field>
                         <Field name="unit" label={i18n('pages.materials.form.unit')} required>
-                            <TextInput name="unit" rules={{ required: 'Unit is required' }} />
+                            <TextInput name="unit" rules={{ required: i18n('errors.required') }} />
                         </Field>
                     </div>
                     <Field name="description" label={i18n('pages.materials.form.description')}>
@@ -76,8 +76,8 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                         <Select
                             name="allowsDecimals"
                             options={[
-                                { label: 'Sí', value: 'true' },
-                                { label: 'No', value: 'false' },
+                                { label: i18n('literal.yes'), value: 'true' },
+                                { label: i18n('literal.no'), value: 'false' },
                             ]}
                         />
                     </Field>

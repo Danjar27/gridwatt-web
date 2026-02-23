@@ -1,4 +1,4 @@
-import { UsersIcon, PlusCircleIcon } from '@phosphor-icons/react';
+import { PlusCircleIcon, AddressBookIcon } from '@phosphor-icons/react';
 import { useAuthContext } from '@context/auth/context';
 import { useInventoryActions } from './utils/context';
 import { Navigate } from 'react-router-dom';
@@ -30,7 +30,7 @@ const Inventory = () => {
             </div>
 
             <Summary
-                icon={UsersIcon}
+                icon={AddressBookIcon}
                 title={i18n('pages.tenants.summary.title')}
                 subtitle={i18n('pages.tenants.summary.subtitle')}
             >

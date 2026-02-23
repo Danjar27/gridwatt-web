@@ -57,10 +57,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         mutationFn: (data: any) => apiClient.createUser(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['users'] });
+            await queryClient.invalidateQueries({ queryKey: ['tenants'] });
             closeCreate();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to create user'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = (data: any) => {
@@ -83,19 +84,19 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <Form key="new" onSubmit={handleSubmit}>
                     <div className="grid grid-cols-2 gap-4">
                         <Field name="name" label={i18n('pages.users.form.name')} required>
-                            <TextInput name="name" rules={{ required: 'Name is required' }} />
+                            <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                         </Field>
                         <Field name="lastName" label={i18n('pages.users.form.lastName')} required>
-                            <TextInput name="lastName" rules={{ required: 'Last name is required' }} />
+                            <TextInput name="lastName" rules={{ required: i18n('errors.required') }} />
                         </Field>
                     </div>
                     <Field name="email" label={i18n('pages.users.form.email')} required>
-                        <EmailInput name="email" rules={{ required: 'Email is required' }} />
+                        <EmailInput name="email" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="password" label={i18n('pages.users.form.password')} required>
                         <PasswordInput
                             name="password"
-                            rules={{ required: 'Password is required', minLength: { value: 6, message: 'Min 6 characters' } }}
+                            rules={{ required: i18n('errors.required'), minLength: { value: 6, message: i18n('errors.minLength', { min: 6 }) } }}
                         />
                     </Field>
                     <Field name="phone" label={i18n('pages.users.form.phone')}>
@@ -104,16 +105,16 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                     <Field name="roleId" label={i18n('pages.users.form.role')} required>
                         <Select
                             name="roleId"
-                            rules={{ required: 'Role is required' }}
-                            options={[{ label: 'Seleccionar rol', value: '' }, ...roleOptions]}
+                            rules={{ required: i18n('errors.required') }}
+                            options={[{ label: i18n('pages.users.form.selectRole'), value: '' }, ...roleOptions]}
                         />
                     </Field>
                     {isAdmin && (
                         <Field name="tenantId" label={i18n('pages.users.form.tenant')} required>
                             <Select
                                 name="tenantId"
-                                rules={{ required: 'Tenant is required' }}
-                                options={[{ label: 'Seleccionar empresa', value: '' }, ...tenantOptions]}
+                                rules={{ required: i18n('errors.required') }}
+                                options={[{ label: i18n('pages.users.form.selectTenant'), value: '' }, ...tenantOptions]}
                             />
                         </Field>
                     )}

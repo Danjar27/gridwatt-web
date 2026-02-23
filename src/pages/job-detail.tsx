@@ -11,6 +11,7 @@ import { JobActivitiesSection } from './job-detail/JobActivitiesSection';
 import { JobSealsSection } from './job-detail/JobSealsSection';
 import { JobMaterialsSection } from './job-detail/JobMaterialsSection';
 import { JobPhotosSection } from './job-detail/JobPhotosSection';
+import { useTranslations } from 'use-intl';
 import * as leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -19,6 +20,7 @@ export function JobDetailPage() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const { online } = useOfflineContext();
+    const i18n = useTranslations();
 
     const [notes, setNotes] = useState('');
     const [meterReading, setMeterReading] = useState('');
@@ -102,7 +104,7 @@ export function JobDetailPage() {
     if (!job) {
         return (
             <div className="flex h-64 items-center justify-center">
-                <p className="text-neutral-900">Job not found</p>
+                <p className="text-neutral-900">{i18n('pages.jobDetail.notFound')}</p>
             </div>
         );
     }
@@ -124,7 +126,7 @@ export function JobDetailPage() {
                         className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
                         <Save className="h-4 w-4" />
-                        Save
+                        {i18n('pages.jobDetail.save')}
                     </button>
                     {job.jobStatus !== 'completed' && (
                         <button
@@ -132,7 +134,7 @@ export function JobDetailPage() {
                             disabled={updateMutation.isPending}
                             className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
                         >
-                            Complete Job
+                            {i18n('pages.jobDetail.complete')}
                         </button>
                     )}
                 </div>
@@ -142,9 +144,9 @@ export function JobDetailPage() {
                 <div className="flex items-center gap-2 rounded-lg bg-secondary-500/10 p-4 text-secondary-500">
                     <AlertCircle className="h-5 w-5" />
                     <div>
-                        <p className="font-medium">You're offline</p>
+                        <p className="font-medium">{i18n('pages.jobDetail.offline')}</p>
                         <p className="text-sm">
-                            Camera is not available offline. Please select images from your library instead.
+                            {i18n('pages.jobDetail.offlineCamera')}
                         </p>
                     </div>
                 </div>
@@ -154,20 +156,20 @@ export function JobDetailPage() {
                 {/* Order Info */}
                 {job.order && (
                     <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                        <h2 className="mb-4 text-lg font-semibold">Order Details</h2>
+                        <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.orderDetails')}</h2>
                         <div className="space-y-2 text-sm">
                             <p>
-                                <span className="text-neutral-900">Customer:</span> {job.order.firstName}{' '}
+                                <span className="text-neutral-900">{i18n('pages.jobDetail.customer')}:</span> {job.order.firstName}{' '}
                                 {job.order.lastName}
                             </p>
                             <p>
-                                <span className="text-neutral-900">Service Type:</span> {job.order.serviceType}
+                                <span className="text-neutral-900">{i18n('pages.jobDetail.serviceType')}:</span> {job.order.serviceType}
                             </p>
                             <p>
-                                <span className="text-neutral-900">Meter Number:</span> {job.order.meterNumber}
+                                <span className="text-neutral-900">{i18n('pages.jobDetail.meterNumber')}:</span> {job.order.meterNumber}
                             </p>
                             <p>
-                                <span className="text-neutral-900">Location:</span> {job.order.orderLocation}
+                                <span className="text-neutral-900">{i18n('pages.jobDetail.location')}:</span> {job.order.orderLocation}
                             </p>
                             {job.order.latitude && job.order.longitude && (
                                 <a
@@ -177,7 +179,7 @@ export function JobDetailPage() {
                                     className="flex items-center gap-1 text-primary-500 hover:underline"
                                 >
                                     <MapPin className="h-4 w-4" />
-                                    Open in Maps
+                                    {i18n('pages.jobDetail.openInMaps')}
                                 </a>
                             )}
                         </div>
@@ -186,26 +188,26 @@ export function JobDetailPage() {
 
                 {/* Job Summary */}
                 <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                    <h2 className="mb-4 text-lg font-semibold">Job Information</h2>
+                    <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.jobInfo')}</h2>
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-neutral-900">Meter Reading</label>
+                            <label className="block text-sm font-medium text-neutral-900">{i18n('pages.jobDetail.meterReading')}</label>
                             <input
                                 type="text"
                                 value={meterReading || job.meterReading || ''}
                                 onChange={(e) => setMeterReading(e.target.value)}
                                 className={`mt-1 ${INPUT_CLASS}`}
-                                placeholder="Enter meter reading"
+                                placeholder={i18n('pages.jobDetail.meterReadingPlaceholder')}
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-neutral-900">Notes</label>
+                            <label className="block text-sm font-medium text-neutral-900">{i18n('pages.jobDetail.notes')}</label>
                             <textarea
                                 value={notes || job.notes || ''}
                                 onChange={(e) => setNotes(e.target.value)}
                                 rows={4}
                                 className={`mt-1 ${INPUT_CLASS}`}
-                                placeholder="Enter notes..."
+                                placeholder={i18n('pages.jobDetail.notesPlaceholder')}
                             />
                         </div>
                     </div>
@@ -227,7 +229,7 @@ export function JobDetailPage() {
             {/* Location Mini Map */}
             {job.order?.latitude && job.order?.longitude && (
                 <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                    <h2 className="mb-4 text-lg font-semibold">Location</h2>
+                    <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.location')}</h2>
                     <JobLocationMap lat={job.order.latitude} lng={job.order.longitude} />
                     <a
                         href={
@@ -240,7 +242,7 @@ export function JobDetailPage() {
                         className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
                     >
                         <ExternalLink className="h-4 w-4" />
-                        Open in Maps
+                        {i18n('pages.jobDetail.openInMaps')}
                     </a>
                 </div>
             )}

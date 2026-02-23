@@ -32,7 +32,7 @@ const ResetPassword: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             closePasswordReset();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to reset password'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = ({ password }: { password: string }) => {
@@ -62,7 +62,7 @@ const ResetPassword: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                         <PasswordInput
                             name="password"
                             autoFocus
-                            rules={{ required: 'Password is required', minLength: { value: 6, message: 'Min 6 characters' } }}
+                            rules={{ required: i18n('errors.required'), minLength: { value: 6, message: i18n('errors.minLength', { min: 6 }) } }}
                         />
                     </Field>
                     <Actions submitLabel={i18n('pages.users.form.passwordReset.title')} onCancel={handleCancel} isLoading={resetMutation.isPending} />

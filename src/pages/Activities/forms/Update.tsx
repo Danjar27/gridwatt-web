@@ -36,7 +36,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             setError(null);
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to update activity'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = ({ id, ...rest }: Activity) => {
@@ -59,12 +59,12 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <FormError message={error} />
                 <Form key={selected.id} onSubmit={handleSubmit} defaultValues={selected}>
                     <Field name="name" label={i18n('pages.activities.form.name')} required>
-                        <TextInput name="name" rules={{ required: 'Name is required' }} />
+                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="description" label={i18n('pages.activities.form.description')}>
                         <TextArea name="description" rows={3} />
                     </Field>
-                    <Actions submitLabel="Update" onCancel={handleCancel} isLoading={updateMutation.isPending} />
+                    <Actions submitLabel={i18n('literal.update')} onCancel={handleCancel} isLoading={updateMutation.isPending} />
                 </Form>
             </Window>
         </Modal>

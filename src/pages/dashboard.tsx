@@ -60,11 +60,11 @@ const DashboardPage = () => {
     const pendingOrders = [];
 
     const exportTargets = [
-        { value: 'orders', label: 'Orders' },
-        { value: 'jobs', label: 'Jobs' },
-        { value: 'materials', label: 'Materials' },
-        { value: 'activities', label: 'Activities' },
-        { value: 'seals', label: 'Seals' },
+        { value: 'orders', label: i18n('routes.orders') },
+        { value: 'jobs', label: i18n('routes.jobs') },
+        { value: 'materials', label: i18n('routes.materials') },
+        { value: 'activities', label: i18n('routes.activities') },
+        { value: 'seals', label: i18n('routes.seals') },
     ] as const;
 
     const orderFields = [
@@ -166,25 +166,25 @@ const DashboardPage = () => {
 
     const stats = [
         {
-            name: 'Total Jobs',
+            name: i18n('pages.dashboard.stats.totalJobs'),
             value: jobs.length,
             icon: Briefcase,
             color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
         },
         {
-            name: 'Pending Jobs',
+            name: i18n('pages.dashboard.stats.pendingJobs'),
             value: pendingJobs.length,
             icon: Clock,
             color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
         },
         {
-            name: 'Completed Jobs',
+            name: i18n('pages.dashboard.stats.completedJobs'),
             value: completedJobs.length,
             icon: CheckCircle,
             color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
         },
         {
-            name: 'Pending Orders',
+            name: i18n('pages.dashboard.stats.pendingOrders'),
             value: pendingOrders.length,
             icon: ClipboardList,
             color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
@@ -226,7 +226,7 @@ const DashboardPage = () => {
                                 subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
                             >
                                 {pendingJobs.length === 0 ? (
-                                    <p className="text-sm text-neutral-900 py-2">No pending jobs</p>
+                                    <p className="text-sm text-neutral-900 py-2">{i18n('pages.dashboard.empty.jobs')}</p>
                                 ) : (
                                     <div className="flex flex-col gap-2">
                                         {pendingJobs.slice(0, 5).map((job: Job) => (
@@ -255,7 +255,7 @@ const DashboardPage = () => {
                                 subtitle={i18n('pages.dashboard.pendingOrders.subtitle')}
                             >
                                 {pendingOrders.length === 0 ? (
-                                    <p className="text-sm text-neutral-900 py-2">No pending orders</p>
+                                    <p className="text-sm text-neutral-900 py-2">{i18n('pages.dashboard.empty.orders')}</p>
                                 ) : (
                                     <div className="flex flex-col gap-2">
                                         {pendingOrders.slice(0, 5).map((order: Order) => (
@@ -293,22 +293,22 @@ const DashboardPage = () => {
                             <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-3">
                                 <DatePicker
                                     id="export-start-date"
-                                    label="From"
+                                    label={i18n('pages.dashboard.export.from')}
                                     value={startDate}
                                     onChange={setStartDate}
-                                    placeholder="Start Date"
+                                    placeholder={i18n('pages.dashboard.export.startPlaceholder')}
                                 />
                                 <DatePicker
                                     id="export-end-date"
-                                    label="To"
+                                    label={i18n('pages.dashboard.export.to')}
                                     value={endDate}
                                     onChange={setEndDate}
                                     min={startDate || undefined}
-                                    placeholder="End Date"
+                                    placeholder={i18n('pages.dashboard.export.endPlaceholder')}
                                 />
                                 <div className="flex flex-col s425:col-span-2 s992:col-span-1">
                                     <label className="block text-sm font-medium mb-1" htmlFor="export-targets">
-                                        Data
+                                        {i18n('pages.dashboard.export.data')}
                                     </label>
                                     <select
                                         id="export-targets"
@@ -338,7 +338,7 @@ const DashboardPage = () => {
                                     className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
                                 >
                                     <Download className="h-4 w-4" />
-                                    {isExporting ? 'Exporting...' : 'Download CSV'}
+                                    {isExporting ? i18n('pages.dashboard.export.exporting') : i18n('pages.dashboard.export.download')}
                                 </button>
                             </div>
                         </div>

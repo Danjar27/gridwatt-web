@@ -55,7 +55,7 @@ const ViewTable = () => {
         },
         {
             id: 'actions',
-            header: 'Actions',
+            header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
                     <button onClick={() => handleEdit(row.original)} className="cursor-pointer">

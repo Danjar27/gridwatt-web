@@ -30,22 +30,22 @@ const ViewTable = () => {
     const columns: Array<ColumnDef<Tenant>> = [
         {
             accessorKey: 'code',
-            header: i18n('pages.tenants.table.code'),
+            header: i18n('pages.tenants.fields.code'),
             cell: ({ row }) => <div className="whitespace-nowrap font-medium">{row.original.code}</div>,
         },
         {
             accessorKey: 'name',
-            header: i18n('pages.tenants.table.name'),
+            header: i18n('pages.tenants.fields.name'),
             cell: ({ row }) => <div className="whitespace-nowrap font-medium">{row.original.name}</div>,
         },
         {
             id: 'users',
-            header: i18n('pages.tenants.table.users'),
+            header: i18n('pages.tenants.fields.users'),
             cell: ({ row }) => <div className="whitespace-nowrap text-sm">{row.original._count.users}</div>,
         },
         {
             id: 'orders',
-            header: i18n('pages.tenants.table.orders'),
+            header: i18n('pages.tenants.fields.orders'),
             cell: ({ row }) => <div className="whitespace-nowrap text-sm">{row.original._count.orders}</div>,
         },
         {
