@@ -77,7 +77,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     });
 
     const login = async (email: string, password: string) => {
-        await loginMutation.mutateAsync({ email, password });
+        return await loginMutation.mutateAsync({ email, password });
     };
 
     const logout = async () => {

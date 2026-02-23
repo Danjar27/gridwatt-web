@@ -1,11 +1,12 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { JobDetailPage } from '@pages/job-detail';
+import { createBrowserRouter } from 'react-router-dom';
+import { JobDetailPage } from '@pages/JobDetail/Page';
 
 import { OrderDetailPage } from '@pages/order-detail';
 import { OrdersImportPage } from '@pages/orders-import';
 
 import Protected from './blocks/Protected';
-import DashboardPage from '@pages/dashboard';
+import HomeRedirect from './blocks/HomeRedirect';
+import DashboardPage from '@pages/Dashboard/Page';
 import LoginPage from '@pages/Login';
 import Root from '@layouts/Root';
 import Dashboard from '@layouts/Dashboard';
@@ -26,7 +27,7 @@ const Router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <Navigate to="/dashboard" replace />,
+                element: <HomeRedirect />,
             },
             {
                 path: 'login',

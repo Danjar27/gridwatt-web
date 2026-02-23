@@ -1,4 +1,4 @@
-import { ClipboardTextIcon, PlusCircleIcon, UploadSimpleIcon } from '@phosphor-icons/react';
+import { PlusCircleIcon, TruckIcon, UploadSimpleIcon } from '@phosphor-icons/react';
 import { useAuthContext } from '@context/auth/context.ts';
 import { Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
@@ -164,7 +164,7 @@ const Inventory = () => {
             {viewMode === 'table' ? (
                 !isTechnician ? (
                     <Summary
-                        icon={ClipboardTextIcon}
+                        icon={TruckIcon}
                         title={i18n('pages.orders.summary.title')}
                         subtitle={i18n('pages.orders.summary.subtitle')}
                     >
@@ -172,7 +172,7 @@ const Inventory = () => {
                     </Summary>
                 ) : (
                     <Summary
-                        icon={ClipboardTextIcon}
+                        icon={TruckIcon}
                         title={i18n('pages.orders.summary.title')}
                         subtitle={i18n('pages.orders.summary.subtitle')}
                         legend={i18n('pages.orders.summary.total', { count: orders.length })}

@@ -324,7 +324,25 @@
             },
             "empty": {
                 "jobs": "Sin trabajos pendientes",
-                "orders": "Sin órdenes pendientes"
+                "orders": "Sin órdenes pendientes",
+                "technicians": "Sin datos de técnicos"
+            },
+            "charts": {
+                "completionRate": {
+                    "title": "Tasa de finalización",
+                    "subtitle": "Trabajos completados vs. pendientes",
+                    "completed": "Completados",
+                    "pending": "Pendientes"
+                },
+                "todayJobs": {
+                    "title": "Trabajos de hoy",
+                    "subtitle": "Trabajos completados en el día"
+                },
+                "topTechnicians": {
+                    "title": "Técnicos más productivos",
+                    "subtitle": "Por trabajos completados",
+                    "jobs": "{count} trabajos"
+                }
             },
             "export": {
                 "from": "Desde",
