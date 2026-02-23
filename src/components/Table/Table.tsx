@@ -4,7 +4,7 @@ import Header from './blocks/Header';
 import Body from './blocks/Body';
 import Pagination from './blocks/Pagination';
 
-function Table<T>({ table, isLoading, total }: TableProps<T>) {
+function Table<T>({ table, isLoading, total, filterConfig }: TableProps<T>) {
     if (isLoading) {
         return (
             <div className="flex h-32 items-center justify-center">
@@ -16,7 +16,7 @@ function Table<T>({ table, isLoading, total }: TableProps<T>) {
     return (
         <div className="overflow-x-auto">
             <table className="w-full min-w-150 overflow-x-auto">
-                <Header headerGroups={table.getHeaderGroups()} />
+                <Header headerGroups={table.getHeaderGroups()} filterConfig={filterConfig} />
                 <Body rows={table.getRowModel().rows} />
             </table>
             <Pagination table={table} total={total} />

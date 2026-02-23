@@ -1,4 +1,5 @@
-import type { ColumnDef, InitialTableState, PaginationState } from '@tanstack/react-table';
+import type { ColumnDef, ColumnFiltersState, InitialTableState, PaginationState, Updater } from '@tanstack/react-table';
+import type { FilterConfig } from '@components/Table/Table.interface';
 import type { PaginatedResponse } from '@/lib/api-client';
 
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
@@ -13,6 +14,7 @@ interface UseServerPaginationOptions<T> {
     defaultPageSize?: number;
     enabled?: boolean;
     extraParams?: Record<string, any>;
+    filterConfig?: FilterConfig;
 }
 
 export function useServerPagination<T>({
@@ -23,19 +25,40 @@ export function useServerPagination<T>({
     enabled = true,
     extraParams,
     initialState,
+    filterConfig,
 }: UseServerPaginationOptions<T>) {
     const [pagination, setPagination] = useState<PaginationState>({
         pageIndex: 0,
         pageSize: defaultPageSize,
     });
 
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+    const handleColumnFiltersChange = (updater: Updater<ColumnFiltersState>) => {
+        const next = typeof updater === 'function' ? updater(columnFilters) : updater;
+        setColumnFilters(next);
+        setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    };
+
+    const columnFilterParams = useMemo(() => {
+        if (!filterConfig) return {};
+        return columnFilters.reduce(
+            (acc, { id, value }) => {
+                const paramKey = filterConfig[id]?.paramKey ?? id;
+                return { ...acc, [paramKey]: value };
+            },
+            {} as Record<string, any>
+        );
+    }, [columnFilters, filterConfig]);
+
     const { data: response, isLoading } = useQuery({
-        queryKey: [...queryKey, pagination.pageIndex, pagination.pageSize, extraParams],
+        queryKey: [...queryKey, pagination.pageIndex, pagination.pageSize, extraParams, columnFilters],
         queryFn: () =>
             fetchFn({
                 limit: pagination.pageSize,
                 offset: pagination.pageIndex * pagination.pageSize,
                 ...extraParams,
+                ...columnFilterParams,
             }),
         enabled,
     });
@@ -48,10 +71,12 @@ export function useServerPagination<T>({
         data,
         columns,
         pageCount: Math.ceil(total / pagination.pageSize),
-        state: { pagination },
+        state: { pagination, columnFilters },
         onPaginationChange: setPagination,
+        onColumnFiltersChange: handleColumnFiltersChange,
         getCoreRowModel: getCoreRowModel(),
         manualPagination: true,
+        manualFiltering: true,
     });
 
     return { table, isLoading, total, data };

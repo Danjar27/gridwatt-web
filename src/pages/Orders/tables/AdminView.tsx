@@ -1,5 +1,6 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { Order } from '@lib/api-client.ts';
+import type { FilterConfig } from '@components/Table/Table.interface';
+import type { Order, User } from '@lib/api-client.ts';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
 import { EyeIcon, MapPinIcon, UserIcon } from '@phosphor-icons/react';
@@ -22,11 +23,7 @@ const getStatusColor = (status: string) => {
     }
 };
 
-interface AdminViewProps {
-    filterTechnicianId: number | null;
-}
-
-const AdminView = ({ filterTechnicianId }: AdminViewProps) => {
+const AdminView = () => {
     const i18n = useTranslations();
 
     const columns = useMemo<Array<ColumnDef<Order, any>>>(
@@ -118,19 +115,33 @@ const AdminView = ({ filterTechnicianId }: AdminViewProps) => {
         [i18n]
     );
 
-    const extraParams = useMemo(
-        () => (filterTechnicianId ? { technicianId: filterTechnicianId } : undefined),
-        [filterTechnicianId]
+    const filterConfig = useMemo<FilterConfig>(
+        () => ({
+            technician: {
+                paramKey: 'technicianId',
+                options: async () => {
+                    const response = await apiClient.getTechnicians();
+                    const technicians: Array<User> = Array.isArray(response)
+                        ? response
+                        : ((response as any)?.data ?? []);
+                    return technicians.map((t) => ({
+                        label: `${t.name} ${t.lastName}`,
+                        value: String(t.id),
+                    }));
+                },
+            },
+        }),
+        []
     );
 
     const { table, isLoading, total } = useServerPagination<Order>({
         queryKey: ['orders', 'all'],
         fetchFn: (params) => apiClient.getOrders(params),
         columns,
-        extraParams,
+        filterConfig,
     });
 
-    return <Table table={table} isLoading={isLoading} total={total} />;
+    return <Table table={table} isLoading={isLoading} total={total} filterConfig={filterConfig} />;
 };
 
 export default AdminView;
