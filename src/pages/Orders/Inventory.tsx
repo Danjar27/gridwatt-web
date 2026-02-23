@@ -1,6 +1,6 @@
 import { ClipboardTextIcon, PlusCircleIcon, UploadSimpleIcon } from '@phosphor-icons/react';
 import { useAuthContext } from '@context/auth/context.ts';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useMemo, useState } from 'react';
 
@@ -19,7 +19,6 @@ import Button from '@components/Button/Button';
 const Inventory = () => {
     const i18n = useTranslations();
 
-    const navigate = useNavigate();
     const { user } = useAuthContext();
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
@@ -182,12 +181,14 @@ const Inventory = () => {
                     </Summary>
                 )
             ) : (
-                <OrdersMap
-                    orders={isTechnician ? orders : allOrders}
-                    technicians={technicians}
-                    onBulkAssign={handleBulkAssign}
-                    isAssigning={bulkAssignMutation.isPending}
-                />
+                <div className="flex-1 min-h-0">
+                    <OrdersMap
+                        orders={isTechnician ? orders : allOrders}
+                        technicians={technicians}
+                        onBulkAssign={handleBulkAssign}
+                        isAssigning={bulkAssignMutation.isPending}
+                    />
+                </div>
             )}
         </div>
     );

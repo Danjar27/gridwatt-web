@@ -2,16 +2,18 @@ import type { FC, PropsWithChildren } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeftIcon } from '@phosphor-icons/react';
 import Connection from '@components/Toolbar/blocks/Connection';
+import { classnames } from '@utils/classnames.ts';
 
 interface Props {
     id: string;
     title: string;
     subtitle?: string;
     backRoute?: string;
+    className?: string;
 }
 
-const Page: FC<PropsWithChildren<Props>> = ({ id, children, title, subtitle, backRoute }) => (
-    <section id={id} className="relative flex flex-col gap-10">
+const Page: FC<PropsWithChildren<Props>> = ({ id, children, title, subtitle, backRoute, className }) => (
+    <section id={id} className={classnames('relative flex flex-col gap-10', className)}>
         <div className="flex flex-col gap-2">
             {backRoute && (
                 <Link
