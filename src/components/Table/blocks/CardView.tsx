@@ -21,16 +21,25 @@ function CardView<T>({ table }: CardViewProps<T>) {
         <div className="space-y-3 p-3">
             {rows.map((row) => {
                 const cells = row.getVisibleCells();
-                const primaryCell = cells[0];
-                const detailCells = cells.slice(1).filter((c) => c.column.id !== 'actions');
+                const selectCell = cells.find((c) => c.column.id === 'select');
+                const nonSelectCells = cells.filter((c) => c.column.id !== 'select');
+                const primaryCell = nonSelectCells[0];
+                const detailCells = nonSelectCells.slice(1).filter((c) => c.column.id !== 'actions');
                 const actionCell = cells.find((c) => c.column.id === 'actions');
 
                 return (
                     <div key={row.id} className="overflow-hidden rounded-lg border border-neutral-800">
                         {/* Primary identifier */}
                         {primaryCell && (
-                            <div className="border-b border-neutral-800 bg-neutral-600 px-4 py-3 text-sm font-semibold">
-                                {flexRender(primaryCell.column.columnDef.cell, primaryCell.getContext())}
+                            <div className="flex items-center justify-between gap-3 border-b border-neutral-800 bg-neutral-600 px-4 py-3 text-sm font-semibold">
+                                <div className="min-w-0 flex-1">
+                                    {flexRender(primaryCell.column.columnDef.cell, primaryCell.getContext())}
+                                </div>
+                                {selectCell && (
+                                    <div className="shrink-0">
+                                        {flexRender(selectCell.column.columnDef.cell, selectCell.getContext())}
+                                    </div>
+                                )}
                             </div>
                         )}
 

@@ -443,6 +443,9 @@
                 "issueDate": "Fecha de emisión",
                 "issueTime": "Hora de emisión"
             },
+            "selected": "{count} órdenes seleccionadas",
+            "importSelected": "Importar seleccionadas ({count})",
+            "removeFromBatch": "Eliminar del lote",
             "errors": {
                 "noFiles": "Selecciona al menos un archivo para procesar.",
                 "parseFiles": "Error al procesar los archivos.",

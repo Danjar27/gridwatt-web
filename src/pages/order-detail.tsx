@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import Button from '@components/Button/Button';
 
 export function OrderDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -69,7 +70,7 @@ export function OrderDetailPage() {
     return (
         <div className="space-y-6">
             <div className="flex items-center gap-4">
-                <Link to="/orders" className="flex items-center gap-1 text-neutral-900 hover:text-foreground">
+                <Link to="/orders" className="flex items-center gap-1 text-neutral-900 hover:text-primary-500">
                     <ArrowLeft className="h-4 w-4" />
                     {i18n('literal.back')}
                 </Link>
@@ -88,7 +89,8 @@ export function OrderDetailPage() {
                     <h2 className="mb-4 text-lg font-semibold">{i18n('pages.orderDetail.customerInfo')}</h2>
                     <div className="space-y-2 text-sm">
                         <p>
-                            <span className="text-neutral-900">{i18n('pages.orderDetail.name')}:</span> {order.firstName} {order.lastName}
+                            <span className="text-neutral-900">{i18n('pages.orderDetail.name')}:</span>{' '}
+                            {order.firstName} {order.lastName}
                         </p>
                         <p>
                             <span className="text-neutral-900">{i18n('pages.orderDetail.email')}:</span> {order.email}
@@ -97,10 +99,12 @@ export function OrderDetailPage() {
                             <span className="text-neutral-900">{i18n('pages.orderDetail.phone')}:</span> {order.phone}
                         </p>
                         <p>
-                            <span className="text-neutral-900">{i18n('pages.orderDetail.idNumber')}:</span> {order.idNumber}
+                            <span className="text-neutral-900">{i18n('pages.orderDetail.idNumber')}:</span>{' '}
+                            {order.idNumber}
                         </p>
                         <p>
-                            <span className="text-neutral-900">{i18n('pages.orderDetail.account')}:</span> {order.accountNumber}
+                            <span className="text-neutral-900">{i18n('pages.orderDetail.account')}:</span>{' '}
+                            {order.accountNumber}
                         </p>
                     </div>
                 </div>
@@ -129,10 +133,12 @@ export function OrderDetailPage() {
                     <h2 className="mb-4 text-lg font-semibold">{i18n('pages.orderDetail.orderDetails')}</h2>
                     <div className="space-y-2 text-sm">
                         <p>
-                            <span className="text-neutral-900">{i18n('pages.orderDetail.serviceType')}:</span> {order.serviceType}
+                            <span className="text-neutral-900">{i18n('pages.orderDetail.serviceType')}:</span>{' '}
+                            {order.serviceType}
                         </p>
                         <p>
-                            <span className="text-neutral-900">{i18n('pages.orderDetail.meterNumber')}:</span> {order.meterNumber}
+                            <span className="text-neutral-900">{i18n('pages.orderDetail.meterNumber')}:</span>{' '}
+                            {order.meterNumber}
                         </p>
                         <p>
                             <span className="text-neutral-900">{i18n('pages.orderDetail.status')}:</span>{' '}
@@ -146,7 +152,8 @@ export function OrderDetailPage() {
                         </p>
                         {order.observations && (
                             <p>
-                                <span className="text-neutral-900">{i18n('pages.orderDetail.observations')}:</span> {order.observations}
+                                <span className="text-neutral-900">{i18n('pages.orderDetail.observations')}:</span>{' '}
+                                {order.observations}
                             </p>
                         )}
                     </div>
@@ -185,13 +192,9 @@ export function OrderDetailPage() {
                                     </option>
                                 ))}
                             </select>
-                            <button
-                                onClick={handleAssign}
-                                disabled={!selectedTechnician || assignMutation.isPending}
-                                className="rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
-                            >
+                            <Button onClick={handleAssign} disabled={!selectedTechnician || assignMutation.isPending}>
                                 {i18n('pages.orderDetail.assign')}
-                            </button>
+                            </Button>
                         </div>
                     )}
                 </div>
@@ -211,7 +214,8 @@ export function OrderDetailPage() {
                                 <div>
                                     <p className="font-medium">Job #{job.id}</p>
                                     <p className="text-sm text-neutral-900">
-                                        {i18n('pages.orderDetail.started')}: {new Date(job.startDateTime).toLocaleString()}
+                                        {i18n('pages.orderDetail.started')}:{' '}
+                                        {new Date(job.startDateTime).toLocaleString()}
                                     </p>
                                 </div>
                                 <span

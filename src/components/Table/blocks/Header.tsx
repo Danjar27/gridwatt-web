@@ -9,7 +9,14 @@ const Header = ({ headerGroups, filterConfig }: HeaderProps) => (
             <tr
                 key={headerGroup.id}
                 className="grid border-b border-neutral-800 bg-neutral-600"
-                style={{ gridTemplateColumns: `repeat(${headerGroup.headers.length}, minmax(0, 1fr))` }}
+                style={{
+                    gridTemplateColumns: headerGroup.headers
+                        .map((h) => {
+                            const meta = h.column.columnDef.meta as { fixed?: boolean } | undefined;
+                            return meta?.fixed ? `${h.getSize()}px` : 'minmax(0, 1fr)';
+                        })
+                        .join(' '),
+                }}
             >
                 {headerGroup.headers.map((header) => {
                     const colFilter = filterConfig?.[header.column.id];
