@@ -6,9 +6,9 @@ import {
     ClipboardIcon,
     TruckIcon,
     ToolboxIcon,
-    StampIcon,
     UsersIcon,
     AddressBookIcon,
+    SealIcon,
 } from '@phosphor-icons/react';
 
 export const NAVIGATION_ITEMS: Array<Section> = [
@@ -26,8 +26,8 @@ export const NAVIGATION_ITEMS: Array<Section> = [
         ],
     },
     {
-        name: 'inventories',
-        label: 'sidebar.sections.inventories',
+        name: 'catalogs',
+        label: 'sidebar.sections.catalogs',
         routes: [
             {
                 name: 'orders',
@@ -46,8 +46,8 @@ export const NAVIGATION_ITEMS: Array<Section> = [
         ],
     },
     {
-        name: 'catalogs',
-        label: 'sidebar.sections.catalogs',
+        name: 'inventories',
+        label: 'sidebar.sections.inventories',
         routes: [
             {
                 name: 'activities',
@@ -63,7 +63,7 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 icon: ToolboxIcon,
                 roles: ['manager'],
             },
-            { name: 'seals', label: 'routes.seals', href: '/seals', icon: StampIcon, roles: ['manager'] },
+            { name: 'seals', label: 'routes.seals', href: '/seals', icon: SealIcon, roles: ['manager'] },
         ],
     },
     {

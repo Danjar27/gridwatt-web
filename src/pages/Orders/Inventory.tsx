@@ -38,7 +38,9 @@ const Inventory = () => {
         queryFn: () => apiClient.getTechnicians(),
         enabled: !isTechnician,
     });
-    const technicians: Array<User> = Array.isArray(technicianResponse) ? technicianResponse : ((technicianResponse as any)?.data ?? []);
+    const technicians: Array<User> = Array.isArray(technicianResponse)
+        ? technicianResponse
+        : ((technicianResponse as any)?.data ?? []);
 
     const { data: allOrdersResponse } = useQuery({
         queryKey: ['orders', 'all-map', filterTechnicianId],
@@ -74,9 +76,7 @@ const Inventory = () => {
                             ? {
                                   ...order,
                                   technicianId,
-                                  technician: tech
-                                      ? (tech as Order['technician'])
-                                      : order.technician,
+                                  technician: tech ? (tech as Order['technician']) : order.technician,
                               }
                             : order
                     ),
@@ -121,49 +121,45 @@ const Inventory = () => {
 
     return (
         <div className={`space-y-6 ${viewMode === 'map' ? 'flex flex-col flex-1 min-h-0' : ''}`}>
-            <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-2">
-                <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                     {!isTechnician && (
                         <>
-                            <Button icon={PlusCircleIcon} onClick={() => navigate('/orders/new')}>
+                            <Button as="a" icon={PlusCircleIcon} to="/orders/new">
                                 {i18n('pages.orders.action')}
                             </Button>
-                            <Link
-                                to="/orders/import"
-                                className="rounded-md border border-primary-500 px-3 py-2 text-sm font-medium text-primary-500 transition hover:bg-primary-500/10"
-                                data-testid="import-orders-btn"
-                            >
-                                <span className="flex items-center gap-2">
-                                    <UploadSimpleIcon weight="duotone" width={16} height={16} />
-                                    {i18n('pages.orders.import')}
-                                </span>
-                            </Link>
+                            <Button as="a" icon={UploadSimpleIcon} variant="outline" to="/orders/import">
+                                {i18n('pages.orders.import')}
+                            </Button>
+
+                            {viewMode === 'map' && (
+                                <select
+                                    className={INPUT_CLASS}
+                                    value={filterTechnicianId ?? ''}
+                                    onChange={(e) =>
+                                        setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)
+                                    }
+                                >
+                                    <option value="">{i18n('pages.orders.filter.allTechnicians')}</option>
+                                    {technicians.map((tech) => (
+                                        <option key={tech.id} value={tech.id}>
+                                            {tech.name} {tech.lastName}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
                         </>
                     )}
-                    <select
-                        className={INPUT_CLASS}
-                        value={viewMode}
-                        onChange={(e) => setViewMode(e.target.value as 'table' | 'map')}
-                        data-testid="view-mode-dropdown"
-                    >
-                        <option value="table">{i18n('pages.orders.viewMode.table')}</option>
-                        <option value="map">{i18n('pages.orders.viewMode.map')}</option>
-                    </select>
-                    {!isTechnician && (
-                        <select
-                            className={INPUT_CLASS}
-                            value={filterTechnicianId ?? ''}
-                            onChange={(e) => setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)}
-                        >
-                            <option value="">{i18n('pages.orders.filter.allTechnicians')}</option>
-                            {technicians.map((tech) => (
-                                <option key={tech.id} value={tech.id}>
-                                    {tech.name} {tech.lastName}
-                                </option>
-                            ))}
-                        </select>
-                    )}
                 </div>
+                <select
+                    className={INPUT_CLASS}
+                    value={viewMode}
+                    onChange={(e) => setViewMode(e.target.value as 'table' | 'map')}
+                    data-testid="view-mode-dropdown"
+                >
+                    <option value="table">{i18n('pages.orders.viewMode.table')}</option>
+                    <option value="map">{i18n('pages.orders.viewMode.map')}</option>
+                </select>
             </div>
 
             {viewMode === 'table' ? (
@@ -173,7 +169,7 @@ const Inventory = () => {
                         title={i18n('pages.orders.summary.title')}
                         subtitle={i18n('pages.orders.summary.subtitle')}
                     >
-                        <AdminView filterTechnicianId={filterTechnicianId} />
+                        <AdminView />
                     </Summary>
                 ) : (
                     <Summary
@@ -193,7 +189,6 @@ const Inventory = () => {
                     isAssigning={bulkAssignMutation.isPending}
                 />
             )}
-
         </div>
     );
 };

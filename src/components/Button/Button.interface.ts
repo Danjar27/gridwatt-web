@@ -1,4 +1,5 @@
 import type { Icon } from '@phosphor-icons/react';
+import type { To } from 'react-router-dom';
 
 export interface ButtonProps {
     /**
@@ -8,6 +9,8 @@ export interface ButtonProps {
      * @default solid
      */
     variant?: 'outline' | 'solid' | 'ghost';
+    as?: 'button' | 'a';
+    to?: To;
     icon?: Icon;
     onClick?: () => void;
     type?: 'button' | 'submit';

@@ -14,7 +14,8 @@
         "active": "Activo",
         "inactive": "Inactivo",
         "add": "Agregar",
-        "edit": "Editar"
+        "edit": "Editar",
+        "refresh": "Actualizar datos"
     },
     "common": {
         "confirmation": "Esta acción no se puede deshacer. ¿Deseas continuar?"
