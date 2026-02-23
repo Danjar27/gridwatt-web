@@ -3,7 +3,7 @@ import type { HeaderProps } from '@components/Table/Table.interface.ts';
 import { flexRender } from '@tanstack/react-table';
 import FilterPopover from './FilterPopover';
 
-const Header = ({ headerGroups, filterConfig }: HeaderProps) => (
+const Header = <T,>({ headerGroups, filterConfig }: HeaderProps<T>) => (
     <thead>
         {headerGroups.map((headerGroup) => (
             <tr

@@ -1,11 +1,10 @@
 import type { PaginationProps } from '../Table.interface';
-import type { FC } from 'react';
 
 import { useTranslations } from 'use-intl';
 
 import Stepper from '@components/Table/blocks/Stepper';
 
-const Pagination: FC<PaginationProps> = ({ table, total }) => {
+const Pagination = <T, _C>({ table, total }: PaginationProps<T>) => {
     const i18n = useTranslations();
 
     const { pageIndex, pageSize } = table.getState().pagination;
