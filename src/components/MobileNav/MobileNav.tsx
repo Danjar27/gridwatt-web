@@ -24,31 +24,34 @@ const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
     ];
 
     return (
-        <nav className="shrink-0 flex s992:hidden bg-neutral-500 border-t border-neutral-800 safe-bottom">
-            {navItems.map((item) => {
-                const isActive = location.pathname.startsWith(item.href);
+        <nav className="shrink-0 flex flex-col s992:hidden bg-neutral-500 border-t border-neutral-800">
+            <div className="flex">
+                {navItems.map((item) => {
+                    const isActive = location.pathname.startsWith(item.href);
 
-                return (
-                    <Link
-                        key={item.href}
-                        to={item.href}
-                        className={classnames(
-                            'flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs',
-                            isActive ? 'text-primary-500' : 'text-neutral-900'
-                        )}
-                    >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                    </Link>
-                );
-            })}
-            <button
-                onClick={onMenuOpen}
-                className="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs text-neutral-900 cursor-pointer"
-            >
-                <Menu className="h-5 w-5" />
-                <span>Menu</span>
-            </button>
+                    return (
+                        <Link
+                            key={item.href}
+                            to={item.href}
+                            className={classnames(
+                                'flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs',
+                                isActive ? 'text-primary-500' : 'text-neutral-900'
+                            )}
+                        >
+                            <item.icon className="h-5 w-5" />
+                            <span>{item.label}</span>
+                        </Link>
+                    );
+                })}
+                <button
+                    onClick={onMenuOpen}
+                    className="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs text-neutral-900 cursor-pointer"
+                >
+                    <Menu className="h-5 w-5" />
+                    <span>Menu</span>
+                </button>
+            </div>
+            <div className="safe-bottom" />
         </nav>
     );
 };

@@ -114,6 +114,15 @@
         position: relative;
     }
 
+    /* Prevent iOS Safari from auto-zooming on input focus */
+    @media screen and (max-width: 768px) {
+        input,
+        select,
+        textarea {
+            font-size: 16px !important;
+        }
+    }
+
     /* Focus ring for elements that shouldn't use absolute ::after (like inputs) */
     input:focus-visible,
     select:focus-visible,
