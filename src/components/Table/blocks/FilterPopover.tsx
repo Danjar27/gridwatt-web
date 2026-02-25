@@ -3,6 +3,8 @@ import type { FilterOption } from '@components/Table/Table.interface';
 import { FunnelSimpleIcon, CheckIcon } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { classnames } from '@utils/classnames.ts';
+import Visible from '@components/atoms/Visible.tsx';
 
 interface FilterPopoverProps {
     options: Array<FilterOption> | (() => Promise<Array<FilterOption>>);
@@ -19,7 +21,9 @@ const FilterPopover = ({ options: optionsDef, value, onChange }: FilterPopoverPr
     const [position, setPosition] = useState({ top: 0, left: 0 });
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            return;
+        }
         if (typeof optionsDef === 'function') {
             setLoading(true);
             optionsDef().then((opts) => {
@@ -29,30 +33,33 @@ const FilterPopover = ({ options: optionsDef, value, onChange }: FilterPopoverPr
         } else {
             setOptions(optionsDef);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     useEffect(() => {
-        if (!open || !buttonRef.current) return;
+        if (!open || !buttonRef.current) {
+            return;
+        }
         const rect = buttonRef.current.getBoundingClientRect();
         setPosition({ top: rect.bottom + 4, left: rect.left });
     }, [open]);
 
     useEffect(() => {
-        if (!open) return;
+        if (!open) {
+            return;
+        }
         const onMouseDown = (e: MouseEvent) => {
-            if (
-                !buttonRef.current?.contains(e.target as Node) &&
-                !popoverRef.current?.contains(e.target as Node)
-            ) {
+            if (!buttonRef.current?.contains(e.target as Node) && !popoverRef.current?.contains(e.target as Node)) {
                 setOpen(false);
             }
         };
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setOpen(false);
+            if (e.key === 'Escape') {
+                setOpen(false);
+            }
         };
         document.addEventListener('mousedown', onMouseDown);
         document.addEventListener('keydown', onKeyDown);
+
         return () => {
             document.removeEventListener('mousedown', onMouseDown);
             document.removeEventListener('keydown', onKeyDown);
@@ -72,9 +79,10 @@ const FilterPopover = ({ options: optionsDef, value, onChange }: FilterPopoverPr
                 ref={buttonRef}
                 type="button"
                 onClick={() => setOpen((o) => !o)}
-                className={`rounded p-0.5 transition-colors hover:bg-neutral-700 ${
-                    isActive ? 'text-primary-500' : 'text-neutral-900 opacity-50 hover:opacity-100'
-                }`}
+                className={classnames('rounded p-0.5 transition-colors hover:bg-neutral-700', {
+                    'text-primary-500': isActive,
+                    'text-neutral-900 opacity-50 hover:opacity-100': !isActive,
+                })}
             >
                 <FunnelSimpleIcon weight={isActive ? 'fill' : 'regular'} width={13} height={13} />
             </button>
@@ -90,9 +98,12 @@ const FilterPopover = ({ options: optionsDef, value, onChange }: FilterPopoverPr
                             <button
                                 type="button"
                                 onClick={() => select(undefined)}
-                                className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-700 ${
-                                    !value ? 'bg-primary-500/10 font-medium text-primary-500' : 'text-neutral-900'
-                                }`}
+                                className={classnames(
+                                    'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-700 text-primary-500',
+                                    {
+                                        'bg-neutral-700/50 font-medium ': !value,
+                                    }
+                                )}
                             >
                                 <span className="flex w-4 shrink-0 items-center justify-center">
                                     {!value && <CheckIcon weight="bold" width={11} height={11} />}
@@ -100,31 +111,32 @@ const FilterPopover = ({ options: optionsDef, value, onChange }: FilterPopoverPr
                                 —
                             </button>
 
-                            {loading ? (
+                            <Visible when={loading}>
                                 <div className="flex items-center justify-center py-4">
                                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-500 border-t-transparent" />
                                 </div>
-                            ) : (
-                                options.map((opt) => (
+                            </Visible>
+                            <Visible when={!loading}>
+                                {options.map((opt) => (
                                     <button
                                         key={opt.value}
                                         type="button"
                                         onClick={() => select(opt.value)}
-                                        className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-700 ${
-                                            value === opt.value
-                                                ? 'bg-primary-500/10 font-medium text-primary-500'
-                                                : 'text-neutral-900'
-                                        }`}
+                                        className={classnames(
+                                            'flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-neutral-700',
+                                            {
+                                                'bg-primary-500/10 font-medium text-primary-500': value === opt.value,
+                                                'text-primary-500': value !== opt.value,
+                                            }
+                                        )}
                                     >
                                         <span className="flex w-4 shrink-0 items-center justify-center">
-                                            {value === opt.value && (
-                                                <CheckIcon weight="bold" width={11} height={11} />
-                                            )}
+                                            {value === opt.value && <CheckIcon weight="bold" width={11} height={11} />}
                                         </span>
                                         {opt.label}
                                     </button>
-                                ))
-                            )}
+                                ))}
+                            </Visible>
                         </div>
                     </div>,
                     document.body

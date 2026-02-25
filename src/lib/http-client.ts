@@ -1,4 +1,6 @@
-import { addOfflineMutation, isOnline, type MutationType } from './offline-store';
+import type { OfflineMutationOptions, RequestOptions } from '@interfaces/api.interface.ts';
+
+import { addOfflineMutation, isOnline } from './offline-store';
 import { clearTokens, getTokens, refreshAccessToken } from '@lib/api/auth.ts';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
@@ -25,28 +27,6 @@ export function isNetworkError(error: unknown): boolean {
     );
 }
 
-// ---------------------------------------------------------------------------
-// Token store
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface RequestOptions extends RequestInit {
-    skipAuth?: boolean;
-}
-
-export interface OfflineMutationOptions {
-    type: MutationType;
-    action: 'create' | 'update' | 'delete' | 'toggle-active';
-    optimisticData?: unknown;
-}
-
-// ---------------------------------------------------------------------------
-// Core request function
-// ---------------------------------------------------------------------------
-
 export async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     const { skipAuth = false, ...fetchOptions } = options;
 
@@ -72,14 +52,13 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
             throw new Error('401: Unauthorized');
         }
 
-        // Try to refresh token
         try {
             const refreshed = await refreshAccessToken();
             if (refreshed) {
-                // Retry original request
+                const freshTokens = getTokens();
                 const retryHeaders: HeadersInit = {
                     ...headers,
-                    Authorization: `Bearer ${tokens?.accessToken}`,
+                    Authorization: `Bearer ${freshTokens?.accessToken}`,
                 };
                 const retryResponse = await fetch(`${API_URL}${endpoint}`, {
                     ...fetchOptions,
@@ -121,10 +100,6 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     return response.json();
 }
 
-// ---------------------------------------------------------------------------
-// Offline-aware mutation wrapper
-// ---------------------------------------------------------------------------
-
 export async function mutationRequest<T>(
     endpoint: string,
     options: RequestOptions,
@@ -164,10 +139,6 @@ export async function mutationRequest<T>(
         throw error;
     }
 }
-
-// ---------------------------------------------------------------------------
-// File upload helper
-// ---------------------------------------------------------------------------
 
 export async function uploadFile<T = unknown>(endpoint: string, formData: FormData): Promise<T> {
     const tokens = getTokens();

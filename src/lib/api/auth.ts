@@ -10,8 +10,6 @@ export const getTokens = (): Tokens | null => {
     const refreshToken = localStorage.getItem('refreshToken');
 
     if (!accessToken || !refreshToken) {
-        console.error('User is not authenticated. Access token or refresh token is missing.');
-
         return null;
     }
 

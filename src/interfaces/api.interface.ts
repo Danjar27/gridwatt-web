@@ -1,3 +1,5 @@
+import type { MutationType } from '@lib/offline-store.ts';
+
 export interface PaginatedQuery {
     /**
      * Number of items to return. Can be used along with {@link offset}
@@ -45,4 +47,18 @@ export interface PaginatedResponse<T> {
      * The actual items returned by the query.
      */
     data: Array<T>;
+}
+
+export interface RequestOptions extends RequestInit {
+    /**
+     * Whether to skip authentication. While the majority of endpoints require authentication,
+     * some endpoints can be accessed without authentication.
+     */
+    skipAuth?: boolean;
+}
+
+export interface OfflineMutationOptions {
+    type: MutationType;
+    action: 'create' | 'update' | 'delete' | 'toggle-active';
+    optimisticData?: unknown;
 }
