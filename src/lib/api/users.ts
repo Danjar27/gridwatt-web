@@ -1,76 +1,41 @@
+import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
 import type { User } from '@interfaces/user.interface.ts';
-import type { Tenant } from '@interfaces/tenant.interface.ts';
-import { request, mutationRequest, type PaginatedResponse } from '../http-client';
 
-export async function getUsers(params?: { limit?: number; offset?: number }) {
-    const qs = params ? `?limit=${params.limit ?? 10}&offset=${params.offset ?? 0}` : '';
+import { buildQueryParameters } from '@utils/common/parameters.ts';
+import { request, mutationRequest } from '../http-client';
 
-    return request<PaginatedResponse<User>>(`/users${qs}`);
-}
+export const getUsers = async (params?: PaginatedQuery) =>
+    request<PaginatedResponse<User>>(`/users${buildQueryParameters(params)}`);
 
-export async function getRoles() {
-    return request<Array<{ id: number; name: string }>>('/users/roles');
-}
+export const getRoles = async () =>
+    request<Array<{ id: number; name: string }>>('/users/roles');
 
-export async function createUser(data: Partial<User> & { password?: string; roleId: number; tenantId?: number }) {
-    const optimisticData: User = {
-        id: data.id || -Date.now(),
-        name: data.name || '',
-        lastName: data.lastName || '',
-        email: data.email || '',
-        phone: data.phone,
-        isActive: data.isActive ?? true,
-        role: { id: data.roleId, name: 'technician' },
-        tenantId: data.tenantId || 0,
-        tenant: data.tenant || ({} as Tenant),
-    };
-
-    return mutationRequest<User>(
+export const createUser = async (data: Partial<User> & { password?: string; roleId: number; tenantId?: number }) =>
+    mutationRequest<User>(
         '/users',
         { method: 'POST', body: JSON.stringify(data) },
-        { type: 'user', action: 'create', optimisticData }
+        { type: 'user', action: 'create', optimisticData: data }
     );
-}
 
-export async function updateUser(id: number, data: Partial<User> & { password?: string; roleId?: number }) {
-    const optimisticData: User = {
-        id,
-        name: data.name || '',
-        lastName: data.lastName || '',
-        email: data.email || '',
-        phone: data.phone,
-        isActive: data.isActive,
-        role: { id: data.roleId || 0, name: 'technician' },
-        tenantId: data.tenantId || 0,
-        tenant: data.tenant || ({} as Tenant),
-    };
-
-    return mutationRequest<User>(
+export const updateUser = async (id: number, data: Partial<User> & { password?: string; roleId?: number }) =>
+    mutationRequest<User>(
         `/users/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },
-        { type: 'user', action: 'update', optimisticData }
+        { type: 'user', action: 'update', optimisticData: { id, ...data } }
     );
-}
 
-export async function getTechnicians() {
-    return request<Array<User>>('/users/technicians');
-}
+export const getTechnicians = async () =>
+    request<Array<User>>('/users/technicians');
 
-export async function getProfile() {
-    return request<User>('/users/profile');
-}
+export const getProfile = async () =>
+    request<User>('/users/profile');
 
-export async function updateProfile(data: Partial<User>) {
-    return request<User>('/users/profile', {
-        method: 'PUT',
-        body: JSON.stringify(data),
-    });
-}
+export const updateProfile = async (data: Partial<User>) =>
+    request<User>('/users/profile', { method: 'PUT', body: JSON.stringify(data) });
 
-export async function deleteUser(id: number) {
-    return mutationRequest(
+export const deleteUser = async (id: number) =>
+    mutationRequest(
         `/users/${id}`,
         { method: 'DELETE' },
         { type: 'user', action: 'delete', optimisticData: { id } }
     );
-}

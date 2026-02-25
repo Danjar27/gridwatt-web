@@ -1,66 +1,36 @@
+import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
 import type { Material } from '@interfaces/material.interface.ts';
-import { request, mutationRequest, type PaginatedResponse } from '../http-client';
 
-export async function getMaterials(params?: { limit?: number; offset?: number; from?: string; to?: string }) {
-    const qs = params
-        ? `?${new URLSearchParams(
-              Object.entries(params)
-                  .filter(([, v]) => v !== null)
-                  .map(([k, v]) => [k, String(v)])
-          ).toString()}`
-        : '';
+import { buildQueryParameters } from '@utils/common/parameters.ts';
+import { request, mutationRequest } from '../http-client';
 
-    return request<PaginatedResponse<Material>>(`/materials${qs}`);
-}
+export const getMaterials = async (params?: PaginatedQuery) =>
+    request<PaginatedResponse<Material>>(`/materials${buildQueryParameters(params)}`);
 
-export async function createMaterial(data: Partial<Material>) {
-    const optimisticData: Material = {
-        id: data.id || `temp-${Date.now()}`,
-        name: data.name || '',
-        type: data.type || '',
-        unit: data.unit || '',
-        description: data.description,
-        allowsDecimals: data.allowsDecimals ?? false,
-        isActive: data.isActive ?? true,
-    };
-
-    return mutationRequest<Material>(
+export const createMaterial = async (data: Partial<Material>) =>
+    mutationRequest<Material>(
         '/materials',
         { method: 'POST', body: JSON.stringify(data) },
-        { type: 'material', action: 'create', optimisticData }
+        { type: 'material', action: 'create', optimisticData: data }
     );
-}
 
-export async function updateMaterial(id: string, data: Partial<Material>) {
-    const optimisticData: Material = {
-        id,
-        name: data.name || '',
-        type: data.type || '',
-        unit: data.unit || '',
-        description: data.description,
-        allowsDecimals: data.allowsDecimals ?? false,
-        isActive: data.isActive ?? true,
-    };
-
-    return mutationRequest<Material>(
+export const updateMaterial = async (id: string, data: Partial<Material>) =>
+    mutationRequest<Material>(
         `/materials/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },
-        { type: 'material', action: 'update', optimisticData }
+        { type: 'material', action: 'update', optimisticData: data }
     );
-}
 
-export async function deleteMaterial(id: string) {
-    return mutationRequest<void>(
+export const deleteMaterial = async (id: string) =>
+    mutationRequest<void>(
         `/materials/${id}`,
         { method: 'DELETE' },
         { type: 'material', action: 'delete', optimisticData: { id } }
     );
-}
 
-export async function toggleMaterialActive(id: string) {
-    return mutationRequest<Material>(
+export const toggleMaterialActive = async (id: string) =>
+    mutationRequest<Material>(
         `/materials/${id}/toggle-active`,
         { method: 'PATCH' },
         { type: 'material', action: 'toggle-active', optimisticData: { id } }
     );
-}

@@ -1,5 +1,5 @@
 import { uploadJobPhoto } from './api/jobs.ts';
-import { executeRequest } from './http-client';
+import { request } from './http-client';
 import {
     getPendingMutations,
     updateMutationStatus,
@@ -58,7 +58,7 @@ export async function syncPendingMutations(): Promise<{
 
             const endpoint = normalizeEndpoint(mutation.endpoint);
 
-            await executeRequest(endpoint, {
+            await request(endpoint, {
                 method: mutation.method,
                 ...(mutation.data ? { body: JSON.stringify(mutation.data) } : {}),
             });

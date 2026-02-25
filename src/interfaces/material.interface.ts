@@ -5,7 +5,6 @@ export interface Material {
     description?: string;
     unit: string;
     allowsDecimals: boolean;
-    isActive: boolean;
 }
 export interface WorkMaterial {
     id: string;

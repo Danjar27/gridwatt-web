@@ -1,6 +1,7 @@
 import type { ColumnDef, ColumnFiltersState, InitialTableState, PaginationState, Updater } from '@tanstack/react-table';
+import type { PaginatedResponse } from '@interfaces/api.interface.ts';
 import type { FilterConfig } from '@components/Table/Table.interface';
-import type { PaginatedResponse } from '@/lib/http-client';
+
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
@@ -40,10 +41,14 @@ export function useServerPagination<T>({
     };
 
     const columnFilterParams = useMemo(() => {
-        if (!filterConfig) return {};
+        if (!filterConfig) {
+            return {};
+        }
+
         return columnFilters.reduce(
             (acc, { id, value }) => {
                 const paramKey = filterConfig[id]?.paramKey ?? id;
+
                 return { ...acc, [paramKey]: value };
             },
             {} as Record<string, any>
