@@ -9,7 +9,7 @@ export const AuthContext = createContext<Context>({
 });
 
 export const AuthActions = createContext<Actions>({
-    login: async () => {},
+    login: async () => null,
     logout: async () => {},
 });
 

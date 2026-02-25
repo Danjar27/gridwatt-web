@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
-import type { Order, User } from '@lib/api-client.ts';
+import type {User} from "@interfaces/user.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
 
 interface OrdersMapProps {
     orders: Array<Order>;
@@ -191,7 +192,7 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
         markersRef.current.forEach((marker) => map.removeLayer(marker));
         markersRef.current.clear();
 
-        // Add new markers
+        // Create new markers
         markersData.forEach((markerData) => {
             const isSelected = selectedOrderIds.has(markerData.id);
             const color = markerData.icon === 'warning' ? '#f59e0b' : markerData.color || '#3b82f6';

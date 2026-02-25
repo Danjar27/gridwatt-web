@@ -1,9 +1,9 @@
-import type { LucideIcon } from 'lucide-react';
+import type { Icon } from '@phosphor-icons/react';
 
 export interface SummaryProps {
     title: string;
     subtitle?: string;
-    icon?: LucideIcon;
+    icon?: Icon;
     legend?: string;
     className?: string;
 }

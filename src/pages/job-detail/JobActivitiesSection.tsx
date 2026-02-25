@@ -1,29 +1,37 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Plus } from 'lucide-react';
-import { apiClient, type Job, type JobActivity } from '@/lib/api-client';
+import { getActivities } from '@lib/api/activities.ts';
+import { addJobActivity, removeJobActivity } from '@lib/api/jobs.ts';
+import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
+import Window from '@components/Modal/blocks/Window';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import { markJobPendingInLists } from './utils';
+import { useTranslations } from 'use-intl';
+import type { Job } from "@interfaces/job.interface.ts";
+import type { JobActivity } from '@interfaces/activity.interface.ts';
 
 interface Props {
     jobId: number;
-    jobActivities: JobActivity[];
+    jobActivities: Array<JobActivity>;
 }
 
 export function JobActivitiesSection({ jobId, jobActivities }: Props) {
     const queryClient = useQueryClient();
+    const i18n = useTranslations();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedActivityId, setSelectedActivityId] = useState('');
 
     const { data: activitiesData } = useQuery({
         queryKey: ['activities'],
-        queryFn: () => apiClient.getActivities({ limit: 200 }),
+        queryFn: () => getActivities({ limit: 200 }),
     });
 
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
-        mutationFn: (activityId: string) => apiClient.addJobActivity(jobId, activityId),
+        mutationFn: (activityId: string) => addJobActivity(jobId, activityId),
         onMutate: async (activityId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
@@ -34,11 +42,16 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 activityId,
                 activity: activity ?? undefined,
             };
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobActivities: [...(old.jobActivities ?? []), tempJobActivity] } : old
+                old ? { ...old, jobActivities: [...(old.jobActivities ?? []), tempJobActivity], ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             setSelectedActivityId('');
             setModalOpen(false);
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -47,18 +60,25 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
     const removeMutation = useMutation({
-        mutationFn: (jobActivityId: string) => apiClient.removeJobActivity(jobActivityId),
+        mutationFn: (jobActivityId: string) => removeJobActivity(jobActivityId),
         onMutate: async (jobActivityId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId) } : old
+                old ? { ...old, jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId), ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -67,7 +87,9 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
@@ -77,13 +99,13 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
             <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Activities</h2>
+                <h2 className="text-lg font-semibold">{i18n('pages.jobDetail.activities.title')}</h2>
                 <button
                     onClick={() => setModalOpen(true)}
                     className="flex items-center gap-1 rounded-lg bg-primary-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-600"
                 >
                     <Plus className="h-4 w-4" />
-                    Add
+                    {i18n('literal.add')}
                 </button>
             </div>
 
@@ -106,17 +128,18 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-neutral-900">No activities added</p>
+                <p className="text-center text-neutral-900">{i18n('pages.jobDetail.activities.empty')}</p>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add Activity">
+            <Modal id="job-activities-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+                <Window title={i18n('pages.jobDetail.activities.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
                     <select
                         value={selectedActivityId}
                         onChange={(e) => setSelectedActivityId(e.target.value)}
                         className={INPUT_CLASS}
                     >
-                        <option value="">Select an activity...</option>
+                        <option value="">{i18n('pages.jobDetail.activities.select')}</option>
                         {availableActivities.map((a) => (
                             <option key={a.id} value={a.id}>
                                 {a.name}
@@ -128,9 +151,10 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                         disabled={!selectedActivityId || addMutation.isPending}
                         className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
-                        Add
+                        {i18n('literal.add')}
                     </button>
                 </div>
+                </Window>
             </Modal>
         </div>
     );

@@ -193,6 +193,11 @@ export async function removeCacheItem(key: string): Promise<void> {
     await db.delete('cache', key);
 }
 
+export async function clearCache(): Promise<void> {
+    const db = await getDB();
+    await db.clear('cache');
+}
+
 // Sync status
 export function isOnline(): boolean {
     return navigator.onLine;

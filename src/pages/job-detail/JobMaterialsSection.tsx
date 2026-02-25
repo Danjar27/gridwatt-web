@@ -1,17 +1,25 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Plus } from 'lucide-react';
-import { apiClient, type Job, type WorkMaterial, type Material } from '@/lib/api-client';
+import { addJobMaterial, removeJobMaterial } from '@lib/api/jobs.ts';
+import { getMaterials } from '@lib/api/materials.ts';
+import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
+import Window from '@components/Modal/blocks/Window';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import { markJobPendingInLists } from './utils';
+import { useTranslations } from 'use-intl';
+import type { Job } from "@interfaces/job.interface.ts";
+import type { Material, WorkMaterial } from '@interfaces/material.interface.ts';
 
 interface Props {
     jobId: number;
-    workMaterials: WorkMaterial[];
+    workMaterials: Array<WorkMaterial>;
 }
 
 export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     const queryClient = useQueryClient();
+    const i18n = useTranslations();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMaterialId, setSelectedMaterialId] = useState('');
     const [quantity, setQuantity] = useState('');
@@ -19,14 +27,14 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
 
     const { data: materialsData } = useQuery({
         queryKey: ['materials'],
-        queryFn: () => apiClient.getMaterials({ limit: 200 }),
+        queryFn: () => getMaterials({ limit: 200 }),
     });
 
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
         mutationFn: ({ materialId, qty }: { materialId: string; qty: number }) =>
-            apiClient.addJobMaterial(jobId, materialId, qty),
+            addJobMaterial(jobId, materialId, qty),
         onMutate: async ({ materialId, qty }) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
@@ -38,13 +46,18 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 quantity: qty,
                 material: material ?? undefined,
             };
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial] } : old
+                old ? { ...old, workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial], ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             setSelectedMaterialId('');
             setQuantity('');
             setSelectedMaterial(null);
             setModalOpen(false);
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -53,18 +66,25 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
     const removeMutation = useMutation({
-        mutationFn: (workMaterialId: string) => apiClient.removeJobMaterial(workMaterialId),
+        mutationFn: (workMaterialId: string) => removeJobMaterial(workMaterialId),
         onMutate: async (workMaterialId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
+            const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId) } : old
+                old ? { ...old, workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId), ...(pendingSync ? { _pendingSync: true } : {}) } : old
             );
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
+
             return { previous };
         },
         onError: (_err, _data, context) => {
@@ -73,7 +93,9 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             }
         },
         onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
@@ -95,13 +117,13 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
             <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Materials</h2>
+                <h2 className="text-lg font-semibold">{i18n('pages.jobDetail.materials.title')}</h2>
                 <button
                     onClick={() => setModalOpen(true)}
                     className="flex items-center gap-1 rounded-lg bg-primary-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-600"
                 >
                     <Plus className="h-4 w-4" />
-                    Add
+                    {i18n('literal.add')}
                 </button>
             </div>
 
@@ -109,8 +131,8 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 <table className="w-full text-sm">
                     <thead>
                         <tr className="border-b border-neutral-800">
-                            <th className="py-2 text-left">Material</th>
-                            <th className="py-2 text-right">Quantity</th>
+                            <th className="py-2 text-left">{i18n('pages.jobDetail.materials.material')}</th>
+                            <th className="py-2 text-right">{i18n('pages.jobDetail.materials.quantity')}</th>
                             <th className="py-2 text-right w-10"></th>
                         </tr>
                     </thead>
@@ -135,17 +157,18 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                     </tbody>
                 </table>
             ) : (
-                <p className="text-center text-neutral-900">No materials added</p>
+                <p className="text-center text-neutral-900">{i18n('pages.jobDetail.materials.empty')}</p>
             )}
 
-            <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add Material">
+            <Modal id="job-materials-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+                <Window title={i18n('pages.jobDetail.materials.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
                     <select
                         value={selectedMaterialId}
                         onChange={(e) => handleMaterialChange(e.target.value)}
                         className={INPUT_CLASS}
                     >
-                        <option value="">Select a material...</option>
+                        <option value="">{i18n('pages.jobDetail.materials.select')}</option>
                         {availableMaterials.map((m) => (
                             <option key={m.id} value={m.id}>
                                 {m.name}
@@ -158,7 +181,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                         onChange={(e) => setQuantity(e.target.value)}
                         step={selectedMaterial?.allowsDecimals ? '0.01' : '1'}
                         min="0"
-                        placeholder="Quantity"
+                        placeholder={i18n('pages.jobDetail.materials.quantity')}
                         className={INPUT_CLASS}
                     />
                     <button
@@ -166,9 +189,10 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                         disabled={!selectedMaterialId || !quantity || Number(quantity) <= 0 || addMutation.isPending}
                         className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
-                        Add
+                        {i18n('literal.add')}
                     </button>
                 </div>
+                </Window>
             </Modal>
         </div>
     );

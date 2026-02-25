@@ -1,21 +1,24 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { JobsPage } from '@pages/jobs.tsx';
-import { JobDetailPage } from '@pages/job-detail.tsx';
+import { createBrowserRouter } from 'react-router-dom';
+import { JobDetailPage } from '@pages/JobDetail/Page';
 
-import { OrderDetailPage } from '@pages/order-detail.tsx';
-import { OrdersImportPage } from '@pages/orders-import.tsx';
+import { OrderDetailPage } from '@pages/order-detail';
+import { OrdersImportPage } from '@pages/orders-import';
 
-import Protected from './blocks/Protected.tsx';
-import DashboardPage from '@pages/dashboard.tsx';
-import LoginPage from '@pages/Login.tsx';
-import Root from '@layouts/Root.tsx';
-import Dashboard from '@layouts/Dashboard.tsx';
-import MaterialsPage from '@pages/Materials.tsx';
-import ActivitiesPage from '@pages/Activities.tsx';
-import SealsPage from '@pages/Seals.tsx';
-import ProfilePage from '@pages/Profile.tsx';
-import UsersPage from '@pages/Users.tsx';
-import OrdersPage from '@pages/Orders.tsx';
+import Protected from './blocks/Protected';
+import HomeRedirect from './blocks/HomeRedirect';
+import DashboardPage from '@pages/Dashboard/Page';
+import LoginPage from '@pages/Login';
+import Root from '@layouts/Root';
+import Dashboard from '@layouts/Dashboard';
+import MaterialsPage from '@pages/Materials/Page';
+import ActivitiesPage from '@pages/Activities/Page';
+import SealsPage from '@pages/Seals/Page';
+import ProfilePage from '@pages/Profile';
+import UsersPage from '@pages/Users/Page';
+import CreateOrderPage from '@pages/Orders/CreatePage';
+import OrdersPage from '@pages/Orders/Page';
+import JobsPage from '@pages/Jobs/Page';
+import TenantsPage from '@pages/Tenants/Page';
 
 const Router = createBrowserRouter([
     {
@@ -24,7 +27,7 @@ const Router = createBrowserRouter([
         children: [
             {
                 index: true,
-                element: <Navigate to="/dashboard" replace />,
+                element: <HomeRedirect />,
             },
             {
                 path: 'login',
@@ -53,6 +56,10 @@ const Router = createBrowserRouter([
                                 element: <OrdersPage />,
                             },
                             {
+                                path: 'orders/new',
+                                element: <CreateOrderPage />,
+                            },
+                            {
                                 path: 'orders/import',
                                 element: <OrdersImportPage />,
                             },
@@ -75,6 +82,10 @@ const Router = createBrowserRouter([
                             {
                                 path: 'users',
                                 element: <UsersPage />,
+                            },
+                            {
+                                path: 'tenants',
+                                element: <TenantsPage />,
                             },
                             {
                                 path: 'profile',

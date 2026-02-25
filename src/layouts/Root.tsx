@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom';
 
-import OfflineProvider from '@context/offline/provider.tsx';
+import OfflineProvider from '@context/offline/provider';
 
 const Root = () => (
     <OfflineProvider>

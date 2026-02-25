@@ -1,4 +1,4 @@
-import type { User } from '@lib/api-client.ts';
+import type {User} from "@interfaces/user.interface.ts";
 
 export interface Context {
     /**
@@ -19,7 +19,7 @@ export interface Actions {
      * Attempts to log in a user with the provided email and password.
      * On success, updates the user state.
      */
-    login: (email: string, password: string) => Promise<void>;
+    login: (email: string, password: string) => Promise<User | null>;
     /**
      * Logs out the current user and resets the user state.
      */

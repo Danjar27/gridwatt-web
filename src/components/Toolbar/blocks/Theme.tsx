@@ -1,20 +1,21 @@
+import { MoonStarsIcon, SunIcon } from '@phosphor-icons/react';
 import { useTheme } from '@hooks/useTheme.ts';
-import { Moon, Sun } from 'lucide-react';
-import Visible from '@components/atoms/Visible.tsx';
+
+import Visible from '@components/atoms/Visible';
 
 const Theme = () => {
     const [theme, toggleTheme] = useTheme();
 
     return (
         <button
-            className="cursor-pointer hover:bg-neutral-700 p-2 bg-neutral-600 flex justify-center items-center rounded-lg"
+            className="cursor-pointer hover:bg-neutral-500 p-2 flex justify-center items-center rounded-lg"
             onClick={toggleTheme}
         >
             <Visible when={theme === 'dark'}>
-                <Moon />
+                <MoonStarsIcon width={24} height={24} weight="duotone" />
             </Visible>
             <Visible when={theme === 'light'}>
-                <Sun />
+                <SunIcon width={24} height={24} weight="duotone" />
             </Visible>
         </button>
     );

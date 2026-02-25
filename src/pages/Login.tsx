@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
-import Logo from '@components/atoms/Logo.tsx';
+import Logo from '@components/atoms/Logo';
 import { useAuthActions, useAuthContext } from '@context/auth/context.ts';
 
 const LoginPage = () => {
@@ -24,10 +24,12 @@ const LoginPage = () => {
         setError(null);
 
         try {
-            await login(email, password);
-            navigate('/dashboard', { replace: true });
+            const user = await login(email, password);
+            const role = user?.role?.name;
+            const destination = role === 'admin' ? '/tenants' : role === 'technician' ? '/jobs' : '/dashboard';
+            navigate(destination, { replace: true });
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Login failed');
+            setError(err instanceof Error ? err.message : i18n('errors.common'));
         }
     };
 

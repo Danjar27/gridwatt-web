@@ -3,14 +3,14 @@ import type { FC } from 'react';
 
 import { classnames } from '@utils/classnames.ts';
 
-import Theme from './blocks/Theme.tsx';
-import Connection from './blocks/Connection.tsx';
-import Logout from './blocks/Logout.tsx';
+import Theme from './blocks/Theme';
+import Logout from '@components/Toolbar/blocks/Logout';
+import Refresh from '@components/Toolbar/blocks/Refresh';
 
 const Toolbar: FC<ToolbarProps> = ({ className }) => (
-    <div className={classnames('flex gap-5', className)}>
-        <div className="flex bg-neutral-500 w-full rounded-lg justify-center items-center p-5 gap-5 border border-neutral-800">
-            <Connection />
+    <div className={classnames('flex gap-2', className)}>
+        <div className="flex w-full rounded-lg justify-center items-center gap-3">
+            <Refresh />
             <Theme />
             <Logout />
         </div>

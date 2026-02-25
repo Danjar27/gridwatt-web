@@ -1,0 +1,31 @@
+{
+    "id": "0",
+    "index": 0,
+    "original": {
+        "id": 3,
+        "tenantId": 1,
+        "roleId": 3,
+        "name": "alex",
+        "lastName": "andrade",
+        "email": "alex@example.com",
+        "phone": "123123",
+        "isActive": true,
+        "lastLoginAt": "2026-02-21T06:45:11.518Z",
+        "role": { "id": 3, "name": "manager" },
+        "tenant": {
+            "id": 1,
+            "name": "Default Tenant",
+            "slug": "default",
+            "isActive": true,
+            "createdAt": "2026-02-20T16:58:51.980Z",
+            "updatedAt": "2026-02-20T16:58:51.980Z"
+        }
+    },
+    "depth": 0,
+    "_valuesCache": {},
+    "_uniqueValuesCache": {},
+    "subRows": [],
+    "columnFilters": {},
+    "columnFiltersMeta": {},
+    "_groupingValuesCache": {}
+}

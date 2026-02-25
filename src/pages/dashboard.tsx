@@ -1,17 +1,21 @@
-import type { Job, Order } from '@lib/api-client';
-
 import { Briefcase, ClipboardList, CheckCircle, Clock, Download, LayoutDashboard } from 'lucide-react';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@lib/api-client';
+import { getActivities } from '@lib/api/activities.ts';
+import { getJobs, getMyJobs } from '@lib/api/jobs.ts';
+import { getMaterials } from '@lib/api/materials.ts';
+import { getMyOrders, getOrders } from '@lib/api/orders.ts';
+import { getSeals } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
 import DatePicker from '@components/DatePicker/DatePicker';
-import Summary from '@components/Summary/Summary.tsx';
+import Summary from '@components/Summary/Summary';
 import Papa from 'papaparse';
-import Page from '@layouts/Page.tsx';
+import Page from '@layouts/Page';
+import type {Order} from "@interfaces/order.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 
 const DashboardPage = () => {
     const i18n = useTranslations();
@@ -19,44 +23,47 @@ const DashboardPage = () => {
 
     const userRole = user?.role?.name;
     const isTechnician = userRole === 'technician';
-    const isAdmin = userRole === 'admin' || userRole === 'manager';
+    const isManager = userRole === 'manager';
+    const isAdminRole = userRole === 'admin';
 
     const { data: jobs = [] } = useQuery<Array<Job>, Error>({
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
             if (isTechnician) {
-                return await apiClient.getMyJobs();
+                return await getMyJobs();
             } else {
-                const res = await apiClient.getJobs();
+                const res = await getJobs();
 
                 return res.data;
             }
         },
+        enabled: !isAdminRole,
     });
 
     const { data: orders = [] } = useQuery<Array<Order>, Error>({
         queryKey: ['orders', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
             if (isTechnician) {
-                return await apiClient.getMyOrders();
+                return await getMyOrders();
             } else {
-                const res = await apiClient.getOrders();
+                const res = await getOrders();
 
                 return res.data;
             }
         },
+        enabled: !isAdminRole,
     });
 
-    const pendingJobs = jobs.filter((j: Job) => j.jobStatus !== 'completed');
-    const completedJobs = jobs.filter((j: Job) => j.jobStatus === 'completed');
-    const pendingOrders = orders.filter((o: Order) => o.orderStatus === 'pending');
+    const pendingJobs = jobs.filter((j) => j.jobStatus !== 'completed');
+    const completedJobs = jobs.filter((j) => j.jobStatus === 'completed');
+    const pendingOrders = orders.filter((o) => o.status === 'pending');
 
     const exportTargets = [
-        { value: 'orders', label: 'Orders' },
-        { value: 'jobs', label: 'Jobs' },
-        { value: 'materials', label: 'Materials' },
-        { value: 'activities', label: 'Activities' },
-        { value: 'seals', label: 'Seals' },
+        { value: 'orders', label: i18n('routes.orders') },
+        { value: 'jobs', label: i18n('routes.jobs') },
+        { value: 'materials', label: i18n('routes.materials') },
+        { value: 'activities', label: i18n('routes.activities') },
+        { value: 'seals', label: i18n('routes.seals') },
     ] as const;
 
     const orderFields = [
@@ -118,23 +125,23 @@ const DashboardPage = () => {
                 let fields: Array<string> = [];
 
                 if (target === 'orders') {
-                    const response = await apiClient.getOrders(dateParams);
+                    const response = await getOrders(dateParams);
                     data = response.data;
                     fields = orderFields;
                 } else if (target === 'jobs') {
-                    const response = await apiClient.getJobs(dateParams);
+                    const response = await getJobs(dateParams);
                     data = response.data;
                     fields = jobFields;
                 } else if (target === 'materials') {
-                    const response = await apiClient.getMaterials(dateParams);
+                    const response = await getMaterials(dateParams);
                     data = response.data;
                     fields = materialFields;
                 } else if (target === 'activities') {
-                    const response = await apiClient.getActivities(dateParams);
+                    const response = await getActivities(dateParams);
                     data = response.data;
                     fields = activityFields;
                 } else if (target === 'seals') {
-                    const response = await apiClient.getSeals(dateParams);
+                    const response = await getSeals(dateParams);
                     data = response.data;
                     fields = sealFields;
                 }
@@ -158,25 +165,25 @@ const DashboardPage = () => {
 
     const stats = [
         {
-            name: 'Total Jobs',
+            name: i18n('pages.dashboard.stats.totalJobs'),
             value: jobs.length,
             icon: Briefcase,
             color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
         },
         {
-            name: 'Pending Jobs',
+            name: i18n('pages.dashboard.stats.pendingJobs'),
             value: pendingJobs.length,
             icon: Clock,
             color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400',
         },
         {
-            name: 'Completed Jobs',
+            name: i18n('pages.dashboard.stats.completedJobs'),
             value: completedJobs.length,
             icon: CheckCircle,
             color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400',
         },
         {
-            name: 'Pending Orders',
+            name: i18n('pages.dashboard.stats.pendingOrders'),
             value: pendingOrders.length,
             icon: ClipboardList,
             color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
@@ -190,88 +197,92 @@ const DashboardPage = () => {
             subtitle={i18n('pages.dashboard.subtitle', { name: user?.name || '' })}
         >
             <div className="flex flex-col gap-4 s768:gap-6 s992:gap-10">
-                <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-4">
-                    {stats.map((stat) => (
-                        <div
-                            key={stat.name}
-                            className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 s768:p-5"
-                        >
-                            <div className="flex items-center gap-3">
-                                <div className={`rounded-lg p-2.5 ${stat.color}`}>
-                                    <stat.icon className="h-5 w-5" />
+                {!isAdminRole && (
+                    <>
+                        <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-4">
+                            {stats.map((stat) => (
+                                <div
+                                    key={stat.name}
+                                    className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4 s768:p-5"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`rounded-lg p-2.5 ${stat.color}`}>
+                                            <stat.icon className="h-5 w-5" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-neutral-900">{stat.name}</p>
+                                            <p className="text-2xl font-bold">{stat.value}</p>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-neutral-900">{stat.name}</p>
-                                    <p className="text-2xl font-bold">{stat.value}</p>
-                                </div>
-                            </div>
+                            ))}
                         </div>
-                    ))}
-                </div>
 
-                <div className="grid gap-4 s768:gap-6 s992:grid-cols-2">
-                    <Summary
-                        icon={Briefcase}
-                        title={i18n('pages.dashboard.recentJobs.title')}
-                        subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
-                    >
-                        {pendingJobs.length === 0 ? (
-                            <p className="text-sm text-neutral-900 py-2">No pending jobs</p>
-                        ) : (
-                            <div className="flex flex-col gap-2">
-                                {pendingJobs.slice(0, 5).map((job: Job) => (
-                                    <div
-                                        key={job.id}
-                                        className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
-                                    >
-                                        <div>
-                                            <p className="text-sm font-medium">Job #{job.id}</p>
-                                            <p className="text-xs text-neutral-900">
-                                                {job.order?.serviceType} - {job.order?.meterNumber}
-                                            </p>
-                                        </div>
-                                        <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
-                                            {job.jobStatus || 'In Progress'}
-                                        </span>
+                        <div className="grid gap-4 s768:gap-6 s992:grid-cols-2">
+                            <Summary
+                                icon={Briefcase}
+                                title={i18n('pages.dashboard.recentJobs.title')}
+                                subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
+                            >
+                                {pendingJobs.length === 0 ? (
+                                    <p className="text-sm text-neutral-900 py-2">{i18n('pages.dashboard.empty.jobs')}</p>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        {pendingJobs.slice(0, 5).map((job: Job) => (
+                                            <div
+                                                key={job.id}
+                                                className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-medium">Job #{job.id}</p>
+                                                    <p className="text-xs text-neutral-900">
+                                                        {job.order?.serviceType} - {job.order?.meterNumber}
+                                                    </p>
+                                                </div>
+                                                <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                                                    {job.jobStatus || 'In Progress'}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </Summary>
+                                )}
+                            </Summary>
 
-                    <Summary
-                        icon={ClipboardList}
-                        title={i18n('pages.dashboard.pendingOrders.title')}
-                        subtitle={i18n('pages.dashboard.pendingOrders.subtitle')}
-                    >
-                        {pendingOrders.length === 0 ? (
-                            <p className="text-sm text-neutral-900 py-2">No pending orders</p>
-                        ) : (
-                            <div className="flex flex-col gap-2">
-                                {pendingOrders.slice(0, 5).map((order: Order) => (
-                                    <div
-                                        key={order.id}
-                                        className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
-                                    >
-                                        <div>
-                                            <p className="text-sm font-medium">
-                                                {order.firstName} {order.lastName}
-                                            </p>
-                                            <p className="text-xs text-neutral-900">
-                                                {order.serviceType} - {order.meterNumber}
-                                            </p>
-                                        </div>
-                                        <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
-                                            {order.orderStatus}
-                                        </span>
+                            <Summary
+                                icon={ClipboardList}
+                                title={i18n('pages.dashboard.pendingOrders.title')}
+                                subtitle={i18n('pages.dashboard.pendingOrders.subtitle')}
+                            >
+                                {pendingOrders.length === 0 ? (
+                                    <p className="text-sm text-neutral-900 py-2">{i18n('pages.dashboard.empty.orders')}</p>
+                                ) : (
+                                    <div className="flex flex-col gap-2">
+                                        {pendingOrders.slice(0, 5).map((order: Order) => (
+                                            <div
+                                                key={order.id}
+                                                className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-600/40 p-3"
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        {order.firstName} {order.lastName}
+                                                    </p>
+                                                    <p className="text-xs text-neutral-900">
+                                                        {order.serviceType} - {order.meterNumber}
+                                                    </p>
+                                                </div>
+                                                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                                                    {order.status}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </Summary>
-                </div>
+                                )}
+                            </Summary>
+                        </div>
+                    </>
+                )}
 
-                {isAdmin && (
+                {isManager && (
                     <Summary
                         icon={LayoutDashboard}
                         title={i18n('pages.dashboard.dataExport.title')}
@@ -281,22 +292,22 @@ const DashboardPage = () => {
                             <div className="grid gap-4 s425:grid-cols-2 s992:grid-cols-3">
                                 <DatePicker
                                     id="export-start-date"
-                                    label="From"
+                                    label={i18n('pages.dashboard.export.from')}
                                     value={startDate}
                                     onChange={setStartDate}
-                                    placeholder="Start Date"
+                                    placeholder={i18n('pages.dashboard.export.startPlaceholder')}
                                 />
                                 <DatePicker
                                     id="export-end-date"
-                                    label="To"
+                                    label={i18n('pages.dashboard.export.to')}
                                     value={endDate}
                                     onChange={setEndDate}
                                     min={startDate || undefined}
-                                    placeholder="End Date"
+                                    placeholder={i18n('pages.dashboard.export.endPlaceholder')}
                                 />
                                 <div className="flex flex-col s425:col-span-2 s992:col-span-1">
                                     <label className="block text-sm font-medium mb-1" htmlFor="export-targets">
-                                        Data
+                                        {i18n('pages.dashboard.export.data')}
                                     </label>
                                     <select
                                         id="export-targets"
@@ -326,7 +337,7 @@ const DashboardPage = () => {
                                     className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
                                 >
                                     <Download className="h-4 w-4" />
-                                    {isExporting ? 'Exporting...' : 'Download CSV'}
+                                    {isExporting ? i18n('pages.dashboard.export.exporting') : i18n('pages.dashboard.export.download')}
                                 </button>
                             </div>
                         </div>

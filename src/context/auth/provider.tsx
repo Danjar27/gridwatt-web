@@ -1,33 +1,36 @@
 import type { Actions, Context, Credentials } from '@context/auth/interface.ts';
 import type { FC, PropsWithChildren } from 'react';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useIsRestoring } from '@tanstack/react-query';
 import { AuthContext, AuthActions } from './context.ts';
-import { apiClient } from '@lib/api-client.ts';
+import { clearTokens, getMe, getTokens, login as apiLogin, logout as apiLogout } from '@lib/api/auth.ts';
 import { prefetchTechnicianData } from '@lib/technician-prefetch.ts';
 import { useMemo, useEffect, useRef } from 'react';
 
 const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const queryClient = useQueryClient();
+    const isRestoring = useIsRestoring();
 
     const { data: user = null, isLoading } = useQuery({
         queryKey: ['auth', 'me'],
         queryFn: async () => {
-            const hasTokens = apiClient.loadTokens();
-            if (!hasTokens) {
+            const tokens = getTokens();
+
+            if (tokens === null) {
                 return null;
             }
             try {
-                const me = await apiClient.getMe();
+                const me = await getMe();
                 if (me?.role?.name === 'technician') {
                     prefetchTechnicianData().catch(() => {});
                 }
+
                 return me;
             } catch (error) {
                 // Only clear tokens if we are sure the session is invalid (401)
                 if (error instanceof Error && error.message.includes('401')) {
                     console.error('Initial session restoration failed: Unauthorized');
-                    apiClient.clearTokens();
+                    clearTokens();
 
                     return null;
                 }
@@ -51,9 +54,10 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const loginMutation = useMutation({
         mutationFn: async ({ email, password }: Credentials) => {
-            const { user: userData } = await apiClient.login(email, password);
+            await apiLogin(email, password);
 
-            return userData;
+            // Fetch full user data (with tenant info) right after login
+            return getMe();
         },
         onSuccess: (userData) => {
             queryClient.setQueryData(['auth', 'me'], userData);
@@ -65,7 +69,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const logoutMutation = useMutation({
         mutationFn: async () => {
-            await apiClient.logout();
+            await apiLogout();
         },
         onSuccess: () => {
             queryClient.setQueryData(['auth', 'me'], null);
@@ -73,9 +77,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         },
     });
 
-    const login = async (email: string, password: string) => {
-        await loginMutation.mutateAsync({ email, password });
-    };
+    const login = async (email: string, password: string) => await loginMutation.mutateAsync({ email, password });
 
     const logout = async () => {
         await logoutMutation.mutateAsync();
@@ -87,12 +89,16 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         if (user?.role?.name === 'technician' && navigator.onLine) {
             // Run immediately on mount/change, then every 10 minutes
             prefetchTechnicianData().catch(() => {});
-            intervalRef.current = setInterval(() => {
-                if (navigator.onLine) {
-                    prefetchTechnicianData().catch(() => {});
-                }
-            }, 10 * 60 * 1000);
+            intervalRef.current = setInterval(
+                () => {
+                    if (navigator.onLine) {
+                        prefetchTechnicianData().catch(() => {});
+                    }
+                },
+                10 * 60 * 1000
+            );
         }
+
         return () => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -104,10 +110,10 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const context: Context = useMemo(
         () => ({
             user: user,
-            isLoading: isLoading || loginMutation.isPending || logoutMutation.isPending,
+            isLoading: isLoading || isRestoring || loginMutation.isPending || logoutMutation.isPending,
             isAuthenticated: user !== null,
         }),
-        [user, isLoading, loginMutation.isPending, logoutMutation.isPending]
+        [user, isLoading, isRestoring, loginMutation.isPending, logoutMutation.isPending]
     );
 
     const actions: Actions = useMemo(

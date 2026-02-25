@@ -1,9 +1,10 @@
 import type { Role } from '@interfaces/user.interface.ts';
-import type { LucideIcon } from 'lucide-react';
+import type { Icon } from '@phosphor-icons/react';
 
 export interface ItemProps {
     className?: string;
     href: string;
+    onClick?: () => void;
 }
 
 export interface SectionProps {
@@ -26,7 +27,7 @@ interface Route {
     name: string;
     href: string;
     label: string;
-    icon: LucideIcon;
+    icon: Icon;
     roles?: Array<Role>;
 }
 
