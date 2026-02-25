@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
-import type {User} from "@interfaces/user.interface.ts";
+import type { User } from '@interfaces/user.interface.ts';
 import type { Order } from '@interfaces/order.interface.ts';
 
 interface OrdersMapProps {
@@ -223,12 +223,92 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
         });
     }, [markersData, selectedOrderIds, createIcon]);
 
-    // Toggle cursor style when selection mode changes
     useEffect(() => {
-        if (!mapRef.current) {
+        const container = mapRef.current;
+        const map = leafletMapRef.current;
+        if (!container) {
             return;
         }
-        mapRef.current.style.cursor = selectMode ? 'crosshair' : '';
+
+        container.style.cursor = selectMode ? 'crosshair' : '';
+
+        if (!map) {
+            return;
+        }
+
+        if (!selectMode) {
+            map.dragging.enable();
+
+            return;
+        }
+
+        // Disable drag so touch doesn't pan the map while drawing
+        map.dragging.disable();
+
+        const getLatLng = (touch: Touch): L.LatLng => {
+            const rect = container.getBoundingClientRect();
+            const point = L.point(touch.clientX - rect.left, touch.clientY - rect.top);
+
+            return map.containerPointToLatLng(point);
+        };
+
+        const onTouchStart = (e: TouchEvent) => {
+            e.preventDefault();
+            const latlng = getLatLng(e.touches[0]);
+            selStartRef.current = latlng;
+            selRectRef.current = L.rectangle(
+                [
+                    [latlng.lat, latlng.lng],
+                    [latlng.lat, latlng.lng],
+                ],
+                { color: '#6366f1', weight: 2, fillOpacity: 0.15, dashArray: '6 3' }
+            ).addTo(map);
+        };
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (!selStartRef.current || !selRectRef.current) {
+                return;
+            }
+            e.preventDefault();
+            const latlng = getLatLng(e.touches[0]);
+            selRectRef.current.setBounds(L.latLngBounds(selStartRef.current, latlng));
+        };
+
+        const onTouchEnd = () => {
+            if (!selStartRef.current || !selRectRef.current) {
+                return;
+            }
+            const bounds = selRectRef.current.getBounds();
+            map.removeLayer(selRectRef.current);
+            selRectRef.current = null;
+            selStartRef.current = null;
+
+            const idsInBounds: Array<number> = [];
+            markersRef.current.forEach((marker, id) => {
+                if (bounds.contains(marker.getLatLng())) {
+                    idsInBounds.push(id);
+                }
+            });
+            if (idsInBounds.length > 0) {
+                setSelectedOrderIds((prev) => {
+                    const next = new Set(prev);
+                    idsInBounds.forEach((id) => next.add(id));
+
+                    return next;
+                });
+            }
+        };
+
+        container.addEventListener('touchstart', onTouchStart, { passive: false });
+        container.addEventListener('touchmove', onTouchMove, { passive: false });
+        container.addEventListener('touchend', onTouchEnd);
+
+        return () => {
+            container.removeEventListener('touchstart', onTouchStart);
+            container.removeEventListener('touchmove', onTouchMove);
+            container.removeEventListener('touchend', onTouchEnd);
+            map.dragging.enable();
+        };
     }, [selectMode]);
 
     const handleAssign = () => {

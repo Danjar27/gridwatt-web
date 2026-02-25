@@ -1,54 +1,83 @@
 import type { FC } from 'react';
+import type { Icon } from '@phosphor-icons/react';
 
-import { LayoutDashboard, ClipboardList, Briefcase, User, Menu } from 'lucide-react';
+import { HouseIcon, TruckIcon, BagSimpleIcon, AddressBookIcon, UsersIcon, UserIcon } from '@phosphor-icons/react';
+import { Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { classnames } from '@utils/classnames.ts';
+import { useTranslations } from 'use-intl';
+
 import { useAuthContext } from '@context/auth/context.ts';
+import { classnames } from '@utils/classnames.ts';
 
 interface MobileNavProps {
     onMenuOpen: () => void;
 }
 
+interface NavItem {
+    href: string;
+    icon: Icon;
+    label: string;
+}
+
+const PINNED_BY_ROLE: Record<string, Array<NavItem>> = {
+    admin: [
+        { href: '/tenants', icon: AddressBookIcon, label: 'routes.tenants' },
+        { href: '/users', icon: UsersIcon, label: 'routes.users' },
+    ],
+    manager: [
+        { href: '/dashboard', icon: HouseIcon, label: 'routes.dashboard' },
+        { href: '/orders', icon: TruckIcon, label: 'routes.orders' },
+    ],
+    technician: [
+        { href: '/jobs', icon: BagSimpleIcon, label: 'routes.jobs' },
+        { href: '/profile', icon: UserIcon, label: 'routes.profile' },
+    ],
+};
+
 const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
     const location = useLocation();
     const { user } = useAuthContext();
-    const userRole = user?.role?.name;
-    const isTechnician = userRole === 'technician';
+    const i18n = useTranslations();
 
-    const navItems = [
-        { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-        ...(isTechnician
-            ? [{ href: '/jobs', icon: Briefcase, label: 'Jobs' }]
-            : [{ href: '/orders', icon: ClipboardList, label: 'Orders' }]),
-        { href: '/profile', icon: User, label: 'Profile' },
-    ];
+    if (!user) {
+        return null;
+    }
+
+    const items = PINNED_BY_ROLE[user.role?.name] ?? [];
 
     return (
-        <nav className="shrink-0 flex s992:hidden bg-neutral-500 border-t border-neutral-800 safe-bottom">
-            {navItems.map((item) => {
-                const isActive = location.pathname.startsWith(item.href);
+        <nav className="shrink-0 flex flex-col s992:hidden bg-neutral-500 border-t border-neutral-800 h-20">
+            <div className="flex">
+                {items.map((item) => {
+                    const isActive = location.pathname.startsWith(item.href);
+                    const Icon = item.icon;
 
-                return (
-                    <Link
-                        key={item.href}
-                        to={item.href}
-                        className={classnames(
-                            'flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs',
-                            isActive ? 'text-primary-500' : 'text-neutral-900'
-                        )}
-                    >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.label}</span>
-                    </Link>
-                );
-            })}
-            <button
-                onClick={onMenuOpen}
-                className="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs text-neutral-900 cursor-pointer"
-            >
-                <Menu className="h-5 w-5" />
-                <span>Menu</span>
-            </button>
+                    return (
+                        <Link
+                            key={item.href}
+                            to={item.href}
+                            className={classnames(
+                                'flex flex-1 flex-col items-center justify-center gap-1 py-3 text-xs',
+                                {
+                                    'text-primary-500 dark:text-neutral-900': isActive,
+                                    'text-neutral-900/50': !isActive,
+                                }
+                            )}
+                        >
+                            <Icon width={20} height={20} weight="duotone" />
+                            <span>{i18n(item.label)}</span>
+                        </Link>
+                    );
+                })}
+                <button
+                    onClick={onMenuOpen}
+                    className="flex flex-1 flex-col items-center justify-center gap-1 py-3 text-xs text-neutral-900 cursor-pointer"
+                >
+                    <Menu className="h-5 w-5" />
+                    <span>{i18n('sidebar.menu')}</span>
+                </button>
+            </div>
+            <div className="safe-bottom" />
         </nav>
     );
 };

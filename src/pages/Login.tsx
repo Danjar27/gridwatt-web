@@ -38,12 +38,12 @@ const LoginPage = () => {
     return (
         <div className="flex flex-col h-dvh items-center justify-center bg-primary-500 p-4">
             <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
-                <div className="mb-12 gap-2 flex flex-col items-center">
+                <div className="mb-12 gap-2 flex flex-col items-center text-primary-500">
                     <div className="flex h-16 w-16 items-center justify-center">
-                        <Logo className="text-main-500" />
+                        <Logo />
                     </div>
-                    <h1 className="text-2xl font-bold text-gray-900">{i18n('brand')}</h1>
-                    <p className="text-sm text-gray-500">{i18n('auth.label')}</p>
+                    <h1 className="text-2xl font-bold">{i18n('brand')}</h1>
+                    <p className="text-sm text-neutral-900">{i18n('auth.label')}</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">

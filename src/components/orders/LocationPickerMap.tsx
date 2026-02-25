@@ -16,8 +16,22 @@ export function LocationPickerMap({ lat, lng, onChange }: LocationPickerMapProps
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
 
+    const pinIcon = L.divIcon({
+        className: '',
+        html: `<div style="
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            background-color: #FF6F43;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+        "></div>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+        popupAnchor: [0, -14],
+    });
+
     const createMarker = (map: L.Map, latlng: L.LatLng): L.Marker => {
-        const marker = L.marker(latlng, { draggable: true }).addTo(map);
+        const marker = L.marker(latlng, { draggable: true, icon: pinIcon }).addTo(map);
         marker.bindTooltip('Arrastra para ajustar', { permanent: false, direction: 'top' });
         marker.on('dragend', () => {
             const pos = marker.getLatLng();

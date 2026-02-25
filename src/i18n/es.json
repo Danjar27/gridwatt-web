@@ -35,9 +35,11 @@
         "seals": "Sellos",
         "users": "Usuarios",
         "jobs": "Trabajos",
-        "tenants": "Contratos"
+        "tenants": "Contratos",
+        "profile": "Perfil"
     },
     "sidebar": {
+        "menu": "Menú",
         "sections": {
             "general": "General",
             "catalogs": "Catálogos",
