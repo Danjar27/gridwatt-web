@@ -14,7 +14,7 @@ import { ShieldIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthContext } from '@context/auth/context.ts';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { getRoles, updateUser } from '@lib/api/users.ts';
 import { useTranslations } from 'use-intl';
 import { useState, useMemo } from 'react';
 
@@ -30,7 +30,7 @@ const ChangeRole: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     const { data: roles = [] } = useQuery({
         queryKey: ['roles'],
-        queryFn: () => apiClient.getRoles(),
+        queryFn: () => getRoles(),
     });
 
     const roleOptions = useMemo(
@@ -40,7 +40,7 @@ const ChangeRole: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     const roleMutation = useMutation({
         mutationFn: ({ id, roleId }: { id: number; roleId: number }) =>
-            apiClient.updateUser(id, { roleId }),
+            updateUser(id, { roleId }),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['users'] });
             closeRoleChange();

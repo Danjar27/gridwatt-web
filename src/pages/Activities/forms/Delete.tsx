@@ -11,7 +11,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { ClipboardIcon, SealWarningIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { deleteActivity } from '@lib/api/activities.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Activity} from "@interfaces/activity.interface.ts";
@@ -24,7 +24,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const deleteMutation = useMutation({
-        mutationFn: (id: Activity['id']) => apiClient.deleteActivity(id),
+        mutationFn: (id: Activity['id']) => deleteActivity(id),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
             closeDelete();

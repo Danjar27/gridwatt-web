@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import { updateProfile } from '@lib/api/users.ts';
 import { useState } from 'react';
 import { User, Save } from 'lucide-react';
 import { useAuthContext } from '@context/auth/context.ts';
@@ -22,7 +22,7 @@ const ProfilePage = () => {
 
     const updateMutation = useMutation({
         mutationFn: (data: { name?: string; lastName?: string; phone?: string; password?: string }) =>
-            apiClient.updateProfile(data),
+            updateProfile(data),
         onSuccess: () => {
             setSuccess(i18n('pages.profile.success'));
             queryClient.invalidateQueries({ queryKey: ['profile'] });

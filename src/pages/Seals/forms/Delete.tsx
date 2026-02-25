@@ -11,7 +11,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { SealIcon, SealWarningIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { deleteSeal } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Seal} from "@interfaces/seal.interface.ts";
@@ -24,7 +24,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const deleteMutation = useMutation({
-        mutationFn: (id: Seal['id']) => apiClient.deleteSeal(id),
+        mutationFn: (id: Seal['id']) => deleteSeal(id),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['seals'] });
             closeDelete();

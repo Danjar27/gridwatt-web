@@ -3,7 +3,8 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { useQuery, useMutation, useQueryClient, useIsRestoring } from '@tanstack/react-query';
 import { AuthContext, AuthActions } from './context.ts';
-import { apiClient } from '@lib/api-client.ts';
+import { getMe, login as apiLogin, logout as apiLogout } from '@lib/api/auth.ts';
+import { clearTokens, loadTokens } from '@lib/http-client';
 import { prefetchTechnicianData } from '@lib/technician-prefetch.ts';
 import { useMemo, useEffect, useRef } from 'react';
 
@@ -14,12 +15,12 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const { data: user = null, isLoading } = useQuery({
         queryKey: ['auth', 'me'],
         queryFn: async () => {
-            const hasTokens = apiClient.loadTokens();
+            const hasTokens = loadTokens();
             if (!hasTokens) {
                 return null;
             }
             try {
-                const me = await apiClient.getMe();
+                const me = await getMe();
                 if (me?.role?.name === 'technician') {
                     prefetchTechnicianData().catch(() => {});
                 }
@@ -29,7 +30,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
                 // Only clear tokens if we are sure the session is invalid (401)
                 if (error instanceof Error && error.message.includes('401')) {
                     console.error('Initial session restoration failed: Unauthorized');
-                    apiClient.clearTokens();
+                    clearTokens();
 
                     return null;
                 }
@@ -53,10 +54,10 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const loginMutation = useMutation({
         mutationFn: async ({ email, password }: Credentials) => {
-            await apiClient.login(email, password);
+            await apiLogin(email, password);
 
             // Fetch full user data (with tenant info) right after login
-            return apiClient.getMe();
+            return getMe();
         },
         onSuccess: (userData) => {
             queryClient.setQueryData(['auth', 'me'], userData);
@@ -68,7 +69,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
 
     const logoutMutation = useMutation({
         mutationFn: async () => {
-            await apiClient.logout();
+            await apiLogout();
         },
         onSuccess: () => {
             queryClient.setQueryData(['auth', 'me'], null);
@@ -76,9 +77,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         },
     });
 
-    const login = async (email: string, password: string) => {
-        return await loginMutation.mutateAsync({ email, password });
-    };
+    const login = async (email: string, password: string) => await loginMutation.mutateAsync({ email, password });
 
     const logout = async () => {
         await logoutMutation.mutateAsync();

@@ -16,7 +16,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { PackageIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { createMaterial } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Material} from "@interfaces/material.interface.ts";
@@ -29,7 +29,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const createMutation = useMutation({
-        mutationFn: (data: Partial<Material>) => apiClient.createMaterial(data),
+        mutationFn: (data: Partial<Material>) => createMaterial(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['materials'] });
             onSubmit?.();

@@ -1,6 +1,7 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import { assignOrder, getOrder } from '@lib/api/orders.ts';
+import { getTechnicians } from '@lib/api/users.ts';
 import { MapPin, User, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthContext } from '@context/auth/context.ts';
@@ -24,13 +25,13 @@ export function OrderDetailPage() {
 
     const { data: order, isLoading } = useQuery({
         queryKey: ['order', id],
-        queryFn: () => apiClient.getOrder(Number(id)),
+        queryFn: () => getOrder(Number(id)),
         enabled: !!id,
     });
 
     const { data: techniciansResponse } = useQuery({
         queryKey: ['technicians'],
-        queryFn: () => apiClient.getTechnicians(),
+        queryFn: () => getTechnicians(),
         enabled: canAssign,
     });
     const technicians = Array.isArray(techniciansResponse)
@@ -38,7 +39,7 @@ export function OrderDetailPage() {
         : ((techniciansResponse as any)?.data ?? []);
 
     const assignMutation = useMutation({
-        mutationFn: (technicianId: number | null) => apiClient.assignOrder(Number(id), technicianId),
+        mutationFn: (technicianId: number | null) => assignOrder(Number(id), technicianId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['order', id] });
             queryClient.invalidateQueries({ queryKey: ['orders'] });

@@ -3,7 +3,8 @@ import type { FilterConfig } from '@components/Table/Table.interface';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
 import { EyeIcon, MapPinIcon, UserIcon } from '@phosphor-icons/react';
-import { apiClient } from '@lib/api-client.ts';
+import { getOrders } from '@lib/api/orders.ts';
+import { getTechnicians } from '@lib/api/users.ts';
 import { useTranslations } from 'use-intl';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
@@ -121,7 +122,7 @@ const AdminView = () => {
             technician: {
                 paramKey: 'technicianId',
                 options: async () => {
-                    const response = await apiClient.getTechnicians();
+                    const response = await getTechnicians();
                     const technicians: Array<User> = Array.isArray(response)
                         ? response
                         : ((response as any)?.data ?? []);
@@ -138,7 +139,7 @@ const AdminView = () => {
 
     const { table, isLoading, total } = useServerPagination<Order>({
         queryKey: ['orders', 'all'],
-        fetchFn: (params) => apiClient.getOrders(params),
+        fetchFn: (params) => getOrders(params),
         columns,
         filterConfig,
     });

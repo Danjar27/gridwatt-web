@@ -1,7 +1,6 @@
 import type { ColumnDef, ColumnFiltersState, InitialTableState, PaginationState, Updater } from '@tanstack/react-table';
 import type { FilterConfig } from '@components/Table/Table.interface';
-import type { PaginatedResponse } from '@/lib/api-client';
-
+import type { PaginatedResponse } from '@/lib/http-client';
 import { useReactTable, getCoreRowModel } from '@tanstack/react-table';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';

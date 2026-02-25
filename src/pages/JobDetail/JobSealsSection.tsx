@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from '@phosphor-icons/react';
-import { apiClient } from '@lib/api-client';
+import { addJobSeal, removeJobSeal } from '@lib/api/jobs.ts';
+import { getSeals } from '@lib/api/seals.ts';
 import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
@@ -24,13 +25,13 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
 
     const { data: sealsData } = useQuery({
         queryKey: ['seals'],
-        queryFn: () => apiClient.getSeals({ limit: 200 }),
+        queryFn: () => getSeals({ limit: 200 }),
     });
 
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
-        mutationFn: (sealId: string) => apiClient.addJobSeal(jobId, sealId),
+        mutationFn: (sealId: string) => addJobSeal(jobId, sealId),
         onMutate: async (sealId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
@@ -66,7 +67,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     });
 
     const removeMutation = useMutation({
-        mutationFn: (jobSealId: string) => apiClient.removeJobSeal(jobSealId),
+        mutationFn: (jobSealId: string) => removeJobSeal(jobSealId),
         onMutate: async (jobSealId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);

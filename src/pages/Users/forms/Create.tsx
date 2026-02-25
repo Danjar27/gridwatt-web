@@ -18,7 +18,8 @@ import { UsersIcon } from '@phosphor-icons/react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAuthContext } from '@context/auth/context.ts';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { getTenants } from '@lib/api/tenants.ts';
+import { createUser, getRoles } from '@lib/api/users.ts';
 import { useTranslations } from 'use-intl';
 import { useState, useMemo } from 'react';
 
@@ -34,12 +35,12 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     const { data: roles = [] } = useQuery({
         queryKey: ['roles'],
-        queryFn: () => apiClient.getRoles(),
+        queryFn: () => getRoles(),
     });
 
     const { data: tenantsData } = useQuery({
         queryKey: ['tenants'],
-        queryFn: () => apiClient.getTenants({ limit: 100, offset: 0 }),
+        queryFn: () => getTenants({ limit: 100, offset: 0 }),
         enabled: isAdmin,
     });
 
@@ -54,7 +55,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     );
 
     const createMutation = useMutation({
-        mutationFn: (data: any) => apiClient.createUser(data),
+        mutationFn: (data: any) => createUser(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['users'] });
             await queryClient.invalidateQueries({ queryKey: ['tenants'] });

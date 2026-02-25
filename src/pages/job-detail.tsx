@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import { getJob, updateJob } from '@lib/api/jobs.ts';
 import { isOnline } from '@/lib/offline-store';
 import { useState, useEffect, useRef } from 'react';
 import { Save, MapPin, AlertCircle, ExternalLink } from 'lucide-react';
@@ -28,13 +28,13 @@ export function JobDetailPage() {
 
     const { data: job, isLoading } = useQuery({
         queryKey: ['job', id],
-        queryFn: () => apiClient.getJob(Number(id)),
+        queryFn: () => getJob(Number(id)),
         enabled: !!id,
     });
 
     const updateMutation = useMutation({
         mutationFn: (data: { notes?: string; meterReading?: string; jobStatus?: string }) =>
-            apiClient.updateJob(Number(id), data),
+            updateJob(Number(id), data),
         onMutate: async (data) => {
             await queryClient.cancelQueries({ queryKey: ['job', id] });
             await queryClient.cancelQueries({ queryKey: ['jobs'] });

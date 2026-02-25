@@ -2,7 +2,11 @@ import { Briefcase, ChartBar, ChartDonut, ClipboardText, Download, SquaresFour }
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@lib/api-client';
+import { getActivities } from '@lib/api/activities.ts';
+import { getJobs, getMyJobs } from '@lib/api/jobs.ts';
+import { getMaterials } from '@lib/api/materials.ts';
+import { getMyOrders, getOrders } from '@lib/api/orders.ts';
+import { getSeals } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
@@ -170,9 +174,9 @@ function Inventory() {
     const { data: rawJobs } = useQuery({
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
-            if (isTechnician) {return await apiClient.getMyJobs();}
+            if (isTechnician) {return await getMyJobs();}
 
-            return await apiClient.getJobs();
+            return await getJobs();
         },
         enabled: !isAdmin,
     });
@@ -180,9 +184,9 @@ function Inventory() {
     const { data: rawOrders } = useQuery({
         queryKey: ['orders', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
-            if (isTechnician) {return await apiClient.getMyOrders();}
+            if (isTechnician) {return await getMyOrders();}
 
-            return await apiClient.getOrders();
+            return await getOrders();
         },
         enabled: !isAdmin,
     });
@@ -234,19 +238,19 @@ function Inventory() {
                 let fields: Array<string> = [];
 
                 if (target === 'orders') {
-                    data = (await apiClient.getOrders(dateParams)).data;
+                    data = (await getOrders(dateParams)).data;
                     fields = orderFields;
                 } else if (target === 'jobs') {
-                    data = (await apiClient.getJobs(dateParams)).data;
+                    data = (await getJobs(dateParams)).data;
                     fields = jobFields;
                 } else if (target === 'materials') {
-                    data = (await apiClient.getMaterials(dateParams)).data;
+                    data = (await getMaterials(dateParams)).data;
                     fields = materialFields;
                 } else if (target === 'activities') {
-                    data = (await apiClient.getActivities(dateParams)).data;
+                    data = (await getActivities(dateParams)).data;
                     fields = activityFields;
                 } else if (target === 'seals') {
-                    data = (await apiClient.getSeals(dateParams)).data;
+                    data = (await getSeals(dateParams)).data;
                     fields = sealFields;
                 }
 

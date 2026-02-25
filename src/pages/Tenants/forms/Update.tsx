@@ -14,7 +14,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context';
 import { useMutation } from '@tanstack/react-query';
 import { AddressBookIcon } from '@phosphor-icons/react';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { updateTenant } from '@lib/api/tenants.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Tenant} from "@interfaces/tenant.interface.ts";
@@ -28,7 +28,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: UpdateQuery<Tenant>) => apiClient.updateTenant(Number(id), data),
+        mutationFn: ({ id, data }: UpdateQuery<Tenant>) => updateTenant(Number(id), data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['tenants'] });
             closeUpdate();

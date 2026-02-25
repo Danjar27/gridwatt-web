@@ -2,7 +2,8 @@ import { BriefcaseIcon, EyeIcon, MapPinIcon } from '@phosphor-icons/react';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
-import { apiClient } from '@lib/api-client.ts';
+import { getJobs, getMyJobs } from '@lib/api/jobs.ts';
+import { getTechnicians } from '@lib/api/users.ts';
 import { useQuery } from '@tanstack/react-query';
 import { Link, Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
@@ -33,7 +34,7 @@ const Inventory = () => {
 
     const { data: technicianResponse } = useQuery({
         queryKey: ['technicians'],
-        queryFn: () => apiClient.getTechnicians(),
+        queryFn: () => getTechnicians(),
         enabled: !isTechnician,
     });
     const technicians = Array.isArray(technicianResponse) ? technicianResponse : ((technicianResponse as any)?.data ?? []);
@@ -42,9 +43,9 @@ const Inventory = () => {
         queryKey: ['jobs', isTechnician ? 'my' : 'all', filterTechnicianId],
         queryFn: async () => {
             if (isTechnician) {
-                return await apiClient.getMyJobs();
+                return await getMyJobs();
             } else {
-                const res = await apiClient.getJobs({
+                const res = await getJobs({
                     limit: 10000,
                     ...(filterTechnicianId ? { technicianId: filterTechnicianId } : {}),
                 });

@@ -3,7 +3,7 @@ import { CheckCircle, UploadCloud, AlertTriangle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useReactTable, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import type { ColumnDef, RowSelectionState, PaginationState } from '@tanstack/react-table';
-import { apiClient } from '@/lib/api-client';
+import { commitOrdersImport, previewOrdersImport } from '@lib/api/orders.ts';
 import { classnames } from '@utils/classnames.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
@@ -57,7 +57,7 @@ export function OrdersImportPage() {
         setIsParsing(true);
         setCommitResult(null);
         try {
-            const result = await apiClient.previewOrdersImport(files);
+            const result = await previewOrdersImport(files);
             setPreview(result);
         } catch (err) {
             setError(err instanceof Error ? err.message : i18n('pages.ordersImport.errors.parseFiles'));
@@ -97,7 +97,7 @@ export function OrdersImportPage() {
         setError(null);
         setIsCommitting(true);
         try {
-            const response = await apiClient.commitOrdersImport(validOrders.map((o) => o.data));
+            const response = await commitOrdersImport(validOrders.map((o) => o.data));
             setCommitResult(response.createdCount);
             queryClient.invalidateQueries({ queryKey: ['orders'] });
 

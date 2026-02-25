@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from '../utils/context.ts';
-import { apiClient } from '@lib/api-client.ts';
+import { getMaterials } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
 
 import Table from '@components/Table/Table';
@@ -76,7 +76,7 @@ const ViewTable = () => {
 
     const { table, isLoading, total } = useServerPagination<Material>({
         queryKey: ['materials'],
-        fetchFn: (params) => apiClient.getMaterials(params),
+        fetchFn: (params) => getMaterials(params),
         columns,
     });
 

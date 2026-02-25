@@ -13,7 +13,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context';
 import { AddressBookIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { createTenant } from '@lib/api/tenants.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Tenant} from "@interfaces/tenant.interface.ts";
@@ -25,7 +25,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const createMutation = useMutation({
-        mutationFn: (data: Tenant) => apiClient.createTenant(data),
+        mutationFn: (data: Tenant) => createTenant(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['tenants'] });
             closeCreate();

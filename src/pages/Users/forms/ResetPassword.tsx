@@ -13,7 +13,7 @@ import { useUsersActions, useUsersContext } from '../utils/context';
 import { KeyIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { updateUser } from '@lib/api/users.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
@@ -26,7 +26,7 @@ const ResetPassword: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     const resetMutation = useMutation({
         mutationFn: ({ id, password }: { id: number; password: string }) =>
-            apiClient.updateUser(id, { password }),
+            updateUser(id, { password }),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['users'] });
             closePasswordReset();

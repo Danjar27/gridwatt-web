@@ -1,4 +1,5 @@
-import { apiClient } from './api-client';
+import { uploadJobPhoto } from './api/jobs.ts';
+import { executeRequest } from './http-client';
 import {
     getPendingMutations,
     updateMutationStatus,
@@ -33,6 +34,7 @@ function normalizeEndpoint(endpoint: string): string {
     if (endpoint.startsWith('http')) {
         return endpoint.replace(API_URL, '');
     }
+
     return endpoint;
 }
 
@@ -56,7 +58,7 @@ export async function syncPendingMutations(): Promise<{
 
             const endpoint = normalizeEndpoint(mutation.endpoint);
 
-            await apiClient.executeRequest(endpoint, {
+            await executeRequest(endpoint, {
                 method: mutation.method,
                 ...(mutation.data ? { body: JSON.stringify(mutation.data) } : {}),
             });
@@ -121,7 +123,7 @@ export async function syncPendingPhotos(): Promise<{
             await updatePhotoStatus(photo.id, 'uploading');
 
             const file = new File([photo.blob], photo.type + '.jpg', { type: photo.blob.type });
-            await apiClient.uploadJobPhoto(file, photo.jobId, photo.type as 'antes' | 'despues');
+            await uploadJobPhoto(file, photo.jobId, photo.type as 'antes' | 'despues');
 
             await removePhoto(photo.id);
             synced++;

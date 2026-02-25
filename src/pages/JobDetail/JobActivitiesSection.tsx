@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from '@phosphor-icons/react';
-import { apiClient } from '@lib/api-client';
+import { getActivities } from '@lib/api/activities.ts';
+import { addJobActivity, removeJobActivity } from '@lib/api/jobs.ts';
 import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
@@ -24,13 +25,13 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
 
     const { data: activitiesData } = useQuery({
         queryKey: ['activities'],
-        queryFn: () => apiClient.getActivities({ limit: 200 }),
+        queryFn: () => getActivities({ limit: 200 }),
     });
 
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
-        mutationFn: (activityId: string) => apiClient.addJobActivity(jobId, activityId),
+        mutationFn: (activityId: string) => addJobActivity(jobId, activityId),
         onMutate: async (activityId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
@@ -66,7 +67,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
     });
 
     const removeMutation = useMutation({
-        mutationFn: (jobActivityId: string) => apiClient.removeJobActivity(jobActivityId),
+        mutationFn: (jobActivityId: string) => removeJobActivity(jobActivityId),
         onMutate: async (jobActivityId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);

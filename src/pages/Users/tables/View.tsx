@@ -4,8 +4,7 @@ import { useServerPagination } from '@components/Table/hooks/useServerPagination
 import { PencilSimpleIcon, TrashIcon, KeyIcon, ShieldIcon } from '@phosphor-icons/react';
 import { useUsersActions } from '../utils/context';
 import { useAuthContext } from '@context/auth/context.ts';
-import { apiClient } from '@lib/api-client.ts';
-
+import { getUsers } from '@lib/api/users.ts';
 import Table from '@components/Table/Table';
 import { useTranslations } from 'use-intl';
 import type {User} from "@interfaces/user.interface.ts";
@@ -126,7 +125,7 @@ const ViewTable = () => {
             },
         },
         queryKey: ['users'],
-        fetchFn: (params) => apiClient.getUsers(params),
+        fetchFn: (params) => getUsers(params),
         columns,
         enabled: isAuthorized,
     });

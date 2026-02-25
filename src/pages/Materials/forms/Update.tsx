@@ -16,7 +16,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { PackageIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { updateMaterial } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Material} from "@interfaces/material.interface.ts";
@@ -29,7 +29,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: UpdateQuery<Material>) => apiClient.updateMaterial(id, data),
+        mutationFn: ({ id, data }: UpdateQuery<Material>) => updateMaterial(id, data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['materials'] });
             closeUpdate();

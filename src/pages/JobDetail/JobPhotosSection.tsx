@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, type RefObject } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Camera, X } from '@phosphor-icons/react';
-import { apiClient } from '@lib/api-client';
+import { removeJobPhoto } from '@lib/api/jobs.ts';
 import { addPendingPhoto, getPendingPhotos, removePhoto, isOnline, type PendingPhoto } from '@lib/offline-store';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
@@ -61,7 +61,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
             old ? { ...old, photos: old.photos?.filter((p: Photo) => p.id !== photoId) } : old
         );
         try {
-            await apiClient.removeJobPhoto(photoId);
+            await removeJobPhoto(photoId);
         } catch {
             if (previous) {queryClient.setQueryData(['job', String(jobId)], previous);}
         } finally {

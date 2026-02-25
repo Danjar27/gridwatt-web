@@ -16,7 +16,7 @@ import Form from '@components/Form/Form';
 import Page from '@layouts/Page';
 
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { createOrder } from '@lib/api/orders.ts';
 import type {Order} from "@interfaces/order.interface.ts";
 
 const CreateOrderPage = () => {
@@ -24,7 +24,7 @@ const CreateOrderPage = () => {
     const navigate = useNavigate();
 
     const createMutation = useMutation({
-        mutationFn: (data: Order) => apiClient.createOrder(data),
+        mutationFn: (data: Order) => createOrder(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['orders'] });
             navigate('/orders');

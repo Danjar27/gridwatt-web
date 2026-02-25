@@ -1,7 +1,7 @@
 import { Bell, BellPlus, X } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import { getMyOrders } from '@lib/api/orders.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 import Visible from '@components/atoms/Visible';
 import { classnames } from '@utils/classnames.ts';
@@ -44,7 +44,7 @@ const Notifications = () => {
     // Poll my orders count for technicians
     const { data: myOrders = [] } = useQuery({
         queryKey: ['orders', 'my'],
-        queryFn: () => apiClient.getMyOrders(),
+        queryFn: () => getMyOrders(),
         enabled: isTechnician && !!user,
         refetchInterval: 30_000,
     });

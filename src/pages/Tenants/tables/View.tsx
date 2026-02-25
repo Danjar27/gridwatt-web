@@ -4,7 +4,7 @@ import { useServerPagination } from '@components/Table/hooks/useServerPagination
 import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from '../utils/context';
 import { useAuthContext } from '@context/auth/context';
-import { apiClient } from '@lib/api-client';
+import { getTenants } from '@lib/api/tenants.ts';
 import { useTranslations } from 'use-intl';
 
 import Table from '@components/Table/Table';
@@ -71,7 +71,7 @@ const ViewTable = () => {
 
     const { table, isLoading, total } = useServerPagination<Tenant>({
         queryKey: ['tenants'],
-        fetchFn: (params) => apiClient.getTenants(params),
+        fetchFn: (params) => getTenants(params),
         columns,
         enabled: isAuthorized,
     });

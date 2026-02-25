@@ -6,7 +6,8 @@ import { useMemo, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
-import { apiClient } from '@lib/api-client.ts';
+import { bulkAssignOrders, getMyOrders, getOrders } from '@lib/api/orders.ts';
+import { getTechnicians } from '@lib/api/users.ts';
 import { OrdersMap } from '@/components/orders/OrdersMap';
 import { queryClient } from '@lib/query-client';
 import { isOnline } from '@/lib/offline-store';
@@ -30,13 +31,13 @@ const Inventory = () => {
 
     const { data: myOrders = [], isLoading: myLoading } = useQuery({
         queryKey: ['orders', 'my'],
-        queryFn: () => apiClient.getMyOrders(),
+        queryFn: () => getMyOrders(),
         enabled: isTechnician,
     });
 
     const { data: technicianResponse } = useQuery({
         queryKey: ['technicians'],
-        queryFn: () => apiClient.getTechnicians(),
+        queryFn: () => getTechnicians(),
         enabled: !isTechnician,
     });
     const technicians: Array<User> = Array.isArray(technicianResponse)
@@ -46,7 +47,7 @@ const Inventory = () => {
     const { data: allOrdersResponse } = useQuery({
         queryKey: ['orders', 'all-map', filterTechnicianId],
         queryFn: () =>
-            apiClient.getOrders({
+            getOrders({
                 limit: 10000,
                 offset: 0,
                 ...(filterTechnicianId ? { technicianId: filterTechnicianId } : {}),
@@ -57,7 +58,7 @@ const Inventory = () => {
 
     const bulkAssignMutation = useMutation({
         mutationFn: ({ orderIds, technicianId }: { orderIds: Array<number>; technicianId: number }) =>
-            apiClient.bulkAssignOrders(orderIds, technicianId),
+            bulkAssignOrders(orderIds, technicianId),
         onMutate: async ({ orderIds, technicianId }) => {
             await queryClient.cancelQueries({ queryKey: ['orders', 'all-map'] });
 

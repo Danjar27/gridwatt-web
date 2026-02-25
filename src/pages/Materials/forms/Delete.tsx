@@ -11,7 +11,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { PackageIcon, SealWarningIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { deleteMaterial } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Material} from "@interfaces/material.interface.ts";
@@ -24,7 +24,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const deleteMutation = useMutation({
-        mutationFn: (id: Material['id']) => apiClient.deleteMaterial(id),
+        mutationFn: (id: Material['id']) => deleteMaterial(id),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['materials'] });
             closeDelete();

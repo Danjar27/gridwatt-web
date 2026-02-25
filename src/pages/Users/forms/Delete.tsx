@@ -11,7 +11,7 @@ import { useUsersActions, useUsersContext } from '../utils/context';
 import { UsersIcon, SealWarningIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { deleteUser } from '@lib/api/users.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
@@ -23,7 +23,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiClient.deleteUser(id),
+        mutationFn: (id: number) => deleteUser(id),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['users'] });
             closeDelete();

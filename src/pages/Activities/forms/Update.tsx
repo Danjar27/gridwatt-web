@@ -15,7 +15,7 @@ import { useInventoryActions, useInventoryContext } from '../utils/context.ts';
 import { ClipboardIcon } from '@phosphor-icons/react';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@lib/query-client';
-import { apiClient } from '@lib/api-client';
+import { updateActivity } from '@lib/api/activities.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 import type {Activity} from "@interfaces/activity.interface.ts";
@@ -29,7 +29,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: UpdateQuery<Activity>) => apiClient.updateActivity(id, data),
+        mutationFn: ({ id, data }: UpdateQuery<Activity>) => updateActivity(id, data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
             closeUpdate();

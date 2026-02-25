@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Plus } from 'lucide-react';
-import { apiClient } from '@/lib/api-client';
+import { addJobMaterial, removeJobMaterial } from '@lib/api/jobs.ts';
+import { getMaterials } from '@lib/api/materials.ts';
 import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
@@ -25,14 +26,14 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
 
     const { data: materialsData } = useQuery({
         queryKey: ['materials'],
-        queryFn: () => apiClient.getMaterials({ limit: 200 }),
+        queryFn: () => getMaterials({ limit: 200 }),
     });
 
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
         mutationFn: ({ materialId, qty }: { materialId: string; qty: number }) =>
-            apiClient.addJobMaterial(jobId, materialId, qty),
+            addJobMaterial(jobId, materialId, qty),
         onMutate: async ({ materialId, qty }) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
@@ -71,7 +72,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     });
 
     const removeMutation = useMutation({
-        mutationFn: (workMaterialId: string) => apiClient.removeJobMaterial(workMaterialId),
+        mutationFn: (workMaterialId: string) => removeJobMaterial(workMaterialId),
         onMutate: async (workMaterialId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);

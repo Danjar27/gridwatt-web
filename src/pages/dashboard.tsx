@@ -2,7 +2,11 @@ import { Briefcase, ClipboardList, CheckCircle, Clock, Download, LayoutDashboard
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@lib/api-client';
+import { getActivities } from '@lib/api/activities.ts';
+import { getJobs, getMyJobs } from '@lib/api/jobs.ts';
+import { getMaterials } from '@lib/api/materials.ts';
+import { getMyOrders, getOrders } from '@lib/api/orders.ts';
+import { getSeals } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
@@ -26,9 +30,9 @@ const DashboardPage = () => {
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
             if (isTechnician) {
-                return await apiClient.getMyJobs();
+                return await getMyJobs();
             } else {
-                const res = await apiClient.getJobs();
+                const res = await getJobs();
 
                 return res.data;
             }
@@ -40,9 +44,9 @@ const DashboardPage = () => {
         queryKey: ['orders', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
             if (isTechnician) {
-                return await apiClient.getMyOrders();
+                return await getMyOrders();
             } else {
-                const res = await apiClient.getOrders();
+                const res = await getOrders();
 
                 return res.data;
             }
@@ -126,23 +130,23 @@ const DashboardPage = () => {
                 let fields: Array<string> = [];
 
                 if (target === 'orders') {
-                    const response = await apiClient.getOrders(dateParams);
+                    const response = await getOrders(dateParams);
                     data = response.data;
                     fields = orderFields;
                 } else if (target === 'jobs') {
-                    const response = await apiClient.getJobs(dateParams);
+                    const response = await getJobs(dateParams);
                     data = response.data;
                     fields = jobFields;
                 } else if (target === 'materials') {
-                    const response = await apiClient.getMaterials(dateParams);
+                    const response = await getMaterials(dateParams);
                     data = response.data;
                     fields = materialFields;
                 } else if (target === 'activities') {
-                    const response = await apiClient.getActivities(dateParams);
+                    const response = await getActivities(dateParams);
                     data = response.data;
                     fields = activityFields;
                 } else if (target === 'seals') {
-                    const response = await apiClient.getSeals(dateParams);
+                    const response = await getSeals(dateParams);
                     data = response.data;
                     fields = sealFields;
                 }

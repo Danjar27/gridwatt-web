@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowSquareOut, FloppyDisk, MapPin, Warning } from '@phosphor-icons/react';
-import { apiClient } from '@lib/api-client';
+import { getJob, updateJob, uploadJobPhoto } from '@lib/api/jobs.ts';
 import { isOnline, getPendingPhotos, removePhoto } from '@lib/offline-store';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { INPUT_CLASS, LABEL_CLASS } from '@components/Form/utils/constants';
@@ -31,13 +31,13 @@ export function JobDetailPage() {
 
     const { data: job, isLoading } = useQuery({
         queryKey: ['job', id],
-        queryFn: () => apiClient.getJob(Number(id)),
+        queryFn: () => getJob(Number(id)),
         enabled: !!id,
     });
 
     const updateMutation = useMutation({
         mutationFn: (data: { notes?: string; meterReading?: string; jobStatus?: string }) =>
-            apiClient.updateJob(Number(id), data),
+            updateJob(Number(id), data),
         onMutate: async (data) => {
             await queryClient.cancelQueries({ queryKey: ['job', id] });
             await queryClient.cancelQueries({ queryKey: ['jobs'] });
@@ -89,7 +89,7 @@ export function JobDetailPage() {
                 pending.map(async (p) => {
                     try {
                         const file = new File([p.blob], `${p.type}.jpg`, { type: p.blob.type || 'image/jpeg' });
-                        await apiClient.uploadJobPhoto(file, job!.id, p.type);
+                        await uploadJobPhoto(file, job!.id, p.type);
                         await removePhoto(p.id);
                     } catch (err) {
                         console.error('Failed to upload photo:', err);
