@@ -36,8 +36,8 @@ export const assignOrder = async (id: number, technicianId: number | null) =>
 
 export const bulkAssignOrders = async (orderIds: Array<number>, technicianId: number) =>
     mutationRequest<Array<Order>>(
-        '/orders/bulk-assign',
-        { method: 'PUT', body: JSON.stringify({ orderIds, technicianId }) },
+        '/orders/assign',
+        { method: 'PUT', body: JSON.stringify({ orderIds: orderIds.map(String), technicianId }) },
         { type: 'order', action: 'update', optimisticData: orderIds.map((id) => ({ id, technicianId })) }
     );
 
