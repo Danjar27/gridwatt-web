@@ -1,4 +1,5 @@
 import { addOfflineMutation, isOnline, type MutationType } from './offline-store';
+import { clearTokens, getTokens, refreshAccessToken } from '@lib/api/auth.ts';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -28,36 +29,6 @@ export function isNetworkError(error: unknown): boolean {
 // Token store
 // ---------------------------------------------------------------------------
 
-const tokenStore = {
-    accessToken: null as string | null,
-    refreshToken: null as string | null,
-};
-
-export function setTokens(accessToken: string, refreshToken: string) {
-    tokenStore.accessToken = accessToken;
-    tokenStore.refreshToken = refreshToken;
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-}
-
-export function clearTokens() {
-    tokenStore.accessToken = null;
-    tokenStore.refreshToken = null;
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-}
-
-export function getAccessToken() {
-    return tokenStore.accessToken;
-}
-
-export function loadTokens() {
-    tokenStore.accessToken = localStorage.getItem('accessToken');
-    tokenStore.refreshToken = localStorage.getItem('refreshToken');
-
-    return !!tokenStore.refreshToken;
-}
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -72,67 +43,6 @@ export interface OfflineMutationOptions {
     optimisticData?: unknown;
 }
 
-export interface PaginatedResponse<T> {
-    data: Array<T>;
-    total: number;
-    limit: number;
-    offset: number;
-}
-
-// ---------------------------------------------------------------------------
-// Token refresh (singleton promise to avoid parallel refreshes)
-// ---------------------------------------------------------------------------
-
-let refreshingPromise: Promise<boolean> | null = null;
-
-async function refreshAccessToken(): Promise<boolean> {
-    if (refreshingPromise) {
-        return refreshingPromise;
-    }
-
-    refreshingPromise = (async () => {
-        if (!tokenStore.refreshToken) {
-            tokenStore.refreshToken = localStorage.getItem('refreshToken');
-        }
-
-        if (!tokenStore.refreshToken) {
-            return false;
-        }
-
-        try {
-            const response = await fetch(`${API_URL}/auth/refresh`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${tokenStore.refreshToken}`,
-                },
-            });
-
-            if (response.status === 401) {
-                clearTokens();
-                throw new Error('401: Unauthorized');
-            }
-
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                throw new Error(error.message || `Refresh failed: ${response.status}`);
-            }
-
-            const data = await response.json();
-            setTokens(data.accessToken, data.refreshToken);
-
-            return true;
-        } catch (error) {
-            console.error('Failed to refresh access token:', error);
-            throw error;
-        } finally {
-            refreshingPromise = null;
-        }
-    })();
-
-    return refreshingPromise;
-}
-
 // ---------------------------------------------------------------------------
 // Core request function
 // ---------------------------------------------------------------------------
@@ -145,8 +55,10 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
         ...options.headers,
     };
 
-    if (!skipAuth && tokenStore.accessToken) {
-        (headers as Record<string, string>)['Authorization'] = `Bearer ${tokenStore.accessToken}`;
+    const tokens = getTokens();
+
+    if (!skipAuth && tokens?.accessToken) {
+        (headers as Record<string, string>)['Authorization'] = `Bearer ${tokens.accessToken}`;
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -167,7 +79,7 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
                 // Retry original request
                 const retryHeaders: HeadersInit = {
                     ...headers,
-                    Authorization: `Bearer ${tokenStore.accessToken}`,
+                    Authorization: `Bearer ${tokens?.accessToken}`,
                 };
                 const retryResponse = await fetch(`${API_URL}${endpoint}`, {
                     ...fetchOptions,
@@ -253,19 +165,20 @@ export async function mutationRequest<T>(
     }
 }
 
-// Public alias used by sync-manager
-export async function executeRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    return request<T>(endpoint, options);
-}
-
 // ---------------------------------------------------------------------------
 // File upload helper
 // ---------------------------------------------------------------------------
 
 export async function uploadFile<T = unknown>(endpoint: string, formData: FormData): Promise<T> {
+    const tokens = getTokens();
+
+    if (tokens === null) {
+        throw new Error('User is not logged in. Please log in first.');
+    }
+
     const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${tokenStore.accessToken}` },
+        headers: { Authorization: `Bearer ${tokens.accessToken}` },
         body: formData,
     });
 

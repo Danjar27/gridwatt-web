@@ -3,8 +3,7 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { useQuery, useMutation, useQueryClient, useIsRestoring } from '@tanstack/react-query';
 import { AuthContext, AuthActions } from './context.ts';
-import { getMe, login as apiLogin, logout as apiLogout } from '@lib/api/auth.ts';
-import { clearTokens, loadTokens } from '@lib/http-client';
+import { clearTokens, getMe, getTokens, login as apiLogin, logout as apiLogout } from '@lib/api/auth.ts';
 import { prefetchTechnicianData } from '@lib/technician-prefetch.ts';
 import { useMemo, useEffect, useRef } from 'react';
 
@@ -15,8 +14,9 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     const { data: user = null, isLoading } = useQuery({
         queryKey: ['auth', 'me'],
         queryFn: async () => {
-            const hasTokens = loadTokens();
-            if (!hasTokens) {
+            const tokens = getTokens();
+
+            if (tokens === null) {
                 return null;
             }
             try {
@@ -89,11 +89,14 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
         if (user?.role?.name === 'technician' && navigator.onLine) {
             // Run immediately on mount/change, then every 10 minutes
             prefetchTechnicianData().catch(() => {});
-            intervalRef.current = setInterval(() => {
-                if (navigator.onLine) {
-                    prefetchTechnicianData().catch(() => {});
-                }
-            }, 10 * 60 * 1000);
+            intervalRef.current = setInterval(
+                () => {
+                    if (navigator.onLine) {
+                        prefetchTechnicianData().catch(() => {});
+                    }
+                },
+                10 * 60 * 1000
+            );
         }
 
         return () => {
