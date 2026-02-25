@@ -54,14 +54,9 @@ const DashboardPage = () => {
         enabled: !isAdminRole,
     });
 
-    // const pendingJobs = jobs.filter((j: Job) => j.jobStatus !== 'completed');
-    // const completedJobs = jobs.filter((j: Job) => j.jobStatus === 'completed');
-    // const pendingOrders = orders.filter((o: Order) => o.status === 'pending');
-
-    // TODO: FIX THIS
-    const pendingJobs = [];
-    const completedJobs = [];
-    const pendingOrders = [];
+    const pendingJobs = jobs.filter((j) => j.jobStatus !== 'completed');
+    const completedJobs = jobs.filter((j) => j.jobStatus === 'completed');
+    const pendingOrders = orders.filter((o) => o.status === 'pending');
 
     const exportTargets = [
         { value: 'orders', label: i18n('routes.orders') },

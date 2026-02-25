@@ -5,6 +5,7 @@ import { addJobMaterial, removeJobMaterial } from '@lib/api/jobs.ts';
 import { getMaterials } from '@lib/api/materials.ts';
 import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
+import Window from '@components/Modal/blocks/Window';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
@@ -156,7 +157,8 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 <p className="text-center text-neutral-900">{i18n('pages.jobDetail.materials.empty')}</p>
             )}
 
-            <Modal onOpen={modalOpen} onClose={() => setModalOpen(false)} title={i18n('pages.jobDetail.materials.modal')}>
+            <Modal id="job-materials-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+                <Window title={i18n('pages.jobDetail.materials.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
                     <select
                         value={selectedMaterialId}
@@ -187,6 +189,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                         {i18n('literal.add')}
                     </Button>
                 </div>
+                </Window>
             </Modal>
         </div>
     );

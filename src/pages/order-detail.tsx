@@ -6,6 +6,7 @@ import { MapPin, User, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
+import type { User as UserType } from '@interfaces/user.interface.ts';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import Button from '@components/Button/Button';
 
@@ -187,7 +188,7 @@ export function OrderDetailPage() {
                                 className={`flex-1 ${INPUT_CLASS}`}
                             >
                                 <option value="">{i18n('pages.orderDetail.selectTechnician')}</option>
-                                {technicians.map((tech) => (
+                                {technicians.map((tech: UserType) => (
                                     <option key={tech.id} value={tech.id}>
                                         {tech.name} {tech.lastName}
                                     </option>

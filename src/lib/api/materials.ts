@@ -14,7 +14,7 @@ export const createMaterial = async (data: Partial<Material>) =>
         { type: 'material', action: 'create', optimisticData: data }
     );
 
-export const updateMaterial = async (id: string, data: Partial<Material>) =>
+export const updateMaterial = async (id: string | number, data: Partial<Material>) =>
     mutationRequest<Material>(
         `/materials/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },

@@ -34,7 +34,7 @@ const ChangeRole: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     });
 
     const roleOptions = useMemo(
-        () => roles.filter((r) => isAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: r.id })),
+        () => roles.filter((r) => isAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: String(r.id) })),
         [roles, isAdmin]
     );
 
@@ -71,7 +71,7 @@ const ChangeRole: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <p className="mb-2 text-sm text-muted-foreground">
                     {selected.name} {selected.lastName}
                 </p>
-                <Form key={selected.id} onSubmit={handleSubmit} defaultValues={{ roleId: selected.role?.id }}>
+                <Form key={selected.id} onSubmit={handleSubmit} defaultValues={{ roleId: String(selected.role?.id ?? '') }}>
                     <Field name="roleId" label={i18n('pages.users.form.role')} required>
                         <Select name="roleId" rules={{ required: i18n('errors.required') }} options={roleOptions} />
                     </Field>

@@ -5,6 +5,7 @@ import { getActivities } from '@lib/api/activities.ts';
 import { addJobActivity, removeJobActivity } from '@lib/api/jobs.ts';
 import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
+import Window from '@components/Modal/blocks/Window';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
@@ -130,7 +131,8 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 <p className="text-center text-neutral-900">{i18n('pages.jobDetail.activities.empty')}</p>
             )}
 
-            <Modal onOpen={modalOpen} onClose={() => setModalOpen(false)} title={i18n('pages.jobDetail.activities.modal')}>
+            <Modal id="job-activities-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+                <Window title={i18n('pages.jobDetail.activities.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
                     <select
                         value={selectedActivityId}
@@ -152,6 +154,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                         {i18n('literal.add')}
                     </button>
                 </div>
+                </Window>
             </Modal>
         </div>
     );

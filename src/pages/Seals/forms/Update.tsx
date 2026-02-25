@@ -38,8 +38,8 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
-    const handleSubmit = ({ id, isActive, ...rest }: Seal & { isActive: string }) => {
-        updateMutation.mutate({ id, data: { ...rest, isActive: String(isActive) === 'true' } });
+    const handleSubmit = ({ id, isActive, ...rest }: Omit<Seal, 'isActive'> & { isActive: string }) => {
+        updateMutation.mutate({ id, data: { ...rest, isActive: isActive === 'true' } });
     };
 
     const handleCancel = () => {
@@ -58,7 +58,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <Form
                     key={selected.id}
                     onSubmit={handleSubmit}
-                    defaultValues={{ ...selected, isActive: String(selected.isActive) }}
+                    defaultValues={{ ...selected, isActive: String(selected.isActive ?? false) }}
                 >
                     <Field name="name" label={i18n('pages.seals.form.name')} required>
                         <TextInput name="name" rules={{ required: i18n('errors.required') }} />

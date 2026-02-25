@@ -11,6 +11,7 @@ import { useState } from 'react';
 
 import Summary from '@components/Summary/Summary';
 import type { Job } from "@interfaces/job.interface.ts";
+import type { User } from '@interfaces/user.interface.ts';
 
 const getStatusColor = (status?: string) => {
     switch (status) {
@@ -77,7 +78,7 @@ const Inventory = () => {
                         onChange={(e) => setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)}
                     >
                         <option value="">{i18n('pages.jobs.filter.allTechnicians')}</option>
-                        {technicians.map((tech) => (
+                        {technicians.map((tech: User) => (
                             <option key={tech.id} value={tech.id}>
                                 {tech.name} {tech.lastName}
                             </option>

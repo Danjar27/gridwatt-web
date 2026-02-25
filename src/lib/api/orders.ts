@@ -1,4 +1,4 @@
-import type { Order, OrderImportData, OrdersImportCommitResponse } from '@interfaces/order.interface.ts';
+import type { Order, OrderImportData, OrdersImportCommitResponse, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
 import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
 
 import { buildQueryParameters } from '@utils/common/parameters.ts';
@@ -45,7 +45,7 @@ export const previewOrdersImport = async (files: Array<File>) => {
     const formData = new FormData();
     files.forEach((file) => formData.append('files', file));
 
-    return uploadFile('/orders/import/preview', formData);
+    return uploadFile<OrdersImportPreviewResponse>('/orders/import/preview', formData);
 };
 
 export const commitOrdersImport = async (orders: Array<OrderImportData>) =>

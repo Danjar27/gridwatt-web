@@ -10,13 +10,13 @@ export const getActivities = async (params?: PaginatedQuery) => {
     return request<PaginatedResponse<Activity>>(`/activities${query}`);
 };
 
-export const createActivity = async (data: Activity) => mutationRequest<Activity>(
+export const createActivity = async (data: Partial<Activity>) => mutationRequest<Activity>(
         '/activities',
         { method: 'POST', body: JSON.stringify(data) },
         { type: 'activity', action: 'create', optimisticData: data }
     );
 
-export const updateActivity = async (id: string, data: Partial<Activity>) =>
+export const updateActivity = async (id: string | number, data: Partial<Activity>) =>
     mutationRequest<Activity>(
         `/activities/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },

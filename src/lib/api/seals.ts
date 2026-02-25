@@ -14,7 +14,7 @@ export const createSeal = async (data: Partial<Seal>) =>
         { type: 'seal', action: 'create', optimisticData: data }
     );
 
-export const updateSeal = async (id: string, data: Partial<Seal>) =>
+export const updateSeal = async (id: string | number, data: Partial<Seal>) =>
     mutationRequest<Seal>(
         `/seals/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },
