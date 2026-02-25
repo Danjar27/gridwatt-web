@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, type Job } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import { isOnline } from '@/lib/offline-store';
 import { useState, useEffect, useRef } from 'react';
 import { Save, MapPin, AlertCircle, ExternalLink } from 'lucide-react';
@@ -14,6 +14,7 @@ import { JobPhotosSection } from './job-detail/JobPhotosSection';
 import { useTranslations } from 'use-intl';
 import * as leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import type { Job } from "@interfaces/job.interface.ts";
 
 export function JobDetailPage() {
     const { id } = useParams<{ id: string }>();

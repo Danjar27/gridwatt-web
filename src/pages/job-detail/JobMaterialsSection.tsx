@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Plus } from 'lucide-react';
-import { apiClient, type Job, type WorkMaterial, type Material } from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
+import type { Job } from "@interfaces/job.interface.ts";
+import type { Material, WorkMaterial } from '@interfaces/material.interface.ts';
 
 interface Props {
     jobId: number;

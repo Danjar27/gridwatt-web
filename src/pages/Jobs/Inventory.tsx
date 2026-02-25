@@ -2,13 +2,14 @@ import { BriefcaseIcon, EyeIcon, MapPinIcon } from '@phosphor-icons/react';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
-import { apiClient, type Job } from '@lib/api-client.ts';
+import { apiClient } from '@lib/api-client.ts';
 import { useQuery } from '@tanstack/react-query';
 import { Link, Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
 import Summary from '@components/Summary/Summary';
+import type { Job } from "@interfaces/job.interface.ts";
 
 const getStatusColor = (status?: string) => {
     switch (status) {

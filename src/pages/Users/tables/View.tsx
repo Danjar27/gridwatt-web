@@ -1,5 +1,4 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { User } from '@lib/api-client.ts';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
 import { PencilSimpleIcon, TrashIcon, KeyIcon, ShieldIcon } from '@phosphor-icons/react';
@@ -9,6 +8,7 @@ import { apiClient } from '@lib/api-client.ts';
 
 import Table from '@components/Table/Table';
 import { useTranslations } from 'use-intl';
+import type {User} from "@interfaces/user.interface.ts";
 
 const ViewTable = () => {
     const i18n = useTranslations();

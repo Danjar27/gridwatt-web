@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowSquareOut, FloppyDisk, MapPin, Warning } from '@phosphor-icons/react';
-import { apiClient, type Job } from '@lib/api-client';
-import { isOnline } from '@lib/offline-store';
+import { apiClient } from '@lib/api-client';
+import { isOnline, getPendingPhotos, removePhoto } from '@lib/offline-store';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { INPUT_CLASS, LABEL_CLASS } from '@components/Form/utils/constants';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
@@ -17,6 +17,7 @@ import { JobMaterialsSection } from './JobMaterialsSection';
 import { JobPhotosSection } from './JobPhotosSection';
 import Button from '@components/Button/Button';
 import Page from '@layouts/Page';
+import type { Job } from "@interfaces/job.interface.ts";
 
 export function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -50,7 +51,7 @@ export function JobDetailPage() {
 
             const previousJobsCache = queryClient.getQueriesData<Array<Job>>({ queryKey: ['jobs'] });
             for (const [queryKey, cachedJobs] of previousJobsCache) {
-                if (!Array.isArray(cachedJobs)) continue;
+                if (!Array.isArray(cachedJobs)) {continue;}
                 queryClient.setQueryData<Array<Job>>(queryKey, (jobs) =>
                     jobs?.map((j) => (j.id === Number(id) ? { ...j, ...patchedData } : j))
                 );
@@ -59,7 +60,7 @@ export function JobDetailPage() {
             return { previousJob, previousJobsCache };
         },
         onError: (_err, _data, context) => {
-            if (context?.previousJob) queryClient.setQueryData(['job', id], context.previousJob);
+            if (context?.previousJob) {queryClient.setQueryData(['job', id], context.previousJob);}
             if (context?.previousJobsCache) {
                 for (const [queryKey, cachedJobs] of context.previousJobsCache) {
                     queryClient.setQueryData(queryKey, cachedJobs);
@@ -82,6 +83,21 @@ export function JobDetailPage() {
     };
 
     const handleComplete = () => {
+        // Fire uploads in background — fetch requests survive navigation within the SPA
+        getPendingPhotos(job?.id).then((pending) =>
+            Promise.all(
+                pending.map(async (p) => {
+                    try {
+                        const file = new File([p.blob], `${p.type}.jpg`, { type: p.blob.type || 'image/jpeg' });
+                        await apiClient.uploadJobPhoto(file, job!.id, p.type);
+                        await removePhoto(p.id);
+                    } catch (err) {
+                        console.error('Failed to upload photo:', err);
+                    }
+                }),
+            ),
+        );
+
         updateMutation.mutate({
             notes: notes || job?.notes,
             meterReading: meterReading || job?.meterReading,
@@ -247,7 +263,7 @@ function JobLocationMap({ lat, lng }: { lat: number; lng: number }) {
     const mapInstanceRef = useRef<leaflet.Map | null>(null);
 
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) return;
+        if (!mapRef.current || mapInstanceRef.current) {return;}
         const map = leaflet.map(mapRef.current).setView([lat, lng], 15);
         leaflet
             .tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {

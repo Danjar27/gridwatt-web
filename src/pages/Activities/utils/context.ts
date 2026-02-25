@@ -1,6 +1,5 @@
-import type { Activity } from '@lib/api-client.ts';
-
 import { createInventoryContext } from '@context/Inventory/context';
+import type {Activity} from "@interfaces/activity.interface.ts";
 
 export const {
     Provider,

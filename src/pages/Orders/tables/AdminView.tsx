@@ -1,6 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { FilterConfig } from '@components/Table/Table.interface';
-import type { Order, User } from '@lib/api-client.ts';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
 import { EyeIcon, MapPinIcon, UserIcon } from '@phosphor-icons/react';
@@ -10,6 +9,8 @@ import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 
 import Table from '@components/Table/Table';
+import type {User} from "@interfaces/user.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -124,6 +125,7 @@ const AdminView = () => {
                     const technicians: Array<User> = Array.isArray(response)
                         ? response
                         : ((response as any)?.data ?? []);
+
                     return technicians.map((t) => ({
                         label: `${t.name} ${t.lastName}`,
                         value: String(t.id),

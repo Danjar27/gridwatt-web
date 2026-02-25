@@ -1,5 +1,3 @@
-import type { Job, Order, User } from '@lib/api-client';
-
 import { Briefcase, ChartBar, ChartDonut, ClipboardText, Download, SquaresFour } from '@phosphor-icons/react';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
@@ -12,6 +10,9 @@ import DateRangePicker from '@components/DateRangePicker/DateRangePicker';
 import Summary from '@components/Summary/Summary';
 import Button from '@components/Button/Button';
 import Papa from 'papaparse';
+import type {User} from "@interfaces/user.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
+import type { Job } from '@interfaces/job.interface.ts';
 
 const exportTargets = ['orders', 'jobs', 'materials', 'activities', 'seals'] as const;
 type ExportTarget = (typeof exportTargets)[number];
@@ -149,10 +150,11 @@ function HorizontalBarChart({ items, maxValue, jobsLabel, emptyLabel }: BarChart
 
 // Normalize response: some endpoints return Array directly, others return { data: Array }
 function toArray<T>(res: unknown): Array<T> {
-    if (Array.isArray(res)) return res;
+    if (Array.isArray(res)) {return res;}
     if (res && typeof res === 'object' && Array.isArray((res as { data?: unknown }).data)) {
         return (res as { data: Array<T> }).data;
     }
+
     return [];
 }
 
@@ -168,7 +170,8 @@ function Inventory() {
     const { data: rawJobs } = useQuery({
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
-            if (isTechnician) return await apiClient.getMyJobs();
+            if (isTechnician) {return await apiClient.getMyJobs();}
+
             return await apiClient.getJobs();
         },
         enabled: !isAdmin,
@@ -177,7 +180,8 @@ function Inventory() {
     const { data: rawOrders } = useQuery({
         queryKey: ['orders', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
-            if (isTechnician) return await apiClient.getMyOrders();
+            if (isTechnician) {return await apiClient.getMyOrders();}
+
             return await apiClient.getOrders();
         },
         enabled: !isAdmin,
@@ -251,6 +255,7 @@ function Inventory() {
                     fields.forEach((field) => {
                         row[field] = (item as Record<string, unknown>)[field];
                     });
+
                     return row;
                 });
                 downloadCsv(`${target}.csv`, rows);

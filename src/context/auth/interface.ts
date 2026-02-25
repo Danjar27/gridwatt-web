@@ -1,4 +1,4 @@
-import type { User } from '@lib/api-client.ts';
+import type {User} from "@interfaces/user.interface.ts";
 
 export interface Context {
     /**

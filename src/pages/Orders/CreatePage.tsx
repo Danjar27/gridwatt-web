@@ -1,5 +1,3 @@
-import type { Order } from '@lib/api-client';
-
 import { ClipboardTextIcon, MapPinIcon } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
@@ -19,6 +17,7 @@ import Page from '@layouts/Page';
 
 import { queryClient } from '@lib/query-client';
 import { apiClient } from '@lib/api-client';
+import type {Order} from "@interfaces/order.interface.ts";
 
 const CreateOrderPage = () => {
     const i18n = useTranslations();

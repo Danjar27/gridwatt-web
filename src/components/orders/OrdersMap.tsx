@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
-import type { Order, User } from '@lib/api-client.ts';
+import type {User} from "@interfaces/user.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
 
 interface OrdersMapProps {
     orders: Array<Order>;

@@ -3,7 +3,6 @@ import { CheckCircle, UploadCloud, AlertTriangle } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useReactTable, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import type { ColumnDef, RowSelectionState, PaginationState } from '@tanstack/react-table';
-import type { OrdersImportPreviewResponse, OrderImportPreviewItem, OrderImportData } from '@/lib/api-client';
 import { apiClient } from '@/lib/api-client';
 import { classnames } from '@utils/classnames.ts';
 import { useAuthContext } from '@context/auth/context.ts';
@@ -11,6 +10,7 @@ import { useTranslations } from 'use-intl';
 import Button from '@components/Button/Button';
 import Table from '@components/Table/Table';
 import Checkbox from '@components/atoms/Checkbox';
+import type { OrderImportData, OrderImportPreviewItem, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
 
 const CELL_INPUT = 'w-full rounded border border-neutral-800 bg-neutral-500/60 px-1 py-0.5 text-sm';
 
@@ -73,7 +73,7 @@ export function OrdersImportPage() {
     }, []);
 
     const commitOrders = async (selectedOnly = false) => {
-        if (localOrders.length === 0) return;
+        if (localOrders.length === 0) {return;}
 
         let ordersToProcess = localOrders;
         let selectedIndices: Set<number> | null = null;
@@ -90,6 +90,7 @@ export function OrdersImportPage() {
         const validOrders = ordersToProcess.filter((o) => !o.errors || o.errors.length === 0);
         if (validOrders.length === 0) {
             setError(i18n('pages.ordersImport.errors.noValidOrders'));
+
             return;
         }
 

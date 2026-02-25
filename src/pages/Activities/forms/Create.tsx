@@ -1,5 +1,4 @@
 import type { MutationForm } from '@interfaces/form.interface';
-import type { Activity } from '@lib/api-client';
 import type { FC } from 'react';
 
 import PrefixedIdInput from '@components/Form/blocks/PrefixedIdInput';
@@ -19,6 +18,7 @@ import { queryClient } from '@lib/query-client';
 import { apiClient } from '@lib/api-client';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
+import type {Activity} from "@interfaces/activity.interface.ts";
 
 const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();

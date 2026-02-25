@@ -1,6 +1,5 @@
-import type { Seal } from '@lib/api-client.ts';
-
 import { createInventoryContext } from '@context/Inventory/context';
+import type {Seal} from "@interfaces/seal.interface.ts";
 
 export const {
     Provider,

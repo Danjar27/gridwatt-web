@@ -1,5 +1,3 @@
-import type { Job, Order } from '@lib/api-client';
-
 import { Briefcase, ClipboardList, CheckCircle, Clock, Download, LayoutDashboard } from 'lucide-react';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
@@ -12,6 +10,8 @@ import DatePicker from '@components/DatePicker/DatePicker';
 import Summary from '@components/Summary/Summary';
 import Papa from 'papaparse';
 import Page from '@layouts/Page';
+import type {Order} from "@interfaces/order.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 
 const DashboardPage = () => {
     const i18n = useTranslations();

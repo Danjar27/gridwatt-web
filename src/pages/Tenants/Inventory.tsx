@@ -4,6 +4,7 @@ import { useInventoryActions } from './utils/context';
 import { Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 
+import Delete from '@pages/Tenants/forms/Delete.tsx';
 import Summary from '@components/Summary/Summary';
 import Button from '@components/Button/Button';
 import ViewTable from './tables/View';
@@ -39,7 +40,7 @@ const Inventory = () => {
 
             <Create />
             <Update />
-            {/*<Delete />*/}
+            <Delete />
         </div>
     );
 };

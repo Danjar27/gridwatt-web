@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from '@phosphor-icons/react';
-import { apiClient, type Job, type JobActivity } from '@lib/api-client';
+import { apiClient } from '@lib/api-client';
 import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
+import type { Job } from "@interfaces/job.interface.ts";
+import type { JobActivity } from '@interfaces/activity.interface.ts';
 
 interface Props {
     jobId: number;
@@ -49,16 +51,17 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                       }
                     : old
             );
-            if (pendingSync) markJobPendingInLists(queryClient, jobId);
+            if (pendingSync) {markJobPendingInLists(queryClient, jobId);}
             setSelectedActivityId('');
             setModalOpen(false);
+
             return { previous };
         },
         onError: (_err, _data, context) => {
-            if (context?.previous) queryClient.setQueryData(jobKey, context.previous);
+            if (context?.previous) {queryClient.setQueryData(jobKey, context.previous);}
         },
         onSettled: () => {
-            if (isOnline()) queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {queryClient.invalidateQueries({ queryKey: jobKey });}
         },
     });
 
@@ -77,14 +80,15 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                       }
                     : old
             );
-            if (pendingSync) markJobPendingInLists(queryClient, jobId);
+            if (pendingSync) {markJobPendingInLists(queryClient, jobId);}
+
             return { previous };
         },
         onError: (_err, _data, context) => {
-            if (context?.previous) queryClient.setQueryData(jobKey, context.previous);
+            if (context?.previous) {queryClient.setQueryData(jobKey, context.previous);}
         },
         onSettled: () => {
-            if (isOnline()) queryClient.invalidateQueries({ queryKey: jobKey });
+            if (isOnline()) {queryClient.invalidateQueries({ queryKey: jobKey });}
         },
     });
 

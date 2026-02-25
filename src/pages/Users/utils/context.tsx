@@ -1,8 +1,8 @@
-import type { User } from '@lib/api-client.ts';
 import type { PropsWithChildren } from 'react';
 
 import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { useModal } from '@hooks/useModal.ts';
+import type {User} from "@interfaces/user.interface.ts";
 
 interface UsersContext {
     selected: User | null;

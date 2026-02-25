@@ -6,7 +6,7 @@ import { useMemo, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
-import { apiClient, type Order, type User } from '@lib/api-client.ts';
+import { apiClient } from '@lib/api-client.ts';
 import { OrdersMap } from '@/components/orders/OrdersMap';
 import { queryClient } from '@lib/query-client';
 import { isOnline } from '@/lib/offline-store';
@@ -15,6 +15,8 @@ import TechnicianView from '@pages/Orders/tables/TechnicianView';
 import AdminView from '@pages/Orders/tables/AdminView';
 import Summary from '@components/Summary/Summary';
 import Button from '@components/Button/Button';
+import type {User} from "@interfaces/user.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
 
 const Inventory = () => {
     const i18n = useTranslations();

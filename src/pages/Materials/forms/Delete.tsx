@@ -1,5 +1,4 @@
 import type { MutationForm } from '@interfaces/form.interface';
-import type { Material } from '@lib/api-client';
 import type { FC } from 'react';
 
 import FormError from '@components/Form/blocks/Error';
@@ -15,6 +14,7 @@ import { queryClient } from '@lib/query-client';
 import { apiClient } from '@lib/api-client';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
+import type {Material} from "@interfaces/material.interface.ts";
 
 const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();

@@ -23,13 +23,13 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const deleteMutation = useMutation({
-        mutationFn: (id: number) => apiClient.deleteUser(id),
+        mutationFn: (id: number) => apiClient.deleteTenant(id),
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['users'] });
+            await queryClient.invalidateQueries({ queryKey: ['tenants'] });
             closeDelete();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to delete user'),
+        onError: (err: Error) => setError(err.message || 'Failed to delete tenant'),
     });
 
     const handleConfirm = () => {
@@ -54,11 +54,13 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <Form key={selected.id} onSubmit={handleConfirm}>
                     <div className="flex flex-col items-center gap-3 py-4 text-center">
                         <SealWarningIcon size={40} className="text-secondary-500" weight="duotone" />
-                        <p className="text-sm">
-                            {i18n('common.confirmation', { name: `${selected.name} ${selected.lastName}` })}
-                        </p>
+                        <p className="text-sm">{i18n('common.confirmation')}</p>
                     </div>
-                    <Actions submitLabel={i18n('literal.delete')} onCancel={handleCancel} isLoading={deleteMutation.isPending} />
+                    <Actions
+                        submitLabel={i18n('literal.delete')}
+                        onCancel={handleCancel}
+                        isLoading={deleteMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>

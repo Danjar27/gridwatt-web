@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, type Photo } from '@/lib/api-client';
-import { addPendingPhoto, getPendingPhotos, isOnline, type PendingPhoto } from '@/lib/offline-store';
+import { useState, useEffect, useRef, type RefObject } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
+import { addPendingPhoto, getPendingPhotos, removePhoto, isOnline, type PendingPhoto } from '@/lib/offline-store';
 import { useOfflineContext } from '@context/offline/context.ts';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { Camera, X } from 'lucide-react';
 import { useTranslations } from 'use-intl';
+import type {Photo} from "@interfaces/photo.interface.ts";
 
 interface Props {
     jobId: number;
@@ -20,11 +21,13 @@ export function JobPhotosSection({ jobId, photos }: Props) {
     const i18n = useTranslations();
     const [pendingPhotos, setPendingPhotos] = useState<Record<string, Blob>>({});
     const [objectUrls, setObjectUrls] = useState<Record<string, string>>({});
+    const antesRef = useRef<HTMLInputElement>(null);
+    const despuesRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         let cancelled = false;
         getPendingPhotos(jobId).then((pending: Array<PendingPhoto>) => {
-            if (cancelled) {return;}
+            if (cancelled) { return; }
             const map: Record<string, Blob> = {};
             for (const p of pending) {
                 map[p.type] = p.blob;
@@ -35,7 +38,6 @@ export function JobPhotosSection({ jobId, photos }: Props) {
         return () => { cancelled = true; };
     }, [jobId]);
 
-    // Manage object URLs for pending blobs
     useEffect(() => {
         const urls: Record<string, string> = {};
         for (const [type, blob] of Object.entries(pendingPhotos)) {
@@ -50,49 +52,41 @@ export function JobPhotosSection({ jobId, photos }: Props) {
         };
     }, [pendingPhotos]);
 
-    const removePhotoMutation = useMutation({
-        mutationFn: (photoId: string) => apiClient.removeJobPhoto(photoId),
-        onMutate: async (photoId) => {
-            await queryClient.cancelQueries({ queryKey: ['job', String(jobId)] });
-            const previous = queryClient.getQueryData<{ photos?: Array<Photo> }>(['job', String(jobId)]);
-            queryClient.setQueryData(['job', String(jobId)], (old: any) =>
-                old ? { ...old, photos: old.photos?.filter((p: Photo) => p.id !== photoId) } : old
-            );
-
-            return { previous };
-        },
-        onError: (_err, _data, context) => {
-            if (context?.previous) {
-                queryClient.setQueryData(['job', String(jobId)], context.previous);
-            }
-        },
-        onSettled: () => {
-            if (isOnline()) {
-                queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
-            }
-        },
-    });
-
-    const handleCapture = async (file: File, type: SlotType) => {
-        if (online) {
-            try {
-                const photo = await apiClient.uploadJobPhoto(file, jobId, type);
-                queryClient.setQueryData(['job', String(jobId)], (old: any) =>
-                    old ? { ...old, photos: [...(old.photos || []), photo] } : old
-                );
-            } catch (error) {
-                console.error('Upload failed:', error);
-            }
-        } else {
-            await addPendingPhoto({ jobId, blob: file, type });
-            setPendingPhotos((prev) => ({ ...prev, [type]: file }));
+    const handleRemoveServerPhoto = async (photoId: string) => {
+        await queryClient.cancelQueries({ queryKey: ['job', String(jobId)] });
+        const previous = queryClient.getQueryData<{ photos?: Array<Photo> }>(['job', String(jobId)]);
+        queryClient.setQueryData(['job', String(jobId)], (old: any) =>
+            old ? { ...old, photos: old.photos?.filter((p: Photo) => p.id !== photoId) } : old
+        );
+        try {
+            await apiClient.removeJobPhoto(photoId);
+        } catch {
+            if (previous) {queryClient.setQueryData(['job', String(jobId)], previous);}
+        } finally {
+            if (isOnline()) {queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });}
         }
     };
 
-    const renderSlot = (type: SlotType, label: string) => {
+    const handleCapture = async (file: File, type: SlotType) => {
+        await addPendingPhoto({ jobId, blob: file, type });
+        setPendingPhotos((prev) => ({ ...prev, [type]: file }));
+    };
+
+    const handleRemovePending = async (type: SlotType) => {
+        const pending = await getPendingPhotos(jobId);
+        const entry = pending.find((p) => p.type === type);
+        if (entry) {await removePhoto(entry.id);}
+        setPendingPhotos((prev) => {
+            const next = { ...prev };
+            delete next[type];
+
+            return next;
+        });
+    };
+
+    const renderSlot = (type: SlotType, label: string, fileInputRef: RefObject<HTMLInputElement | null>) => {
         const serverPhoto = photos.find((p) => p.type === type);
         const pendingBlob = pendingPhotos[type];
-        const fileInputRef = useRef<HTMLInputElement>(null);
 
         return (
             <div className="space-y-2">
@@ -102,8 +96,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                     <div className="relative aspect-square overflow-hidden rounded-lg">
                         <img src={serverPhoto.path} alt={label} className="h-full w-full object-cover" />
                         <button
-                            onClick={() => removePhotoMutation.mutate(serverPhoto.id)}
-                            disabled={removePhotoMutation.isPending}
+                            onClick={() => handleRemoveServerPhoto(serverPhoto.id)}
                             className="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
                         >
                             <X className="h-3.5 w-3.5" />
@@ -117,6 +110,12 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                                 alt={`${label} (pending)`}
                                 className="h-full w-full object-cover"
                             />
+                            <button
+                                onClick={() => handleRemovePending(type)}
+                                className="absolute top-1 right-1 rounded-full bg-red-600 p-1 text-white hover:bg-red-700"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
                         </div>
                     </PendingSyncWrapper>
                 ) : (
@@ -141,7 +140,7 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) {handleCapture(file, type);}
+                                if (file) { handleCapture(file, type); }
                                 e.target.value = '';
                             }}
                         />
@@ -155,8 +154,8 @@ export function JobPhotosSection({ jobId, photos }: Props) {
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
             <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.photos.title')}</h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                {renderSlot('antes', i18n('pages.jobDetail.photos.before'))}
-                {renderSlot('despues', i18n('pages.jobDetail.photos.after'))}
+                {renderSlot('antes', i18n('pages.jobDetail.photos.before'), antesRef)}
+                {renderSlot('despues', i18n('pages.jobDetail.photos.after'), despuesRef)}
             </div>
         </div>
     );

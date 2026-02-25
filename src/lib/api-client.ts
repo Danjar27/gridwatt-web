@@ -1,5 +1,13 @@
+import type { Order, OrderImportData, OrdersImportCommitResponse } from '@interfaces/order.interface.ts';
+import type { Activity } from '@interfaces/activity.interface.ts';
+import type { Material } from '@interfaces/material.interface.ts';
+import type { Tenant } from '@interfaces/tenant.interface.ts';
+import type { Photo } from '@interfaces/photo.interface.ts';
+import type { Seal } from '@interfaces/seal.interface.ts';
+import type { User } from '@interfaces/user.interface.ts';
+import type { Job } from '@interfaces/job.interface.ts';
+
 import { addOfflineMutation, isOnline, type MutationType } from './offline-store';
-import type { Role } from '@interfaces/user.interface.ts';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -389,19 +397,6 @@ class ApiClient {
         );
     }
 
-    // Notifications
-    async getNotifications() {
-        return this.request<Array<Notification>>('/notifications');
-    }
-
-    async markNotificationRead(id: number) {
-        return this.request('/notifications/' + id + '/read', { method: 'PUT' });
-    }
-
-    async markAllNotificationsRead() {
-        return this.request('/notifications/read-all', { method: 'PUT' });
-    }
-
     // Jobs
     async getJobs(params?: { limit?: number; offset?: number; from?: string; to?: string; technicianId?: number }) {
         const qs = params
@@ -695,38 +690,20 @@ class ApiClient {
         );
     }
 
-    // Upload
-    async uploadJobPhoto(file: File, jobId: number, type: 'antes' | 'despues'): Promise<Photo> {
+    async uploadJobPhoto(file: File, jobId: number, type: string): Promise<Photo> {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('jobId', String(jobId));
         formData.append('type', type);
-        const response = await fetch(`${API_URL}/upload/job-photo`, {
+
+        const response = await fetch(`${API_URL}/jobs/${jobId}/photos/upload`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${this.accessToken}` },
             body: formData,
         });
-        if (!response.ok) {
-            throw new Error('Upload failed');
-        }
-
-        return response.json();
-    }
-
-    async uploadFile(file: File) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch(`${API_URL}/upload`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${this.accessToken}`,
-            },
-            body: formData,
-        });
 
         if (!response.ok) {
-            throw new Error('Upload failed');
+            const error = await response.json().catch(() => ({}));
+            throw new Error(error.message || 'Upload failed');
         }
 
         return response.json();
@@ -781,7 +758,7 @@ class ApiClient {
         });
     }
 
-    async deactivateTenant(id: number) {
+    async deleteTenant(id: number) {
         return this.request<Tenant>(`/tenants/${id}`, {
             method: 'DELETE',
         });
@@ -789,193 +766,3 @@ class ApiClient {
 }
 
 export const apiClient = new ApiClient();
-
-// Types
-export interface Tenant {
-    id: number;
-    name: string;
-    code: string;
-    isActive: boolean;
-    createdAt: string;
-    updatedAt: string;
-    _count: {
-        users: number;
-        orders: number;
-        jobs: number;
-        materials: number;
-        activities: number;
-        seals: number;
-    };
-}
-
-export interface User {
-    id: number;
-    name: string;
-    lastName: string;
-    email: string;
-    phone?: string;
-    isActive?: boolean;
-    role: { id: number; name: Role };
-    tenantId: number;
-    tenant: Tenant;
-}
-
-export interface Order {
-    id: number;
-    technicianId?: number;
-    serviceType: string;
-    meterNumber: string;
-    status: string;
-    issueDate: string;
-    issueTime: string;
-    accountNumber: string;
-    lastName: string;
-    firstName: string;
-    idNumber: string;
-    email: string;
-    phone: string;
-    orderLocation: string;
-    latitude?: number;
-    longitude?: number;
-    observations?: string;
-    technician?: User;
-    jobs?: Array<Job>;
-}
-
-export interface OrderImportData {
-    serviceType: string;
-    meterNumber: string;
-    orderStatus: string;
-    issueDate: string;
-    issueTime: string;
-    accountNumber: string;
-    lastName: string;
-    firstName: string;
-    idNumber: string;
-    email: string;
-    phone: string;
-    orderLocation: string;
-    panelTowerBlock?: string;
-    coordinateX?: number;
-    coordinateY?: number;
-    latitude?: number;
-    longitude?: number;
-    appliedTariff?: string;
-    transformerNumber?: string;
-    distributionNetwork?: string;
-    transformerOwnership?: string;
-    sharedSubstation?: string;
-    normalLoad?: string;
-    fluctuatingLoad?: string;
-    plannerGroup?: string;
-    workPosition?: string;
-    lockerSequence?: string;
-    observations?: string;
-    technicianId?: number;
-}
-
-export interface OrderImportPreviewItem {
-    data: OrderImportData;
-    fileName: string;
-    rowNumber?: number;
-    errors?: Array<string>;
-    warnings?: Array<string>;
-}
-
-export interface OrdersImportPreviewResponse {
-    orders: Array<OrderImportPreviewItem>;
-    fileErrors: Array<{ fileName: string; message: string }>;
-}
-
-export interface OrdersImportCommitResponse {
-    createdCount: number;
-}
-
-export interface Notification {
-    id: number;
-    userId: number;
-    type: string;
-    title: string;
-    message: string;
-    data?: { orderId?: number; jobId?: number };
-    read: boolean;
-    createdAt: string;
-}
-
-export interface Job {
-    id: number;
-    orderId: number;
-    technicianId: number;
-    startDateTime: string;
-    endDateTime?: string;
-    jobType: string;
-    jobStatus?: string;
-    gpsLocation?: string;
-    meterReading?: string;
-    notes?: string;
-    synchronized: boolean;
-    order?: Order;
-    technician?: User;
-    photos?: Array<Photo>;
-    workMaterials?: Array<WorkMaterial>;
-    jobActivities?: Array<JobActivity>;
-    jobSeals?: Array<JobSeal>;
-    /** Client-side flag: true when changes are queued for sync */
-    _pendingSync?: boolean;
-}
-
-export interface Photo {
-    id: string;
-    jobId: number;
-    path: string;
-    type: string;
-    dateTime: string;
-    notes?: string;
-}
-
-export interface Material {
-    id: string;
-    name: string;
-    type: string;
-    description?: string;
-    unit: string;
-    allowsDecimals: boolean;
-    isActive: boolean;
-}
-
-export interface Activity {
-    id: string;
-    name: string;
-    description?: string;
-    isActive: boolean;
-}
-
-export interface Seal {
-    id: string;
-    name: string;
-    description?: string;
-    type: string;
-    isActive: boolean;
-}
-
-export interface WorkMaterial {
-    id: string;
-    jobId: number;
-    materialId: string;
-    quantity: number;
-    material?: Material;
-}
-
-export interface JobActivity {
-    id: string;
-    jobId: number;
-    activityId: string;
-    activity?: Activity;
-}
-
-export interface JobSeal {
-    id: string;
-    jobId: number;
-    sealId: string;
-    seal?: Seal;
-}
