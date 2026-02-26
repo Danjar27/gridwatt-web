@@ -1,3 +1,4 @@
+import type { Material } from '@interfaces/material.interface.ts';
 import type { MutationForm } from '@interfaces/form.interface';
 import type { UpdateQuery } from '@interfaces/query.interface';
 import type { FC } from 'react';
@@ -19,7 +20,6 @@ import { queryClient } from '@lib/query-client';
 import { updateMaterial } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Material} from "@interfaces/material.interface.ts";
 
 const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -53,11 +53,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="update-material" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
-            <Window
-                title={i18n('pages.materials.form.update')}
-                className="w-full max-w-150 px-4"
-                icon={PackageIcon}
-            >
+            <Window title={i18n('pages.materials.form.update')} className="w-full max-w-150 px-4" icon={PackageIcon}>
                 <FormError message={error} />
                 <Form key={selected.id} onSubmit={handleSubmit} defaultValues={selected}>
                     <Field name="name" label={i18n('pages.materials.form.name')} required>

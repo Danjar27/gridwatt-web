@@ -58,7 +58,11 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                             {i18n('common.confirmation', { name: `${selected.name} ${selected.lastName}` })}
                         </p>
                     </div>
-                    <Actions submitLabel={i18n('literal.delete')} onCancel={handleCancel} isLoading={deleteMutation.isPending} />
+                    <Actions
+                        submitLabel={i18n('literal.delete')}
+                        onCancel={handleCancel}
+                        isLoading={deleteMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>

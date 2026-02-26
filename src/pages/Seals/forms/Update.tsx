@@ -1,5 +1,6 @@
 import type { MutationForm } from '@interfaces/form.interface';
 import type { UpdateQuery } from '@interfaces/query.interface';
+import type { Seal } from '@interfaces/seal.interface.ts';
 import type { FC } from 'react';
 
 import TextInput from '@components/Form/blocks/TextInput';
@@ -19,7 +20,6 @@ import { queryClient } from '@lib/query-client';
 import { updateSeal } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Seal} from "@interfaces/seal.interface.ts";
 
 const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -70,9 +70,19 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                         <TextArea name="description" rows={3} />
                     </Field>
                     <Field name="isActive" label={i18n('pages.seals.form.isActive')}>
-                        <Select name="isActive" options={[{ label: i18n('literal.active'), value: 'true' }, { label: i18n('literal.inactive'), value: 'false' }]} />
+                        <Select
+                            name="isActive"
+                            options={[
+                                { label: i18n('literal.active'), value: 'true' },
+                                { label: i18n('literal.inactive'), value: 'false' },
+                            ]}
+                        />
                     </Field>
-                    <Actions submitLabel={i18n('literal.update')} onCancel={handleCancel} isLoading={updateMutation.isPending} />
+                    <Actions
+                        submitLabel={i18n('literal.update')}
+                        onCancel={handleCancel}
+                        isLoading={updateMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>

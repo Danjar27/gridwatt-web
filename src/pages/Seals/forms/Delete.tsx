@@ -1,4 +1,5 @@
 import type { MutationForm } from '@interfaces/form.interface';
+import type { Seal } from '@interfaces/seal.interface.ts';
 import type { FC } from 'react';
 
 import FormError from '@components/Form/blocks/Error';
@@ -14,7 +15,6 @@ import { queryClient } from '@lib/query-client';
 import { deleteSeal } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Seal} from "@interfaces/seal.interface.ts";
 
 const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -57,7 +57,11 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                         <SealWarningIcon size={40} className="text-secondary-500" weight="duotone" />
                         <p className="text-sm">{i18n('common.confirmation', { name: selected.name })}</p>
                     </div>
-                    <Actions submitLabel={i18n('literal.delete')} onCancel={handleCancel} isLoading={deleteMutation.isPending} />
+                    <Actions
+                        submitLabel={i18n('literal.delete')}
+                        onCancel={handleCancel}
+                        isLoading={deleteMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>

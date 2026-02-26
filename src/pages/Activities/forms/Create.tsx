@@ -31,6 +31,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         mutationFn: (data: Partial<Activity>) => createActivity(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['activities'] });
+            closeCreate();
             setError(null);
             onSubmit?.();
         },

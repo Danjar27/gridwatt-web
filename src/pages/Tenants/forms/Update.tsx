@@ -1,5 +1,6 @@
 import type { UpdateQuery } from '@interfaces/query.interface.ts';
 import type { MutationForm } from '@interfaces/form.interface';
+import type { Tenant } from '@interfaces/tenant.interface.ts';
 import type { FC } from 'react';
 
 import TextInput from '@components/Form/blocks/TextInput';
@@ -17,7 +18,6 @@ import { queryClient } from '@lib/query-client';
 import { updateTenant } from '@lib/api/tenants.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Tenant} from "@interfaces/tenant.interface.ts";
 
 const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
