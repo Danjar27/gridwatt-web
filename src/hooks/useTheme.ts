@@ -6,8 +6,10 @@ const THEME_COLORS: Record<string, string> = {
     dark: '#28272C',
 };
 
+type Theme = 'light' | 'dark';
+
 export const useTheme = () => {
-    const [theme, setTheme] = useLocalStorage('theme', 'light');
+    const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
 
     useEffect(() => {
         const themeStr = theme.toString();
