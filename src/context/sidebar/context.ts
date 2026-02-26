@@ -3,11 +3,16 @@ import type { Actions, Context } from './interface.ts';
 import { createContext, useContext } from 'react';
 
 export const SidebarContext = createContext<Context>({
-    collapsed: false,
+    isOpen: false,
+    isCollapsed: false,
 });
 
 export const SidebarActions = createContext<Actions>({
-    toggleCollapsed: () => {},
+    open: () => {},
+    close: () => {},
+    expand: () => {},
+    collapse: () => {},
+    toggle: () => {},
 });
 
 export const useSidebarContext = () => useContext(SidebarContext);

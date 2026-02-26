@@ -3,31 +3,45 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { useLocalStorage } from '@hooks/useLocalStorage.ts';
 import { SidebarActions, SidebarContext } from './context';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 const SidebarProvider: FC<PropsWithChildren> = ({ children }) => {
     const [collapsed, setCollapsed] = useLocalStorage<State>('sidebar', 'expanded');
+    const [isOpen, setIsOpen] = useState(false);
 
-    const toggleCollapsed = () => {
+    const collapse = () => setCollapsed('collapsed');
+
+    const expand = () => setCollapsed('expanded');
+
+    const open = () => setIsOpen(true);
+
+    const close = () => setIsOpen(false);
+
+    const toggle = () => {
         if (collapsed === 'expanded') {
-            return setCollapsed('collapsed');
+            return collapse();
         }
 
-        setCollapsed('expanded');
+        expand();
     };
 
     const context = useMemo(
         () => ({
-            collapsed: collapsed === 'collapsed',
+            isOpen,
+            isCollapsed: collapsed === 'collapsed',
         }),
-        [collapsed]
+        [collapsed, isOpen]
     );
 
     const actions = useMemo(
         () => ({
-            toggleCollapsed,
+            collapse,
+            expand,
+            open,
+            close,
+            toggle,
         }),
-        [toggleCollapsed]
+        [collapse, expand, open, close, toggle]
     );
 
     return (
