@@ -1,28 +1,37 @@
 import type { FC } from 'react';
 
-import { buildUserInitials } from '../utils/format.ts';
+import { useSidebarContext } from '@context/sidebar/context.ts';
 import { useAuthContext } from '@context/auth/context.ts';
+import { buildUserInitials } from '../utils/format.ts';
+import { classnames } from '@utils/classnames.ts';
 import { Link } from 'react-router-dom';
 
 const User: FC = () => {
-    const { user } = useAuthContext()
+    const { collapsed } = useSidebarContext();
+    const { user } = useAuthContext();
 
     if (!user) {
         return null;
     }
 
     const fullName = `${user?.name} ${user?.lastName}`;
-
     const initials = buildUserInitials(fullName);
 
     return (
-        <Link to="/profile" className="flex items-center gap-5 hover:bg-neutral-500 p-3 rounded-lg">
-            <div className="flex justify-center items-center font= h-10 w-10 rounded-full bg-primary-500">
-                <span className="text-white font-bold">{initials}</span>
+        <Link
+            to="/profile"
+            title={collapsed ? fullName : undefined}
+            className={classnames(
+                'flex items-center rounded-lg px-2 py-2 hover:bg-neutral-500 transition-colors duration-200',
+                collapsed ? 's992:gap-0 s992:justify-center' : 'gap-3'
+            )}
+        >
+            <div className="flex shrink-0 items-center justify-center h-10 w-10 rounded-md bg-primary-500">
+                <span className="text-md font-bold text-white uppercase">{initials}</span>
             </div>
-            <div className="flex flex-col gap-1">
-                <span>{fullName}</span>
-                <span className="max-w-max px-2 py-0.5 text-xs bg-neutral-800 text-neutral-500 rounded">
+            <div className={classnames('flex flex-col gap-0.5 min-w-0 overflow-hidden', collapsed && 's992:max-w-0')}>
+                <span className="text-sm font-medium whitespace-nowrap">{fullName}</span>
+                <span className="w-fit px-1.5 py-0.5 text-xs bg-neutral-700 text-neutral-900 rounded whitespace-nowrap">
                     {user.role?.name}
                 </span>
             </div>
