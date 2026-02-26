@@ -2,16 +2,12 @@ import type { FC } from 'react';
 import type { Icon } from '@phosphor-icons/react';
 
 import { HouseIcon, TruckIcon, BagSimpleIcon, AddressBookIcon, UsersIcon, UserIcon } from '@phosphor-icons/react';
-import { Menu } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
-import { useTranslations } from 'use-intl';
-
+import { useSidebarActions } from '@context/sidebar/context.ts';
 import { useAuthContext } from '@context/auth/context.ts';
+import { Link, useLocation } from 'react-router-dom';
 import { classnames } from '@utils/classnames.ts';
-
-interface MobileNavProps {
-    onMenuOpen: () => void;
-}
+import { useTranslations } from 'use-intl';
+import { Menu } from 'lucide-react';
 
 interface NavItem {
     href: string;
@@ -34,10 +30,12 @@ const PINNED_BY_ROLE: Record<string, Array<NavItem>> = {
     ],
 };
 
-const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
-    const location = useLocation();
-    const { user } = useAuthContext();
+const MobileNav: FC = () => {
     const i18n = useTranslations();
+    const location = useLocation();
+    const { open } = useSidebarActions();
+
+    const { user } = useAuthContext();
 
     if (!user) {
         return null;
@@ -70,7 +68,7 @@ const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
                     );
                 })}
                 <button
-                    onClick={onMenuOpen}
+                    onClick={open}
                     className="flex flex-1 flex-col items-center justify-center gap-1 py-3 text-xs text-neutral-900 cursor-pointer"
                 >
                     <Menu className="h-5 w-5" />
