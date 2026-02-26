@@ -1,3 +1,4 @@
+import type { Order } from '@interfaces/order.interface.ts';
 import type { MutationForm } from '@interfaces/form.interface';
 import type { FC } from 'react';
 
@@ -13,7 +14,6 @@ import { queryClient } from '@lib/query-client';
 import { createOrder } from '@lib/api/orders.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Order} from "@interfaces/order.interface.ts";
 
 const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -33,7 +33,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         onError: (err: Error) => setError(err.message || 'Failed to create order'),
     });
 
-    const handleSubmit = (data: any) => {
+    const handleSubmit = (data: Order) => {
         createMutation.mutate(data);
     };
 

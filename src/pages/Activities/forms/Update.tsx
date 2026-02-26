@@ -1,3 +1,4 @@
+import type { Activity } from '@interfaces/activity.interface.ts';
 import type { MutationForm } from '@interfaces/form.interface';
 import type { UpdateQuery } from '@interfaces/query.interface';
 import type { FC } from 'react';
@@ -18,7 +19,6 @@ import { queryClient } from '@lib/query-client';
 import { updateActivity } from '@lib/api/activities.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Activity} from "@interfaces/activity.interface.ts";
 
 const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -64,7 +64,11 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                     <Field name="description" label={i18n('pages.activities.form.description')}>
                         <TextArea name="description" rows={3} />
                     </Field>
-                    <Actions submitLabel={i18n('literal.update')} onCancel={handleCancel} isLoading={updateMutation.isPending} />
+                    <Actions
+                        submitLabel={i18n('literal.update')}
+                        onCancel={handleCancel}
+                        isLoading={updateMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>

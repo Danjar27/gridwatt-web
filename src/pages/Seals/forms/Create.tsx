@@ -1,4 +1,5 @@
 import type { MutationForm } from '@interfaces/form.interface';
+import type { Seal } from '@interfaces/seal.interface.ts';
 import type { FC } from 'react';
 
 import PrefixedIdInput from '@components/Form/blocks/PrefixedIdInput';
@@ -18,7 +19,6 @@ import { queryClient } from '@lib/query-client';
 import { createSeal } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Seal} from "@interfaces/seal.interface.ts";
 
 const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -31,6 +31,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         mutationFn: (data: Partial<Seal>) => createSeal(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['seals'] });
+            closeCreate();
             onSubmit?.();
         },
         onError: (err: Error) => setError(err.message || i18n('errors.common')),

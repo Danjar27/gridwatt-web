@@ -1,3 +1,4 @@
+import type { Material } from '@interfaces/material.interface.ts';
 import type { MutationForm } from '@interfaces/form.interface';
 import type { FC } from 'react';
 
@@ -19,7 +20,6 @@ import { queryClient } from '@lib/query-client';
 import { createMaterial } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Material} from "@interfaces/material.interface.ts";
 
 const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -32,6 +32,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         mutationFn: (data: Partial<Material>) => createMaterial(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['materials'] });
+            closeCreate();
             onSubmit?.();
         },
         onError: (err: Error) => setError(err.message || i18n('errors.common')),
@@ -48,11 +49,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="new-material" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
-            <Window
-                title={i18n('pages.materials.form.create')}
-                className="w-full max-w-150 px-4"
-                icon={PackageIcon}
-            >
+            <Window title={i18n('pages.materials.form.create')} className="w-full max-w-150 px-4" icon={PackageIcon}>
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit} defaultValues={{ allowsDecimals: false, isActive: true }}>
                     <Field name="id" label={i18n('pages.materials.form.id')} required>
