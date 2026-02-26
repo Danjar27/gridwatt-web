@@ -13,9 +13,9 @@
     --neutral-800: #B8B8B8;
     --neutral-900: #8F8F8F;
 
-    --primary-500: #2C423F;
-    --primary-600: #293D3A;
-    --primary-700: #21312F;
+    --primary-500: #15387A;
+    --primary-600: #0F2857;
+    --primary-700: #091834;
 
     --secondary-500: #FF6F43;
     --secondary-600: #9D391B;
@@ -30,15 +30,15 @@
 
 
 .dark {
-    --neutral-500: #1E1D21;
-    --neutral-600: #28272C;
-    --neutral-700: #3A3840;
-    --neutral-800: #6E6C78;
-    --neutral-900: #D1CFD9;
+    --neutral-500: #29282A;
+    --neutral-600: #333234;
+    --neutral-700: #474649;
+    --neutral-800: #656468;
+    --neutral-900: #8E8D91;
 
-    --primary-500: #3A413D;
-    --primary-600: #303633;
-    --primary-700: #1D201F;
+    --primary-500: #F3752B;
+    --primary-600: #F4813E;
+    --primary-700: #F69A65;
 
     --secondary-500: #FF8560;
     --secondary-600: #C4553A;
@@ -105,58 +105,6 @@
 }
 
 @layer base {
-    button,
-    a,
-    input,
-    select,
-    textarea,
-    [tabindex]:not([tabindex='-1']) {
-        position: relative;
-    }
-
-    /* Focus ring for elements that shouldn't use absolute ::after (like inputs) */
-    input:focus-visible,
-    select:focus-visible,
-    textarea:focus-visible {
-        outline: none !important;
-        box-shadow: 0 0 0 4px transparent,
-        0 0 0 5px white,
-        0 0 0 7px var(--color-primary-500) !important;
-        border-radius: inherit;
-    }
-
-    /* Remove ::after for input-like elements as they can't have them or it's broken */
-    input::after,
-    select::after,
-    textarea::after {
-        display: none;
-    }
-
-    button:focus-visible::after,
-    a:focus-visible::after,
-    [tabindex]:not([tabindex='-1']):focus-visible::after {
-        opacity: 1;
-        box-shadow: 0 0 0 1px white,
-        0 0 0 3px var(--color-primary-500) !important;
-    }
-
-    button::after,
-    a::after,
-    [tabindex]:not([tabindex='-1'])::after {
-        content: '';
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        bottom: -4px;
-        left: -4px;
-        pointer-events: none;
-        border-radius: inherit;
-        box-shadow: 0 0 0 0 white,
-        0 0 0 0 var(--color-primary-500);
-        z-index: 10;
-        opacity: 0;
-    }
-
     button:focus-visible,
     a:focus-visible,
     input:focus-visible,
@@ -164,6 +112,7 @@
     textarea:focus-visible,
     [tabindex]:not([tabindex='-1']):focus-visible {
         outline: none !important;
+        border-color: var(--primary-500) !important;
     }
 }
 

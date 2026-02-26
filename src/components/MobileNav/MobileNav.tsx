@@ -46,7 +46,7 @@ const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
     const items = PINNED_BY_ROLE[user.role?.name] ?? [];
 
     return (
-        <nav className="shrink-0 flex flex-col s992:hidden bg-neutral-500 border-t border-neutral-800 h-20">
+        <nav className="shrink-0 flex flex-col s992:hidden bg-neutral-500 border-t border-neutral-800 h-16.25">
             <div className="flex">
                 {items.map((item) => {
                     const isActive = location.pathname.startsWith(item.href);
@@ -59,7 +59,7 @@ const MobileNav: FC<MobileNavProps> = ({ onMenuOpen }) => {
                             className={classnames(
                                 'flex flex-1 flex-col items-center justify-center gap-1 py-3 text-xs',
                                 {
-                                    'text-primary-500 dark:text-neutral-900': isActive,
+                                    'text-primary-500': isActive,
                                     'text-neutral-900/50': !isActive,
                                 }
                             )}
