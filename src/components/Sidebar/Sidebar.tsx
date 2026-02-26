@@ -2,22 +2,22 @@ import type { SidebarProps } from './Sidebar.interface.ts';
 import type { FC } from 'react';
 
 import { getAvailableRoutesByRole } from '@components/Sidebar/utils/data.ts';
-import { useSidebarContext } from '@context/sidebar/context';
+import { useSidebarActions, useSidebarContext } from '@context/sidebar/context';
 import { useAuthContext } from '@context/auth/context.ts';
 import { classnames } from '@utils/classnames.ts';
 import { useTranslations } from 'use-intl';
 
 import Surface from '@components/Sidebar/blocks/Surface';
 import User from '@components/Sidebar/blocks/User';
-import Toolbar from '@components/Toolbar/Toolbar';
 import SidebarSection from './blocks/Section';
 import Logo from '@components/atoms/Logo';
 import Item from './blocks/Item';
 
-const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
+const Sidebar: FC<SidebarProps> = ({ className }) => {
     const i18n = useTranslations();
 
-    const { collapsed } = useSidebarContext();
+    const { isCollapsed, isOpen } = useSidebarContext();
+    const { close } = useSidebarActions();
     const { user } = useAuthContext();
 
     if (!user) {
@@ -28,7 +28,7 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
 
     return (
         <>
-            <Surface open={open} onClose={onClose} />
+            <Surface open={isOpen} onClose={close} />
             <aside
                 className={classnames(
                     'flex shrink-0 flex-col justify-between overflow-hidden',
@@ -36,11 +36,12 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
                     'transition-[transform,width] duration-200 ease-in-out',
                     's992:static s992:translate-x-0 s992:rounded-lg',
                     {
-                        'translate-x-0': open,
-                        '-translate-x-full': !open,
-                        's992:w-54': !collapsed,
-                        's992:w-14': collapsed,
-                    }
+                        'translate-x-0': isOpen,
+                        '-translate-x-full': !isOpen,
+                        's992:w-54': !isCollapsed,
+                        's992:w-14': isCollapsed,
+                    },
+                    className
                 )}
             >
                 <div className="flex flex-col gap-2">
@@ -49,7 +50,7 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
                         <span
                             className={classnames(
                                 'text-base font-semibold whitespace-nowrap overflow-hidden',
-                                collapsed && 's992:max-w-0'
+                                isCollapsed && 's992:max-w-0'
                             )}
                         >
                             {i18n('brand')}
@@ -58,12 +59,12 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
 
                     <nav className="flex flex-col gap-3 px-2">
                         {sections.map((section) => (
-                            <SidebarSection key={section.name} title={i18n(section.label)} collapsed={collapsed}>
+                            <SidebarSection key={section.name} title={i18n(section.label)} collapsed={isCollapsed}>
                                 {section.routes.map(({ name, href, icon: Icon, label }) => (
                                     <Item
                                         key={name}
                                         href={href}
-                                        onClick={onClose}
+                                        onClick={close}
                                         icon={<Icon width={20} height={20} weight="duotone" />}
                                         label={i18n(label)}
                                     />
@@ -73,10 +74,7 @@ const Sidebar: FC<SidebarProps> = ({ open, onClose }) => {
                     </nav>
                 </div>
 
-                <div className="flex flex-col gap-3 px-2">
-                    <Toolbar />
-                    <User />
-                </div>
+                <User />
             </aside>
         </>
     );

@@ -1,27 +1,23 @@
 import type { Role } from '@interfaces/user.interface.ts';
 import type { Icon } from '@phosphor-icons/react';
+import type { ReactNode } from 'react';
 
 export interface ItemProps {
     className?: string;
     href: string;
     onClick?: () => void;
+    icon: ReactNode;
+    label: string;
 }
 
 export interface SectionProps {
     title: string;
+    collapsed?: boolean;
 }
 
-export interface MobileSidebarProps {
-    className?: string;
-    open: boolean;
-    onClose: () => void;
-}
-
-export interface DesktopSidebarProps {
+export interface SidebarProps {
     className?: string;
 }
-
-export type SidebarProps = MobileSidebarProps & DesktopSidebarProps;
 
 interface Route {
     name: string;
