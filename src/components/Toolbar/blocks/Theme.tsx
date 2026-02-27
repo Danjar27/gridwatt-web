@@ -8,7 +8,7 @@ const Theme = () => {
 
     return (
         <button
-            className="cursor-pointer hover:bg-neutral-500 p-2 flex justify-center items-center rounded-lg"
+            className="cursor-pointer p-2 flex justify-center items-center rounded-lg text-neutral-900 hover:bg-neutral-500 hover:text-black dark:hover:text-white transition-colors duration-200"
             onClick={toggleTheme}
         >
             <Visible when={theme === 'dark'}>
