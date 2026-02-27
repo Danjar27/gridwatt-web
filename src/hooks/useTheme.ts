@@ -12,13 +12,13 @@ export const useTheme = () => {
     const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
 
     useEffect(() => {
-        const themeStr = theme.toString();
+        const themeValue = theme.toString();
         document.body.classList.remove('light', 'dark');
-        document.body.classList.add(themeStr);
+        document.body.classList.add(themeValue);
 
         const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
         if (meta) {
-            meta.content = THEME_COLORS[themeStr] ?? THEME_COLORS.light;
+            meta.content = THEME_COLORS[themeValue] ?? THEME_COLORS.light;
         }
     }, [theme]);
 
