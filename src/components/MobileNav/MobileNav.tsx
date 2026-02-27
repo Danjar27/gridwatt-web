@@ -1,13 +1,20 @@
 import type { FC } from 'react';
 import type { Icon } from '@phosphor-icons/react';
 
-import { HouseIcon, TruckIcon, BagSimpleIcon, AddressBookIcon, UsersIcon, UserIcon } from '@phosphor-icons/react';
+import {
+    HouseIcon,
+    TruckIcon,
+    BagSimpleIcon,
+    AddressBookIcon,
+    UsersIcon,
+    UserIcon,
+    ListIcon,
+} from '@phosphor-icons/react';
 import { useSidebarActions } from '@context/sidebar/context.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 import { Link, useLocation } from 'react-router-dom';
 import { classnames } from '@utils/classnames.ts';
 import { useTranslations } from 'use-intl';
-import { Menu } from 'lucide-react';
 
 interface NavItem {
     href: string;
@@ -71,7 +78,7 @@ const MobileNav: FC = () => {
                     onClick={open}
                     className="flex flex-1 flex-col items-center justify-center gap-1 py-3 text-xs text-neutral-900 cursor-pointer"
                 >
-                    <Menu className="h-5 w-5" />
+                    <ListIcon size={20} className="h-5 w-5" weight="duotone" />
                     <span>{i18n('sidebar.menu')}</span>
                 </button>
             </div>

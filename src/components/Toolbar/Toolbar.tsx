@@ -9,7 +9,7 @@ import Logout from '@components/Toolbar/blocks/Logout';
 import Theme from './blocks/Theme';
 
 const Toolbar: FC<ToolbarProps> = ({ className }) => {
-    const { collapsed } = useSidebarContext();
+    const { isCollapsed } = useSidebarContext();
 
     return (
         <div className={classnames('flex gap-2', className)}>
@@ -17,7 +17,7 @@ const Toolbar: FC<ToolbarProps> = ({ className }) => {
                 className={classnames(
                     'flex w-full rounded-lg justify-center items-center gap-2',
                     'flex-row',
-                    collapsed && 's992:flex-col'
+                    isCollapsed && 's992:flex-col'
                 )}
             >
                 <Refresh />

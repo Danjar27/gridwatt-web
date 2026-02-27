@@ -8,6 +8,7 @@ import { classnames } from '@utils/classnames.ts';
 import { useTranslations } from 'use-intl';
 
 import Surface from '@components/Sidebar/blocks/Surface';
+import Toolbar from '@components/Toolbar/Toolbar';
 import User from '@components/Sidebar/blocks/User';
 import SidebarSection from './blocks/Section';
 import Logo from '@components/atoms/Logo';
@@ -33,7 +34,7 @@ const Sidebar: FC<SidebarProps> = ({ className }) => {
                 className={classnames(
                     'flex shrink-0 flex-col justify-between overflow-hidden',
                     'fixed top-0 left-0 z-50 h-full bg-neutral-600 w-64 py-4',
-                    'transition-[transform,width] duration-200 ease-in-out',
+                    'transition-[translate,width] duration-200 ease-in-out',
                     's992:static s992:translate-x-0 s992:rounded-lg',
                     {
                         'translate-x-0': isOpen,
@@ -74,7 +75,12 @@ const Sidebar: FC<SidebarProps> = ({ className }) => {
                     </nav>
                 </div>
 
-                <User />
+                <div className="flex flex-col gap-5 px-2">
+                    <div className="inline s992:hidden">
+                        <Toolbar />
+                    </div>
+                    <User />
+                </div>
             </aside>
         </>
     );

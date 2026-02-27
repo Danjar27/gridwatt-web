@@ -1,8 +1,10 @@
 import type { FC, PropsWithChildren } from 'react';
-import { Link } from 'react-router-dom';
+
 import { ArrowLeftIcon } from '@phosphor-icons/react';
-import Connection from '@components/Toolbar/blocks/Connection';
 import { classnames } from '@utils/classnames.ts';
+import { Link } from 'react-router-dom';
+
+import Breadcrumb from '@components/Breadcrumb/Breadcrumb';
 
 interface Props {
     id: string;
@@ -13,23 +15,22 @@ interface Props {
 }
 
 const Page: FC<PropsWithChildren<Props>> = ({ id, children, title, subtitle, backRoute, className }) => (
-    <section id={id} className={classnames('relative flex flex-col gap-10', className)}>
-        <div className="flex flex-col gap-2">
-            {backRoute && (
-                <Link
-                    to={backRoute}
-                    className="flex items-center gap-1.5 text-sm text-primary-500 w-fit mb-1"
-                >
-                    <ArrowLeftIcon size={16} />
-                    Back
-                </Link>
-            )}
-            <h1 className="text-3xl font-bold capitalize">{title}</h1>
-            <h2 className="text-sm text-neutral-900">{subtitle}</h2>
+    <section id={id} className={classnames('flex flex-col gap-8 s992:gap-10', className)}>
+        {/* Page header */}
+        <div className="flex flex-col gap-3">
+            <Breadcrumb />
+            <div className="flex flex-col gap-2">
+                {backRoute && (
+                    <Link to={backRoute} className="flex items-center gap-1.5 text-sm text-primary-500 w-fit">
+                        <ArrowLeftIcon size={14} />
+                        Back
+                    </Link>
+                )}
+                <h1 className="text-3xl font-bold capitalize">{title}</h1>
+                {subtitle && <p className="text-sm text-neutral-900">{subtitle}</p>}
+            </div>
         </div>
-        <div className=" hidden s992:flex rounded p-1 px-2 absolute top-0 right-0">
-            <Connection />
-        </div>
+
         {children}
     </section>
 );
