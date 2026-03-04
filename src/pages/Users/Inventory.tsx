@@ -11,7 +11,6 @@ import Create from '@pages/Users/forms/Create';
 import Update from '@pages/Users/forms/Update';
 import Delete from '@pages/Users/forms/Delete';
 import ResetPassword from '@pages/Users/forms/ResetPassword';
-import ChangeRole from '@pages/Users/forms/ChangeRole';
 import Summary from '@components/Summary/Summary';
 
 const Inventory = () => {
@@ -45,7 +44,6 @@ const Inventory = () => {
             <Update />
             <Delete />
             <ResetPassword />
-            <ChangeRole />
         </div>
     );
 };

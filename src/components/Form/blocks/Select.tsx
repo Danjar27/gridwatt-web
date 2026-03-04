@@ -13,12 +13,7 @@ const Select: FC<SelectProps> = ({ name, rules, options, disabled }) => {
             control={control}
             rules={rules}
             render={({ field }) => (
-                <Dropdown
-                    value={field.value ?? ''}
-                    onChange={field.onChange}
-                    options={options}
-                    disabled={disabled}
-                />
+                <Dropdown value={field.value ?? ''} onChange={field.onChange} options={options} disabled={disabled} />
             )}
         />
     );
