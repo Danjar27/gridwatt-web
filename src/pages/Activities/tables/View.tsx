@@ -35,9 +35,14 @@ const ViewTable = () => {
             cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
         },
         {
-            accessorKey: 'description',
-            header: i18n('pages.activities.form.description'),
-            cell: ({ row }) => <div className="text-sm truncate">{row.original.description || '-'}</div>,
+            accessorKey: 'contractPrice',
+            header: i18n('pages.activities.form.contractPrice'),
+            cell: ({ row }) => <div className="text-sm">{row.original.contractPrice ?? '-'}</div>,
+        },
+        {
+            accessorKey: 'technicianPrice',
+            header: i18n('pages.activities.form.technicianPrice'),
+            cell: ({ row }) => <div className="text-sm">{row.original.technicianPrice ?? '-'}</div>,
         },
         {
             id: 'actions',

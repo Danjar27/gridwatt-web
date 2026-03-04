@@ -2,8 +2,8 @@ import type { MutationForm } from '@interfaces/form.interface';
 import type { FC } from 'react';
 
 import PrefixedIdInput from '@components/Form/blocks/PrefixedIdInput';
+import NumberInput from '@components/Form/blocks/NumberInput';
 import TextInput from '@components/Form/blocks/TextInput';
-import TextArea from '@components/Form/blocks/TextArea';
 import FormError from '@components/Form/blocks/Error';
 import Actions from '@components/Form/blocks/Actions';
 import Window from '@components/Modal/blocks/Window';
@@ -59,9 +59,14 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                     <Field name="name" label={i18n('pages.activities.form.name')} required>
                         <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
-                    <Field name="description" label={i18n('pages.activities.form.description')}>
-                        <TextArea name="description" rows={3} />
-                    </Field>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Field name="contractPrice" label={i18n('pages.activities.form.contractPrice')} required>
+                            <NumberInput name="contractPrice" step="any" min={0} rules={{ required: i18n('errors.required') }} />
+                        </Field>
+                        <Field name="technicianPrice" label={i18n('pages.activities.form.technicianPrice')} required>
+                            <NumberInput name="technicianPrice" step="any" min={0} rules={{ required: i18n('errors.required') }} />
+                        </Field>
+                    </div>
                     <Actions
                         submitLabel={i18n('literal.create')}
                         onCancel={handleCancel}

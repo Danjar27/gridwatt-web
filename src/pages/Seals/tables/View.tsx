@@ -44,26 +44,6 @@ const ViewTable = () => {
             ),
         },
         {
-            accessorKey: 'description',
-            header: i18n('pages.seals.form.description'),
-            cell: ({ row }) => <div className="text-sm text-muted-foreground">{row.original.description || '-'}</div>,
-        },
-        {
-            accessorKey: 'isActive',
-            header: i18n('pages.seals.form.isActive'),
-            cell: ({ row }) => (
-                <span
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        row.original.isActive
-                            ? 'bg-green-100 text-green-700 border border-green-200'
-                            : 'bg-gray-100 text-gray-600 border border-gray-200'
-                    }`}
-                >
-                    {row.original.isActive ? i18n('literal.active') : i18n('literal.inactive')}
-                </span>
-            ),
-        },
-        {
             id: 'actions',
             header: i18n('literal.actions'),
             cell: ({ row }) => (

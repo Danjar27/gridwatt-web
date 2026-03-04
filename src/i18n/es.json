@@ -122,7 +122,8 @@
                 "delete": "Eliminar Actividad",
                 "id": "Identificador",
                 "name": "Nombre",
-                "description": "Descripción"
+                "contractPrice": "Precio contractual",
+                "technicianPrice": "Precio técnico"
             },
             "summary": {
                 "title": "Todas las actividades",
@@ -140,11 +141,7 @@
                 "delete": "Eliminar Material",
                 "id": "Identificador",
                 "name": "Nombre",
-                "type": "Tipo",
-                "unit": "Unidad",
-                "description": "Descripción",
-                "allowsDecimals": "Permite decimales",
-                "isActive": "Estado"
+                "unit": "Unidad"
             },
             "summary": {
                 "title": "Todos los materiales",
@@ -162,9 +159,7 @@
                 "delete": "Eliminar Sello",
                 "id": "Identificador",
                 "name": "Nombre",
-                "type": "Tipo",
-                "description": "Descripción",
-                "isActive": "Estado"
+                "type": "Tipo"
             },
             "summary": {
                 "title": "Todos los sellos",

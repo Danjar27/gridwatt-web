@@ -4,7 +4,6 @@ import type { FC } from 'react';
 
 import PrefixedIdInput from '@components/Form/blocks/PrefixedIdInput';
 import TextInput from '@components/Form/blocks/TextInput';
-import TextArea from '@components/Form/blocks/TextArea';
 import FormError from '@components/Form/blocks/Error';
 import Actions from '@components/Form/blocks/Actions';
 import Window from '@components/Modal/blocks/Window';
@@ -59,9 +58,6 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                     </Field>
                     <Field name="type" label={i18n('pages.seals.form.type')} required>
                         <TextInput name="type" rules={{ required: i18n('errors.required') }} />
-                    </Field>
-                    <Field name="description" label={i18n('pages.seals.form.description')}>
-                        <TextArea name="description" rows={3} />
                     </Field>
                     <Actions
                         submitLabel={i18n('literal.create')}

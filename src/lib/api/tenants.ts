@@ -10,8 +10,7 @@ export const getTenants = async (params?: PaginatedQuery) =>
 export const createTenant = async (data: { name: string; code: string }) =>
     request<Tenant>('/tenants', { method: 'POST', body: JSON.stringify(data) });
 
-export const updateTenant = async (id: number, data: { name?: string; slug?: string; isActive?: boolean }) =>
+export const updateTenant = async (id: number, data: { name?: string; slug?: string }) =>
     request<Tenant>(`/tenants/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 
-export const deleteTenant = async (id: number) =>
-    request<Tenant>(`/tenants/${id}`, { method: 'DELETE' });
+export const deleteTenant = async (id: number) => request<Tenant>(`/tenants/${id}`, { method: 'DELETE' });

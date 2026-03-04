@@ -1,8 +1,8 @@
 export interface Activity {
     id: string;
     name: string;
-    description?: string;
-    isActive?: boolean;
+    contractPrice?: number;
+    technicianPrice?: number;
 }
 
 export interface JobActivity {

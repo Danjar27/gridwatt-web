@@ -35,20 +35,6 @@ const ViewTable = () => {
             cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
         },
         {
-            accessorKey: 'description',
-            header: i18n('pages.materials.form.description'),
-            cell: ({ row }) => <div className="text-sm text-muted-foreground">{row.original.description}</div>,
-        },
-        {
-            accessorKey: 'type',
-            header: i18n('pages.materials.form.type'),
-            cell: ({ row }) => (
-                <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                    {row.original.type}
-                </span>
-            ),
-        },
-        {
             accessorKey: 'unit',
             header: i18n('pages.materials.form.unit'),
             cell: ({ row }) => <div className="text-sm">{row.original.unit}</div>,

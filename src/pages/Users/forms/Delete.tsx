@@ -29,7 +29,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             closeDelete();
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to delete user'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleConfirm = () => {
