@@ -23,7 +23,6 @@ interface CreateRangeProps {
 
 interface RangeFormData {
     type: string;
-    namePrefix?: string;
     from: number;
     to: number;
 }
@@ -69,9 +68,6 @@ const CreateRange: FC<CreateRangeProps> = ({ isOpen, onClose }) => {
                         <Form key="seal-range" onSubmit={handleSubmit}>
                             <Field name="type" label={i18n('pages.seals.form.type')} required>
                                 <TextInput name="type" rules={{ required: i18n('errors.required') }} />
-                            </Field>
-                            <Field name="namePrefix" label={i18n('pages.seals.form.namePrefix')}>
-                                <TextInput name="namePrefix" />
                             </Field>
                             <Field name="from" label={i18n('pages.seals.form.fromNumber')} required>
                                 <NumberInput

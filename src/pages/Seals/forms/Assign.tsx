@@ -1,6 +1,5 @@
 import type { FC } from 'react';
 
-import NumberInput from '@components/Form/blocks/NumberInput';
 import FormError from '@components/Form/blocks/Error';
 import Actions from '@components/Form/blocks/Actions';
 import Window from '@components/Modal/blocks/Window';
@@ -25,8 +24,6 @@ interface AssignProps {
 
 interface AssignFormData {
     technicianId: string;
-    fromNumber: number;
-    toNumber: number;
 }
 
 const Assign: FC<AssignProps> = ({ isOpen, onClose }) => {
@@ -44,10 +41,11 @@ const Assign: FC<AssignProps> = ({ isOpen, onClose }) => {
     const assignMutation = useMutation({
         mutationFn: (data: AssignFormData) => {
             if (!selected) throw new Error(i18n('errors.common'));
+            // Single-seal: fromNumber and toNumber both equal the seal's own id (the sequential number)
             return assignSeal(selected.id, {
                 technicianId: Number(data.technicianId),
-                fromNumber: Number(data.fromNumber),
-                toNumber: Number(data.toNumber),
+                fromNumber: selected.id,
+                toNumber: selected.id,
             });
         },
         onSuccess: async () => {
@@ -79,8 +77,10 @@ const Assign: FC<AssignProps> = ({ isOpen, onClose }) => {
 
                 {selected && (
                     <p className="mb-4 text-sm text-neutral-400">
-                        {selected.name}{' '}
-                        <span className="font-mono text-xs text-neutral-500">({selected.id})</span>
+                        {i18n('pages.seals.form.id')}:{' '}
+                        <span className="font-mono font-medium text-neutral-200">{selected.id}</span>
+                        {' · '}
+                        <span className="text-neutral-500">{selected.type}</span>
                     </p>
                 )}
 
@@ -90,22 +90,6 @@ const Assign: FC<AssignProps> = ({ isOpen, onClose }) => {
                             name="technicianId"
                             options={technicianOptions}
                             rules={{ required: i18n('errors.required') }}
-                        />
-                    </Field>
-                    <Field name="fromNumber" label={i18n('pages.seals.form.fromSealNumber')} required>
-                        <NumberInput
-                            name="fromNumber"
-                            step="1"
-                            min={1}
-                            rules={{ required: i18n('errors.required'), min: { value: 1, message: '≥ 1' } }}
-                        />
-                    </Field>
-                    <Field name="toNumber" label={i18n('pages.seals.form.toSealNumber')} required>
-                        <NumberInput
-                            name="toNumber"
-                            step="1"
-                            min={1}
-                            rules={{ required: i18n('errors.required'), min: { value: 1, message: '≥ 1' } }}
                         />
                     </Field>
                     <Actions

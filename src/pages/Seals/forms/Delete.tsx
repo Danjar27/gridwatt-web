@@ -55,7 +55,7 @@ const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <Form key={selected.id} onSubmit={handleConfirm}>
                     <div className="flex flex-col items-center gap-3 py-4 text-center">
                         <SealWarningIcon size={40} className="text-secondary-500" weight="duotone" />
-                        <p className="text-sm">{i18n('common.confirmation', { name: selected.name })}</p>
+                        <p className="text-sm">{i18n('common.confirmation', { name: String(selected.id) })}</p>
                     </div>
                     <Actions
                         submitLabel={i18n('literal.delete')}

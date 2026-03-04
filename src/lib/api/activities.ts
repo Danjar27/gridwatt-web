@@ -42,3 +42,27 @@ export const importActivities = async (file: File) => {
         total: number;
     }>('/activities/import', formData);
 };
+
+export interface ActivityPreviewRow {
+    row: number;
+    data: { id: string; name: string; contractPrice?: number; technicianPrice?: number };
+    errors: Array<{ field: string; reason: string }>;
+}
+
+export interface ActivityCommitResult {
+    created: number;
+    updated: number;
+    errors: number;
+    total: number;
+}
+
+export const previewActivitiesImport = async (file: File): Promise<ActivityPreviewRow[]> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return uploadFile<ActivityPreviewRow[]>('/activities/import/preview', formData);
+};
+
+export const commitActivitiesImport = async (
+    rows: Array<{ id: string; name: string; contractPrice?: number; technicianPrice?: number }>
+): Promise<ActivityCommitResult> =>
+    request<ActivityCommitResult>('/activities/import/commit', { method: 'POST', body: JSON.stringify({ rows }) });

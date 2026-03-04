@@ -18,6 +18,7 @@ import { queryClient } from '@lib/query-client';
 import { updateSeal } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
+import NumberInput from '@components/Form/blocks/NumberInput.tsx';
 
 const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -27,7 +28,7 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: UpdateQuery<Seal>) => updateSeal(id, data),
+        mutationFn: ({ id, data }: UpdateQuery<Seal>) => updateSeal(Number(id), data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['seals'] });
             closeUpdate();
@@ -53,13 +54,9 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         <Modal id="update-seal" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
             <Window title={i18n('pages.seals.form.update')} className="w-full max-w-150 px-4" icon={SealIcon}>
                 <FormError message={error} />
-                <Form
-                    key={selected.id}
-                    onSubmit={handleSubmit}
-                    defaultValues={selected}
-                >
-                    <Field name="name" label={i18n('pages.seals.form.name')} required>
-                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
+                <Form key={selected.id} onSubmit={handleSubmit} defaultValues={selected}>
+                    <Field name="id" label={i18n('pages.seals.form.id')} required>
+                        <NumberInput name="id" rules={{ required: i18n('errors.required') }} />
                     </Field>
                     <Field name="type" label={i18n('pages.seals.form.type')} required>
                         <TextInput name="type" rules={{ required: i18n('errors.required') }} />

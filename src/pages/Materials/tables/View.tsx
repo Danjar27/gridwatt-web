@@ -2,7 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { FC } from 'react';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
-import { PencilSimpleIcon, TrashIcon, UserPlusIcon } from '@phosphor-icons/react';
+import { PencilSimpleIcon, TrashIcon, UserPlusIcon, ArrowLineDownIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from '../utils/context.ts';
 import { getMaterials } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
@@ -12,9 +12,10 @@ import type { Material } from '@interfaces/material.interface.ts';
 
 interface ViewTableProps {
     onAssign?: (material: Material) => void;
+    onIngress?: (material: Material) => void;
 }
 
-const ViewTable: FC<ViewTableProps> = ({ onAssign }) => {
+const ViewTable: FC<ViewTableProps> = ({ onAssign, onIngress }) => {
     const i18n = useTranslations();
     const { select, openUpdate, openDelete } = useInventoryActions();
 
@@ -31,6 +32,11 @@ const ViewTable: FC<ViewTableProps> = ({ onAssign }) => {
     const handleAssign = (material: Material) => {
         select(material);
         onAssign?.(material);
+    };
+
+    const handleIngress = (material: Material) => {
+        select(material);
+        onIngress?.(material);
     };
 
     const columns: Array<ColumnDef<Material>> = [
@@ -63,6 +69,9 @@ const ViewTable: FC<ViewTableProps> = ({ onAssign }) => {
             header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
+                    <button onClick={() => handleIngress(row.original)} className="cursor-pointer" title={i18n('pages.materials.form.ingress')}>
+                        <ArrowLineDownIcon weight="duotone" className="text-blue-400" width={20} height={20} />
+                    </button>
                     <button onClick={() => handleAssign(row.original)} className="cursor-pointer" title={i18n('pages.materials.form.assign')}>
                         <UserPlusIcon weight="duotone" className="text-green-500" width={20} height={20} />
                     </button>

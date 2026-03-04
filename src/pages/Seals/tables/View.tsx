@@ -37,12 +37,7 @@ const ViewTable: FC<ViewTableProps> = ({ onAssign }) => {
         {
             accessorKey: 'id',
             header: i18n('pages.seals.form.id'),
-            cell: ({ row }) => <div className="font-mono text-sm">{row.original.id}</div>,
-        },
-        {
-            accessorKey: 'name',
-            header: i18n('pages.seals.form.name'),
-            cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
+            cell: ({ row }) => <div className="font-mono text-sm font-medium">{row.original.id}</div>,
         },
         {
             accessorKey: 'type',

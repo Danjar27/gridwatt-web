@@ -22,7 +22,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     const queryClient = useQueryClient();
     const i18n = useTranslations();
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedSealId, setSelectedSealId] = useState('');
+    const [selectedSealId, setSelectedSealId] = useState<number | ''>('');
 
     const { data: sealsData } = useQuery({
         queryKey: ['seals'],
@@ -32,7 +32,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
-        mutationFn: (sealId: string) => addJobSeal(jobId, sealId),
+        mutationFn: (sealId: number) => addJobSeal(jobId, String(sealId)),
         onMutate: async (sealId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
@@ -40,7 +40,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
             const tempJobSeal: JobSeal = {
                 id: `temp-${Date.now()}`,
                 jobId,
-                sealId,
+                sealId: Number(sealId),
                 seal: seal ?? undefined,
             };
             const pendingSync = !isOnline();
@@ -95,7 +95,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     });
 
     const addedIds = new Set(jobSeals.map((js) => js.sealId));
-    const availableSeals = sealsData?.data.filter((s) => s.isActive && !addedIds.has(s.id)) ?? [];
+    const availableSeals = sealsData?.data.filter((s) => !addedIds.has(s.id)) ?? [];
 
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
@@ -113,7 +113,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                             key={js.id}
                             className="flex items-center gap-1 rounded-full bg-primary-500/20 px-3 py-1 text-sm text-primary-500"
                         >
-                            {js.seal?.name}
+                            {js.seal ? `#${js.seal.id} — ${js.seal.type}` : `#${js.sealId}`}
                             <button
                                 onClick={() => removeMutation.mutate(js.id)}
                                 disabled={removeMutation.isPending}
@@ -133,20 +133,20 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                 <div className="space-y-4">
                     <select
                         value={selectedSealId}
-                        onChange={(e) => setSelectedSealId(e.target.value)}
+                        onChange={(e) => setSelectedSealId(e.target.value === '' ? '' : Number(e.target.value))}
                         className={INPUT_CLASS}
                     >
                         <option value="">{i18n('pages.jobDetail.seals.select')}</option>
                         {availableSeals.map((s) => (
                             <option key={s.id} value={s.id}>
-                                {s.name}
+                                #{s.id} — {s.type}
                             </option>
                         ))}
                     </select>
                     <Button
                         variant="solid"
-                        disabled={!selectedSealId || addMutation.isPending}
-                        onClick={() => selectedSealId && addMutation.mutate(selectedSealId)}
+                        disabled={selectedSealId === '' || addMutation.isPending}
+                        onClick={() => selectedSealId !== '' && addMutation.mutate(Number(selectedSealId))}
                     >
                         {i18n('literal.add')}
                     </Button>

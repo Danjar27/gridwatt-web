@@ -192,14 +192,7 @@ const CreateOrderPage = () => {
                                                 </Field>
                                             </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <Field name="coordinateX" label={i18n('pages.orders.form.fields.coordinateX')}>
-                                                    <NumberInput name="coordinateX" />
-                                                </Field>
-                                                <Field name="coordinateY" label={i18n('pages.orders.form.fields.coordinateY')}>
-                                                    <NumberInput name="coordinateY" />
-                                                </Field>
-                                            </div>
+
                                         </div>
                                     </Summary>
                                 </div>
