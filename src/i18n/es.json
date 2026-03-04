@@ -289,6 +289,24 @@
                 "title": "Todas las órdenes",
                 "subtitle": "Lista de órdenes registradas",
                 "total": "Total de órdenes: {count}"
+            },
+            "map": {
+                "drawArea": "Dibujar área",
+                "cancelDraw": "Cancelar dibujo",
+                "drawHint": "Clic para vértices · Mantén y arrastra para forma libre · Doble clic para cerrar",
+                "editShapeHint": "Arrastra los vértices para editar la forma",
+                "saveShape": "Guardar forma",
+                "cancelEdit": "Cancelar",
+                "unassigned": "Sin asignar"
+            },
+            "areas": {
+                "title": "Configurar área",
+                "editTitle": "Modificar área",
+                "technician": "Técnico asignado",
+                "noTechnician": "Sin técnico asignado",
+                "deleteConfirm": "¿Eliminar esta área? Las órdenes asignadas a través de ella serán desasignadas.",
+                "editShape": "Editar forma",
+                "delete": "Eliminar área"
             }
         },
         "jobs": {
