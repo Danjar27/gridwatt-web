@@ -34,3 +34,17 @@ export const toggleSealActive = async (id: string) =>
         { method: 'PATCH' },
         { type: 'seal', action: 'toggle-active', optimisticData: { id } }
     );
+
+export const createSealRange = async (data: { type: string; namePrefix?: string; from: number; to: number }) =>
+    request<{ requested: number; created: number; skipped: number }>(
+        '/seals/range',
+        { method: 'POST', body: JSON.stringify(data) }
+    );
+
+export const assignSeal = async (
+    id: string,
+    data: { technicianId: number; fromNumber: number; toNumber: number }
+) => request<{ sealId: string; technicianId: number; fromNumber: number; toNumber: number }>(
+    `/seals/${id}/assign`,
+    { method: 'POST', body: JSON.stringify(data) }
+);

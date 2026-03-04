@@ -15,7 +15,8 @@
         "inactive": "Inactivo",
         "add": "Agregar",
         "edit": "Editar",
-        "refresh": "Actualizar datos"
+        "refresh": "Actualizar datos",
+        "close": "Cerrar"
     },
     "common": {
         "confirmation": "Esta acción no se puede deshacer. ¿Deseas continuar?"
@@ -25,6 +26,15 @@
         "common": "Ocurrió un Error. Por favor, intenta de nuevo",
         "required": "Este campo es requerido",
         "minLength": "Mínimo {min} caracteres"
+    },
+    "import": {
+        "hint": "Arrastra un archivo CSV o Excel, o haz clic para seleccionar",
+        "submit": "Importar",
+        "success": "Importación completada",
+        "created": "Creados",
+        "updated": "Actualizados",
+        "errors": "Errores",
+        "noFile": "Selecciona un archivo para continuar"
     },
     "brand": "Grid Watt",
     "routes": {
@@ -116,6 +126,7 @@
             "title": "Actividades",
             "subtitle": "Administra las actividades y tareas de tu empresa",
             "action": "Agregar actividad",
+            "import": "Importar",
             "form": {
                 "create": "Nueva Actividad",
                 "update": "Actualizar Actividad",
@@ -135,13 +146,20 @@
             "title": "Materiales",
             "subtitle": "Administra los materiales de inventario y proveedores",
             "action": "Agregar material",
+            "import": "Importar",
             "form": {
                 "create": "Nuevo Material",
                 "update": "Actualizar Material",
                 "delete": "Eliminar Material",
                 "id": "Identificador",
                 "name": "Nombre",
-                "unit": "Unidad"
+                "unit": "Unidad",
+                "totalStock": "Disponible",
+                "assign": "Asignar a técnico",
+                "technician": "Técnico",
+                "quantity": "Cantidad",
+                "available": "Disponible",
+                "noStock": "Sin stock disponible para este material"
             },
             "summary": {
                 "title": "Todos los materiales",
@@ -153,13 +171,22 @@
             "title": "Sellos",
             "subtitle": "Administra los tipos de sellos y configuraciones",
             "action": "Agregar sello",
+            "range": "Crear rango",
             "form": {
                 "create": "Nuevo Sello",
                 "update": "Actualizar Sello",
                 "delete": "Eliminar Sello",
+                "range": "Nuevo rango de sellos",
                 "id": "Identificador",
                 "name": "Nombre",
-                "type": "Tipo"
+                "type": "Tipo",
+                "namePrefix": "Prefijo de nombre",
+                "fromNumber": "Desde",
+                "toNumber": "Hasta",
+                "assign": "Asignar sellos",
+                "technician": "Técnico",
+                "fromSealNumber": "Número inicial",
+                "toSealNumber": "Número final"
             },
             "summary": {
                 "title": "Todos los sellos",

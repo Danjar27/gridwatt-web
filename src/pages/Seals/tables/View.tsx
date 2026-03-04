@@ -1,15 +1,20 @@
 import type { ColumnDef } from '@tanstack/react-table';
+import type { FC } from 'react';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
-import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
+import { PencilSimpleIcon, TrashIcon, UserPlusIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from '../utils/context.ts';
 import { getSeals } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 
 import Table from '@components/Table/Table';
-import type {Seal} from "@interfaces/seal.interface.ts";
+import type { Seal } from '@interfaces/seal.interface.ts';
 
-const ViewTable = () => {
+interface ViewTableProps {
+    onAssign?: (seal: Seal) => void;
+}
+
+const ViewTable: FC<ViewTableProps> = ({ onAssign }) => {
     const i18n = useTranslations();
     const { select, openUpdate, openDelete } = useInventoryActions();
 
@@ -21,6 +26,11 @@ const ViewTable = () => {
     const handleRemove = (seal: Seal) => {
         select(seal);
         openDelete();
+    };
+
+    const handleAssign = (seal: Seal) => {
+        select(seal);
+        onAssign?.(seal);
     };
 
     const columns: Array<ColumnDef<Seal>> = [
@@ -48,6 +58,9 @@ const ViewTable = () => {
             header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
+                    <button onClick={() => handleAssign(row.original)} className="cursor-pointer" title={i18n('pages.seals.form.assign')}>
+                        <UserPlusIcon weight="duotone" className="text-primary-500" width={20} height={20} />
+                    </button>
                     <button onClick={() => handleEdit(row.original)} className="cursor-pointer">
                         <PencilSimpleIcon
                             weight="duotone"
