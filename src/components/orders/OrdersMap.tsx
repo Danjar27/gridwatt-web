@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
 import type { User } from '@interfaces/user.interface.ts';
+
+import Dropdown from '@components/Dropdown/Dropdown';
 import type { Order } from '@interfaces/order.interface.ts';
 
 interface OrdersMapProps {
@@ -352,19 +353,16 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
                     <span className="text-sm font-medium">
                         {selectedOrderIds.size} order{selectedOrderIds.size > 1 ? 's' : ''} selected
                     </span>
-                    <select
-                        value={assignTechnicianId || ''}
-                        onChange={(e) => setAssignTechnicianId(Number(e.target.value) || null)}
-                        className={INPUT_CLASS}
-                        style={{ maxWidth: 220 }}
-                    >
-                        <option value="">Select technician...</option>
-                        {technicians.map((tech) => (
-                            <option key={tech.id} value={tech.id}>
-                                {tech.name} {tech.lastName}
-                            </option>
-                        ))}
-                    </select>
+                    <div style={{ maxWidth: 220, width: '100%' }}>
+                        <Dropdown
+                            value={assignTechnicianId ?? ''}
+                            onChange={(v) => setAssignTechnicianId(Number(v) || null)}
+                            options={[
+                                { label: 'Select technician...', value: '' },
+                                ...technicians.map((tech) => ({ label: `${tech.name} ${tech.lastName}`, value: tech.id })),
+                            ]}
+                        />
+                    </div>
                     <button
                         onClick={handleAssign}
                         disabled={!assignTechnicianId || isAssigning}

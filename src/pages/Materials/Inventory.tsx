@@ -6,7 +6,6 @@ import { useState } from 'react';
 
 import FullImportModal from '@components/Import/FullImportModal';
 import ToolbarButton from '@components/PageToolbar/ToolbarButton';
-import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
 import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ViewTable from '@pages/Materials/tables/View';
 import Create from '@pages/Materials/forms/Create';
@@ -35,7 +34,6 @@ const Inventory = () => {
                 <ToolbarButton icon={PlusCircleIcon} variant="primary" onClick={openCreate}>
                     {i18n('pages.materials.action')}
                 </ToolbarButton>
-                <ToolbarDivider />
                 <ToolbarButton icon={UploadSimpleIcon} onClick={() => setImportOpen(true)}>
                     {i18n('pages.materials.import')}
                 </ToolbarButton>

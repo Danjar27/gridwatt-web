@@ -18,7 +18,7 @@ const ToolbarButton: FC<PropsWithChildren<ToolbarButtonProps>> = ({
         'cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed',
         {
             'bg-primary-500 hover:bg-primary-600 text-white': variant === 'primary',
-            'text-neutral-900 hover:text-primary-500 hover:bg-neutral-700': variant === 'secondary',
+            'text-primary-500/80 dark:text-white/80 dark:hover:text-white hover:text-primary-500 hover:bg-neutral-700': variant === 'secondary',
         }
     );
 

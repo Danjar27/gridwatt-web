@@ -14,10 +14,11 @@ import { isOnline } from '@/lib/offline-store';
 import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ToolbarButton from '@components/PageToolbar/ToolbarButton';
 import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
+import ToolbarSelect from '@components/PageToolbar/ToolbarSelect';
 import TechnicianView from '@pages/Orders/tables/TechnicianView';
 import AdminView from '@pages/Orders/tables/AdminView';
 import Summary from '@components/Summary/Summary';
-import type {User} from "@interfaces/user.interface.ts";
+import type { User } from '@interfaces/user.interface.ts';
 import type { Order } from '@interfaces/order.interface.ts';
 
 const Inventory = () => {
@@ -124,47 +125,36 @@ const Inventory = () => {
 
     return (
         <div className={`space-y-6 ${viewMode === 'map' ? 'flex flex-col flex-1 min-h-0' : ''}`}>
-            <PageToolbar
-                right={
-                    <select
-                        className="rounded-lg border border-neutral-700 bg-neutral-500 px-2.5 py-1 text-sm cursor-pointer"
-                        value={viewMode}
-                        onChange={(e) => setViewMode(e.target.value as 'table' | 'map')}
-                        data-testid="view-mode-dropdown"
-                    >
-                        <option value="table">{i18n('pages.orders.viewMode.table')}</option>
-                        <option value="map">{i18n('pages.orders.viewMode.map')}</option>
-                    </select>
-                }
-            >
+            <PageToolbar>
                 {!isTechnician && (
                     <>
                         <ToolbarButton as="a" icon={PlusCircleIcon} variant="primary" to="/orders/new">
                             {i18n('pages.orders.action')}
                         </ToolbarButton>
-                        <ToolbarDivider />
                         <ToolbarButton as="a" icon={UploadSimpleIcon} to="/orders/import">
                             {i18n('pages.orders.import')}
                         </ToolbarButton>
-
+                        <ToolbarDivider />
+                        <ToolbarSelect<'table' | 'map'>
+                            value={viewMode}
+                            onChange={setViewMode}
+                            options={[
+                                { label: i18n('pages.orders.viewMode.table'), value: 'table' },
+                                { label: i18n('pages.orders.viewMode.map'), value: 'map' },
+                            ]}
+                        />
                         {viewMode === 'map' && (
-                            <>
-                                <ToolbarDivider />
-                                <select
-                                    className="rounded-lg border border-neutral-700 bg-neutral-500 px-2.5 py-1 text-sm cursor-pointer"
-                                    value={filterTechnicianId ?? ''}
-                                    onChange={(e) =>
-                                        setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)
-                                    }
-                                >
-                                    <option value="">{i18n('pages.orders.filter.allTechnicians')}</option>
-                                    {technicians.map((tech) => (
-                                        <option key={tech.id} value={tech.id}>
-                                            {tech.name} {tech.lastName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </>
+                            <ToolbarSelect<number | null>
+                                value={filterTechnicianId}
+                                onChange={setFilterTechnicianId}
+                                options={[
+                                    { label: i18n('pages.orders.filter.allTechnicians'), value: null },
+                                    ...technicians.map((tech) => ({
+                                        label: `${tech.name} ${tech.lastName}`,
+                                        value: tech.id,
+                                    })),
+                                ]}
+                            />
                         )}
                     </>
                 )}

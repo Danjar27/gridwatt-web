@@ -23,7 +23,7 @@ import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
 import type { User as UserType } from '@interfaces/user.interface.ts';
 import type { Order } from '@interfaces/order.interface.ts';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
+import Dropdown from '@components/Dropdown/Dropdown';
 import { classnames } from '@utils/classnames.ts';
 import Button from '@components/Button/Button';
 
@@ -353,18 +353,19 @@ export function OrderDetailPage() {
 
                     {canAssign && (
                         <div className="mt-4 flex gap-2">
-                            <select
-                                value={selectedTechnician ?? ''}
-                                onChange={(e) => setSelectedTechnician(Number(e.target.value) || null)}
-                                className={`flex-1 ${INPUT_CLASS}`}
-                            >
-                                <option value="">{i18n('pages.orderDetail.selectTechnician')}</option>
-                                {technicians.map((tech: UserType) => (
-                                    <option key={tech.id} value={tech.id}>
-                                        {tech.name} {tech.lastName}
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="flex-1">
+                                <Dropdown
+                                    value={selectedTechnician ?? ''}
+                                    onChange={(v) => setSelectedTechnician(v === '' ? null : v as number)}
+                                    options={[
+                                        { label: i18n('pages.orderDetail.selectTechnician'), value: '' },
+                                        ...technicians.map((tech: UserType) => ({
+                                            label: `${tech.name} ${tech.lastName}`,
+                                            value: tech.id,
+                                        })),
+                                    ]}
+                                />
+                            </div>
                             <Button onClick={handleAssign} disabled={!selectedTechnician || assignMutation.isPending}>
                                 {i18n('pages.orderDetail.assign')}
                             </Button>

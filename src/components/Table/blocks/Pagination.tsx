@@ -2,6 +2,7 @@ import type { PaginationProps } from '../Table.interface';
 
 import { useTranslations } from 'use-intl';
 
+import Dropdown from '@components/Dropdown/Dropdown';
 import Stepper from '@components/Table/blocks/Stepper';
 
 const Pagination = <T, _C>({ table, total }: PaginationProps<T>) => {
@@ -25,17 +26,13 @@ const Pagination = <T, _C>({ table, total }: PaginationProps<T>) => {
             </span>
 
             <div className="flex items-center gap-2">
-                <select
-                    value={pageSize}
-                    onChange={(e) => table.setPageSize(Number(e.target.value))}
-                    className="rounded-lg px-4 py-1 text-xs"
-                >
-                    {[10, 30, 60].map((size) => (
-                        <option key={size} value={size}>
-                            {size} / page
-                        </option>
-                    ))}
-                </select>
+                <div className="w-28">
+                    <Dropdown
+                        value={pageSize}
+                        onChange={(v) => table.setPageSize(Number(v))}
+                        options={[10, 30, 60].map((size) => ({ label: `${size} / page`, value: size }))}
+                    />
+                </div>
 
                 <Stepper
                     selected={pageIndex}

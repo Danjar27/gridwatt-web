@@ -1,6 +1,5 @@
 import { BriefcaseIcon, EyeIcon, MapPinIcon } from '@phosphor-icons/react';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { useAuthContext } from '@context/auth/context.ts';
 import { getJobs, getMyJobs } from '@lib/api/jobs.ts';
 import { getTechnicians } from '@lib/api/users.ts';
@@ -10,6 +9,7 @@ import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
 import PageToolbar from '@components/PageToolbar/PageToolbar';
+import ToolbarSelect from '@components/PageToolbar/ToolbarSelect';
 import Summary from '@components/Summary/Summary';
 import type { Job } from "@interfaces/job.interface.ts";
 import type { User } from '@interfaces/user.interface.ts';
@@ -72,22 +72,19 @@ const Inventory = () => {
     return (
         <div className="space-y-6">
             {!isTechnician && (
-                <PageToolbar
-                    right={
-                        <select
-                            className="rounded-lg border border-neutral-700 bg-neutral-500 px-2.5 py-1 text-sm cursor-pointer"
-                            value={filterTechnicianId ?? ''}
-                            onChange={(e) => setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)}
-                        >
-                            <option value="">{i18n('pages.jobs.filter.allTechnicians')}</option>
-                            {technicians.map((tech: User) => (
-                                <option key={tech.id} value={tech.id}>
-                                    {tech.name} {tech.lastName}
-                                </option>
-                            ))}
-                        </select>
-                    }
-                />
+                <PageToolbar>
+                    <ToolbarSelect<number | null>
+                        value={filterTechnicianId}
+                        onChange={setFilterTechnicianId}
+                        options={[
+                            { label: i18n('pages.jobs.filter.allTechnicians'), value: null },
+                            ...technicians.map((tech: User) => ({
+                                label: `${tech.name} ${tech.lastName}`,
+                                value: tech.id,
+                            })),
+                        ]}
+                    />
+                </PageToolbar>
             )}
 
             {jobs.length === 0 ? (

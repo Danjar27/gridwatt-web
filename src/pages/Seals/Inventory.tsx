@@ -4,7 +4,6 @@ import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
 import ToolbarButton from '@components/PageToolbar/ToolbarButton';
-import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
 import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ViewTable from '@pages/Seals/tables/View';
 import Create from '@pages/Seals/forms/Create';
@@ -28,7 +27,6 @@ const Inventory = () => {
                 <ToolbarButton icon={PlusCircleIcon} variant="primary" onClick={openCreate}>
                     {i18n('pages.seals.action')}
                 </ToolbarButton>
-                <ToolbarDivider />
                 <ToolbarButton icon={ListPlusIcon} onClick={() => setRangeOpen(true)}>
                     {i18n('pages.seals.range')}
                 </ToolbarButton>
@@ -56,5 +54,3 @@ const Inventory = () => {
 };
 
 export default Inventory;
-
-

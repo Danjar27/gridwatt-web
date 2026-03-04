@@ -3,16 +3,15 @@ import type { FC, PropsWithChildren } from 'react';
 
 import { classnames } from '@utils/classnames.ts';
 
-const PageToolbar: FC<PropsWithChildren<PageToolbarProps>> = ({ children, right, className }) => (
+const PageToolbar: FC<PropsWithChildren<PageToolbarProps>> = ({ children, className }) => (
     <div
         className={classnames(
-            'flex items-center justify-between gap-3',
-            'bg-neutral-600 border border-neutral-700 rounded-xl px-2 py-1.5',
+            'inline-flex items-center gap-2 p-1',
+            'bg-neutral-600 border border-neutral-700 rounded-xl',
             className
         )}
     >
-        <div className="flex items-center">{children}</div>
-        {right && <div className="flex items-center gap-2">{right}</div>}
+        {children}
     </div>
 );
 

@@ -7,6 +7,7 @@ import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import Dropdown from '@components/Dropdown/Dropdown';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
@@ -131,18 +132,14 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
             <Modal id="job-seals-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
                 <Window title={i18n('pages.jobDetail.seals.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
-                    <select
+                    <Dropdown
                         value={selectedSealId}
-                        onChange={(e) => setSelectedSealId(e.target.value === '' ? '' : Number(e.target.value))}
-                        className={INPUT_CLASS}
-                    >
-                        <option value="">{i18n('pages.jobDetail.seals.select')}</option>
-                        {availableSeals.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                #{s.id} — {s.type}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => setSelectedSealId(v === '' ? '' : v as number)}
+                        options={[
+                            { label: i18n('pages.jobDetail.seals.select'), value: '' },
+                            ...availableSeals.map((s) => ({ label: `#${s.id} — ${s.type}`, value: s.id })),
+                        ]}
+                    />
                     <Button
                         variant="solid"
                         disabled={selectedSealId === '' || addMutation.isPending}

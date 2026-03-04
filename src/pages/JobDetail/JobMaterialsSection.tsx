@@ -7,6 +7,7 @@ import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
 import { INPUT_CLASS } from '@components/Form/utils/constants';
+import Dropdown from '@components/Dropdown/Dropdown';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
@@ -160,18 +161,14 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             <Modal id="job-materials-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
                 <Window title={i18n('pages.jobDetail.materials.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
-                    <select
+                    <Dropdown
                         value={selectedMaterialId}
-                        onChange={(e) => handleMaterialChange(e.target.value)}
-                        className={INPUT_CLASS}
-                    >
-                        <option value="">{i18n('pages.jobDetail.materials.select')}</option>
-                        {availableMaterials.map((m) => (
-                            <option key={m.id} value={m.id}>
-                                {m.name}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => handleMaterialChange(v as string)}
+                        options={[
+                            { label: i18n('pages.jobDetail.materials.select'), value: '' },
+                            ...availableMaterials.map((m) => ({ label: m.name, value: m.id })),
+                        ]}
+                    />
                     <input
                         type="number"
                         value={quantity}
