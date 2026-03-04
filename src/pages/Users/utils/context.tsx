@@ -10,14 +10,12 @@ interface UsersContext {
     isUpdateOpen: boolean;
     isDeleteOpen: boolean;
     isPasswordResetOpen: boolean;
-    isRoleChangeOpen: boolean;
 }
 
 interface UsersActions {
     select: (user: User) => void;
     selectForDelete: (user: User) => void;
     selectForPasswordReset: (user: User) => void;
-    selectForRoleChange: (user: User) => void;
     openCreate: () => void;
     closeCreate: () => void;
     openUpdate: () => void;
@@ -26,8 +24,6 @@ interface UsersActions {
     closeDelete: () => void;
     openPasswordReset: () => void;
     closePasswordReset: () => void;
-    openRoleChange: () => void;
-    closeRoleChange: () => void;
 }
 
 const UsersContext = createContext<UsersContext>({
@@ -36,14 +32,12 @@ const UsersContext = createContext<UsersContext>({
     isUpdateOpen: false,
     isDeleteOpen: false,
     isPasswordResetOpen: false,
-    isRoleChangeOpen: false,
 });
 
 const UsersActionsContext = createContext<UsersActions>({
     select: () => {},
     selectForDelete: () => {},
     selectForPasswordReset: () => {},
-    selectForRoleChange: () => {},
     openCreate: () => {},
     closeCreate: () => {},
     openUpdate: () => {},
@@ -52,8 +46,6 @@ const UsersActionsContext = createContext<UsersActions>({
     closeDelete: () => {},
     openPasswordReset: () => {},
     closePasswordReset: () => {},
-    openRoleChange: () => {},
-    closeRoleChange: () => {},
 });
 
 function Provider({ children }: PropsWithChildren) {
@@ -62,7 +54,6 @@ function Provider({ children }: PropsWithChildren) {
     const [isUpdateOpen, openUpdate, closeUpdate] = useModal();
     const [isDeleteOpen, openDelete, closeDelete] = useModal();
     const [isPasswordResetOpen, openPasswordReset, closePasswordReset] = useModal();
-    const [isRoleChangeOpen, openRoleChange, closeRoleChange] = useModal();
 
     const clearSelected = useCallback(() => setSelected(null), []);
 
@@ -87,13 +78,6 @@ function Provider({ children }: PropsWithChildren) {
         },
         [openPasswordReset]
     );
-    const selectForRoleChange = useCallback(
-        (user: User) => {
-            setSelected(user);
-            openRoleChange();
-        },
-        [openRoleChange]
-    );
 
     const handleCloseUpdate = useCallback(() => {
         clearSelected();
@@ -107,14 +91,10 @@ function Provider({ children }: PropsWithChildren) {
         clearSelected();
         closePasswordReset();
     }, [clearSelected, closePasswordReset]);
-    const handleCloseRoleChange = useCallback(() => {
-        clearSelected();
-        closeRoleChange();
-    }, [clearSelected, closeRoleChange]);
 
     const context: UsersContext = useMemo(
-        () => ({ selected, isCreateOpen, isUpdateOpen, isDeleteOpen, isPasswordResetOpen, isRoleChangeOpen }),
-        [selected, isCreateOpen, isUpdateOpen, isDeleteOpen, isPasswordResetOpen, isRoleChangeOpen]
+        () => ({ selected, isCreateOpen, isUpdateOpen, isDeleteOpen, isPasswordResetOpen }),
+        [selected, isCreateOpen, isUpdateOpen, isDeleteOpen, isPasswordResetOpen]
     );
 
     const actions: UsersActions = useMemo(
@@ -122,7 +102,6 @@ function Provider({ children }: PropsWithChildren) {
             select,
             selectForDelete,
             selectForPasswordReset,
-            selectForRoleChange,
             openCreate,
             closeCreate,
             openUpdate,
@@ -131,14 +110,11 @@ function Provider({ children }: PropsWithChildren) {
             closeDelete: handleCloseDelete,
             openPasswordReset,
             closePasswordReset: handleClosePasswordReset,
-            openRoleChange,
-            closeRoleChange: handleCloseRoleChange,
         }),
         [
             select,
             selectForDelete,
             selectForPasswordReset,
-            selectForRoleChange,
             openCreate,
             closeCreate,
             openUpdate,
@@ -147,8 +123,6 @@ function Provider({ children }: PropsWithChildren) {
             handleCloseDelete,
             openPasswordReset,
             handleClosePasswordReset,
-            openRoleChange,
-            handleCloseRoleChange,
         ]
     );
 

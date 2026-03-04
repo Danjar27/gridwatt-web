@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
-import { PencilSimpleIcon, TrashIcon, KeyIcon, ShieldIcon } from '@phosphor-icons/react';
+import { PencilSimpleIcon, TrashIcon, KeyIcon } from '@phosphor-icons/react';
 import { useUsersActions } from '../utils/context';
 import { useAuthContext } from '@context/auth/context.ts';
 import { getUsers } from '@lib/api/users.ts';
@@ -12,7 +12,7 @@ import type {User} from "@interfaces/user.interface.ts";
 const ViewTable = () => {
     const i18n = useTranslations();
 
-    const { select, selectForDelete, selectForPasswordReset, selectForRoleChange } = useUsersActions();
+    const { select, selectForDelete, selectForPasswordReset } = useUsersActions();
     const { user } = useAuthContext();
 
     const isAdmin = user?.role?.name === 'admin';
@@ -91,13 +91,6 @@ const ViewTable = () => {
                             width={20}
                             height={20}
                         />
-                    </button>
-                    <button
-                        onClick={() => selectForRoleChange(row.original)}
-                        className="cursor-pointer"
-                        title={i18n('pages.users.form.changeRole.title')}
-                    >
-                        <ShieldIcon weight="duotone" className="text-blue-500" width={20} height={20} />
                     </button>
                     <button
                         onClick={() => selectForPasswordReset(row.original)}
