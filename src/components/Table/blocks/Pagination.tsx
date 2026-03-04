@@ -16,7 +16,7 @@ const Pagination = <T, _C>({ table, total }: PaginationProps<T>) => {
     }
 
     return (
-        <div className="flex items-center s992:justify-between justify-end bg-neutral-600 border-t border-neutral-800 px-5 py-3">
+        <div className="flex items-center s992:justify-between justify-end bg-neutral-600 border-t border-neutral-800 px-5 py-1">
             <span className="hidden s992:inline text-xs font-medium">
                 {i18n('table.pagination', {
                     from: pageIndex * pageSize + 1,
@@ -26,13 +26,12 @@ const Pagination = <T, _C>({ table, total }: PaginationProps<T>) => {
             </span>
 
             <div className="flex items-center gap-2">
-                <div className="w-28">
-                    <Dropdown
-                        value={pageSize}
-                        onChange={(v) => table.setPageSize(Number(v))}
-                        options={[10, 30, 60].map((size) => ({ label: `${size} / page`, value: size }))}
-                    />
-                </div>
+                <Dropdown
+                    className="border-none text-xs font-semibold text-primary-500 dark:text-white bg-none transition-none"
+                    value={pageSize}
+                    onChange={(v) => table.setPageSize(Number(v))}
+                    options={[10, 30, 60].map((size) => ({ label: `${size} / page`, value: size }))}
+                />
 
                 <Stepper
                     selected={pageIndex}

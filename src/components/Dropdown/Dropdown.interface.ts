@@ -8,4 +8,5 @@ export interface DropdownProps {
     onChange: (value: string | number) => void;
     options: Array<DropdownOption>;
     disabled?: boolean;
+    className?: string;
 }

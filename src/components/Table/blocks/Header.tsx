@@ -13,6 +13,7 @@ const Header = <T,>({ headerGroups, filterConfig }: HeaderProps<T>) => (
                     gridTemplateColumns: headerGroup.headers
                         .map((h) => {
                             const meta = h.column.columnDef.meta as { fixed?: boolean } | undefined;
+
                             return meta?.fixed ? `${h.getSize()}px` : 'minmax(0, 1fr)';
                         })
                         .join(' '),
