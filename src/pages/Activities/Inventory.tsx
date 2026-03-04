@@ -7,12 +7,14 @@ import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
 import FullImportModal from '@components/Import/FullImportModal';
+import ToolbarButton from '@components/PageToolbar/ToolbarButton';
+import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
+import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ViewTable from '@pages/Activities/tables/View';
 import Create from '@pages/Activities/forms/Create';
 import Update from '@pages/Activities/forms/Update';
 import Delete from '@pages/Activities/forms/Delete';
 import Summary from '@components/Summary/Summary';
-import Button from '@components/Button/Button';
 
 const ACTIVITY_COLUMNS = [
     { key: 'id', label: 'ID' },
@@ -34,16 +36,15 @@ const Inventory = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Button icon={UploadSimpleIcon} variant="outline" onClick={() => setImportOpen(true)}>
-                        {i18n('pages.activities.import')}
-                    </Button>
-                    <Button icon={PlusCircleIcon} onClick={openCreate}>
-                        {i18n('pages.activities.action')}
-                    </Button>
-                </div>
-            </div>
+            <PageToolbar>
+                <ToolbarButton icon={PlusCircleIcon} variant="primary" onClick={openCreate}>
+                    {i18n('pages.activities.action')}
+                </ToolbarButton>
+                <ToolbarDivider />
+                <ToolbarButton icon={UploadSimpleIcon} onClick={() => setImportOpen(true)}>
+                    {i18n('pages.activities.import')}
+                </ToolbarButton>
+            </PageToolbar>
 
             <Summary
                 icon={ClipboardIcon}

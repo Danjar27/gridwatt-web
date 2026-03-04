@@ -5,13 +5,15 @@ import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
 import FullImportModal from '@components/Import/FullImportModal';
+import ToolbarButton from '@components/PageToolbar/ToolbarButton';
+import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
+import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ViewTable from '@pages/Materials/tables/View';
 import Create from '@pages/Materials/forms/Create';
 import Update from '@pages/Materials/forms/Update';
 import Delete from '@pages/Materials/forms/Delete';
 import Assign from '@pages/Materials/forms/Assign';
 import Summary from '@components/Summary/Summary';
-import Button from '@components/Button/Button';
 import Ingress from './forms/Ingress';
 
 const MATERIAL_COLUMNS = [
@@ -29,16 +31,15 @@ const Inventory = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Button icon={UploadSimpleIcon} variant="outline" onClick={() => setImportOpen(true)}>
-                        {i18n('pages.materials.import')}
-                    </Button>
-                    <Button icon={PlusCircleIcon} onClick={openCreate}>
-                        {i18n('pages.materials.action')}
-                    </Button>
-                </div>
-            </div>
+            <PageToolbar>
+                <ToolbarButton icon={PlusCircleIcon} variant="primary" onClick={openCreate}>
+                    {i18n('pages.materials.action')}
+                </ToolbarButton>
+                <ToolbarDivider />
+                <ToolbarButton icon={UploadSimpleIcon} onClick={() => setImportOpen(true)}>
+                    {i18n('pages.materials.import')}
+                </ToolbarButton>
+            </PageToolbar>
 
             <Summary
                 icon={PackageIcon}

@@ -3,6 +3,9 @@ import { useInventoryActions } from './utils/context.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
 
+import ToolbarButton from '@components/PageToolbar/ToolbarButton';
+import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
+import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ViewTable from '@pages/Seals/tables/View';
 import Create from '@pages/Seals/forms/Create';
 import Update from '@pages/Seals/forms/Update';
@@ -11,7 +14,6 @@ import CreateRange from '@pages/Seals/forms/CreateRange';
 import Assign from '@pages/Seals/forms/Assign';
 import AssignMultiple from '@pages/Seals/forms/AssignMultiple';
 import Summary from '@components/Summary/Summary';
-import Button from '@components/Button/Button';
 
 const Inventory = () => {
     const i18n = useTranslations();
@@ -22,19 +24,18 @@ const Inventory = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                    <Button icon={ListPlusIcon} variant="outline" onClick={() => setRangeOpen(true)}>
-                        {i18n('pages.seals.range')}
-                    </Button>
-                    <Button icon={UsersThreeIcon} variant="outline" onClick={() => setAssignMultipleOpen(true)}>
-                        {i18n('pages.seals.assignMultiple')}
-                    </Button>
-                    <Button icon={PlusCircleIcon} onClick={openCreate}>
-                        {i18n('pages.seals.action')}
-                    </Button>
-                </div>
-            </div>
+            <PageToolbar>
+                <ToolbarButton icon={PlusCircleIcon} variant="primary" onClick={openCreate}>
+                    {i18n('pages.seals.action')}
+                </ToolbarButton>
+                <ToolbarDivider />
+                <ToolbarButton icon={ListPlusIcon} onClick={() => setRangeOpen(true)}>
+                    {i18n('pages.seals.range')}
+                </ToolbarButton>
+                <ToolbarButton icon={UsersThreeIcon} onClick={() => setAssignMultipleOpen(true)}>
+                    {i18n('pages.seals.assignMultiple')}
+                </ToolbarButton>
+            </PageToolbar>
 
             <Summary
                 icon={SealIcon}

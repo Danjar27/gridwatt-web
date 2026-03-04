@@ -5,17 +5,18 @@ import { useTranslations } from 'use-intl';
 import { useMemo, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
 import { bulkAssignOrders, getMyOrders, getOrders } from '@lib/api/orders.ts';
 import { getTechnicians } from '@lib/api/users.ts';
 import { OrdersMap } from '@/components/orders/OrdersMap';
 import { queryClient } from '@lib/query-client';
 import { isOnline } from '@/lib/offline-store';
 
+import PageToolbar from '@components/PageToolbar/PageToolbar';
+import ToolbarButton from '@components/PageToolbar/ToolbarButton';
+import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
 import TechnicianView from '@pages/Orders/tables/TechnicianView';
 import AdminView from '@pages/Orders/tables/AdminView';
 import Summary from '@components/Summary/Summary';
-import Button from '@components/Button/Button';
 import type {User} from "@interfaces/user.interface.ts";
 import type { Order } from '@interfaces/order.interface.ts';
 
@@ -123,20 +124,34 @@ const Inventory = () => {
 
     return (
         <div className={`space-y-6 ${viewMode === 'map' ? 'flex flex-col flex-1 min-h-0' : ''}`}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                    {!isTechnician && (
-                        <>
-                            <Button as="a" icon={PlusCircleIcon} to="/orders/new">
-                                {i18n('pages.orders.action')}
-                            </Button>
-                            <Button as="a" icon={UploadSimpleIcon} variant="outline" to="/orders/import">
-                                {i18n('pages.orders.import')}
-                            </Button>
+            <PageToolbar
+                right={
+                    <select
+                        className="rounded-lg border border-neutral-700 bg-neutral-500 px-2.5 py-1 text-sm cursor-pointer"
+                        value={viewMode}
+                        onChange={(e) => setViewMode(e.target.value as 'table' | 'map')}
+                        data-testid="view-mode-dropdown"
+                    >
+                        <option value="table">{i18n('pages.orders.viewMode.table')}</option>
+                        <option value="map">{i18n('pages.orders.viewMode.map')}</option>
+                    </select>
+                }
+            >
+                {!isTechnician && (
+                    <>
+                        <ToolbarButton as="a" icon={PlusCircleIcon} variant="primary" to="/orders/new">
+                            {i18n('pages.orders.action')}
+                        </ToolbarButton>
+                        <ToolbarDivider />
+                        <ToolbarButton as="a" icon={UploadSimpleIcon} to="/orders/import">
+                            {i18n('pages.orders.import')}
+                        </ToolbarButton>
 
-                            {viewMode === 'map' && (
+                        {viewMode === 'map' && (
+                            <>
+                                <ToolbarDivider />
                                 <select
-                                    className={INPUT_CLASS}
+                                    className="rounded-lg border border-neutral-700 bg-neutral-500 px-2.5 py-1 text-sm cursor-pointer"
                                     value={filterTechnicianId ?? ''}
                                     onChange={(e) =>
                                         setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)
@@ -149,20 +164,11 @@ const Inventory = () => {
                                         </option>
                                     ))}
                                 </select>
-                            )}
-                        </>
-                    )}
-                </div>
-                <select
-                    className={INPUT_CLASS}
-                    value={viewMode}
-                    onChange={(e) => setViewMode(e.target.value as 'table' | 'map')}
-                    data-testid="view-mode-dropdown"
-                >
-                    <option value="table">{i18n('pages.orders.viewMode.table')}</option>
-                    <option value="map">{i18n('pages.orders.viewMode.map')}</option>
-                </select>
-            </div>
+                            </>
+                        )}
+                    </>
+                )}
+            </PageToolbar>
 
             {viewMode === 'table' ? (
                 !isTechnician ? (

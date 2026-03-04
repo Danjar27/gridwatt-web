@@ -4,9 +4,10 @@ import { useInventoryActions } from './utils/context';
 import { Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 
+import ToolbarButton from '@components/PageToolbar/ToolbarButton';
+import PageToolbar from '@components/PageToolbar/PageToolbar';
 import Delete from '@pages/Tenants/forms/Delete.tsx';
 import Summary from '@components/Summary/Summary';
-import Button from '@components/Button/Button';
 import ViewTable from './tables/View';
 import Create from './forms/Create';
 import Update from './forms/Update';
@@ -24,11 +25,11 @@ const Inventory = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <Button icon={PlusCircleIcon} onClick={openCreate}>
+            <PageToolbar>
+                <ToolbarButton icon={PlusCircleIcon} variant="primary" onClick={openCreate}>
                     {i18n('pages.tenants.action')}
-                </Button>
-            </div>
+                </ToolbarButton>
+            </PageToolbar>
 
             <Summary
                 icon={AddressBookIcon}
