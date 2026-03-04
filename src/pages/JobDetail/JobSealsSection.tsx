@@ -6,7 +6,6 @@ import { getSeals } from '@lib/api/seals.ts';
 import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
 import Dropdown from '@components/Dropdown/Dropdown';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';

@@ -11,8 +11,8 @@ import Dropdown from '@components/Dropdown/Dropdown';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
-import type { Job } from "@interfaces/job.interface.ts";
-import type { Material, WorkMaterial } from '@interfaces/material.interface.ts';
+import type { Job } from '@interfaces/job.interface.ts';
+import type { WorkMaterial } from '@interfaces/material.interface.ts';
 
 interface Props {
     jobId: number;
@@ -25,7 +25,6 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMaterialId, setSelectedMaterialId] = useState('');
     const [quantity, setQuantity] = useState('');
-    const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
 
     const { data: materialsData } = useQuery({
         queryKey: ['materials'],
@@ -58,19 +57,24 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                       }
                     : old
             );
-            if (pendingSync) {markJobPendingInLists(queryClient, jobId);}
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             setSelectedMaterialId('');
             setQuantity('');
-            setSelectedMaterial(null);
             setModalOpen(false);
 
             return { previous };
         },
         onError: (_err, _data, context) => {
-            if (context?.previous) {queryClient.setQueryData(jobKey, context.previous);}
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
         },
         onSettled: () => {
-            if (isOnline()) {queryClient.invalidateQueries({ queryKey: jobKey });}
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
@@ -89,24 +93,29 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                       }
                     : old
             );
-            if (pendingSync) {markJobPendingInLists(queryClient, jobId);}
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
 
             return { previous };
         },
         onError: (_err, _data, context) => {
-            if (context?.previous) {queryClient.setQueryData(jobKey, context.previous);}
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
         },
         onSettled: () => {
-            if (isOnline()) {queryClient.invalidateQueries({ queryKey: jobKey });}
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
     const addedIds = new Set(workMaterials.map((wm) => wm.materialId));
-    const availableMaterials = materialsData?.data.filter((m) => m.isActive && !addedIds.has(m.id)) ?? [];
+    const availableMaterials = materialsData?.data.filter((m) => !addedIds.has(m.id)) ?? [];
 
     const handleMaterialChange = (materialId: string) => {
         setSelectedMaterialId(materialId);
-        setSelectedMaterial(availableMaterials.find((m) => m.id === materialId) ?? null);
     };
 
     const handleAdd = () => {
@@ -158,34 +167,40 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 <p className="text-center text-neutral-900">{i18n('pages.jobDetail.materials.empty')}</p>
             )}
 
-            <Modal id="job-materials-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+            <Modal
+                id="job-materials-modal"
+                isOpen={modalOpen}
+                onOpen={() => setModalOpen(true)}
+                onClose={() => setModalOpen(false)}
+            >
                 <Window title={i18n('pages.jobDetail.materials.modal')} className="w-full max-w-sm px-4">
-                <div className="space-y-4">
-                    <Dropdown
-                        value={selectedMaterialId}
-                        onChange={(v) => handleMaterialChange(v as string)}
-                        options={[
-                            { label: i18n('pages.jobDetail.materials.select'), value: '' },
-                            ...availableMaterials.map((m) => ({ label: m.name, value: m.id })),
-                        ]}
-                    />
-                    <input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        step={selectedMaterial?.allowsDecimals ? '0.01' : '1'}
-                        min="0"
-                        placeholder={i18n('pages.jobDetail.materials.quantity')}
-                        className={INPUT_CLASS}
-                    />
-                    <Button
-                        variant="solid"
-                        disabled={!selectedMaterialId || !quantity || Number(quantity) <= 0 || addMutation.isPending}
-                        onClick={handleAdd}
-                    >
-                        {i18n('literal.add')}
-                    </Button>
-                </div>
+                    <div className="space-y-4">
+                        <Dropdown
+                            value={selectedMaterialId}
+                            onChange={(v) => handleMaterialChange(v as string)}
+                            options={[
+                                { label: i18n('pages.jobDetail.materials.select'), value: '' },
+                                ...availableMaterials.map((m) => ({ label: m.name, value: m.id })),
+                            ]}
+                        />
+                        <input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            min="0"
+                            placeholder={i18n('pages.jobDetail.materials.quantity')}
+                            className={INPUT_CLASS}
+                        />
+                        <Button
+                            variant="solid"
+                            disabled={
+                                !selectedMaterialId || !quantity || Number(quantity) <= 0 || addMutation.isPending
+                            }
+                            onClick={handleAdd}
+                        >
+                            {i18n('literal.add')}
+                        </Button>
+                    </div>
                 </Window>
             </Modal>
         </div>

@@ -95,7 +95,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
     });
 
     const addedIds = new Set(jobActivities.map((ja) => ja.activityId));
-    const availableActivities = activitiesData?.data.filter((a) => a.isActive && !addedIds.has(a.id)) ?? [];
+    const availableActivities = activitiesData?.data.filter((a) => !addedIds.has(a.id)) ?? [];
 
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">

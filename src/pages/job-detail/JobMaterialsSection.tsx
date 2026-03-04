@@ -11,7 +11,7 @@ import Dropdown from '@components/Dropdown/Dropdown';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
 import type { Job } from "@interfaces/job.interface.ts";
-import type { Material, WorkMaterial } from '@interfaces/material.interface.ts';
+import type { WorkMaterial } from '@interfaces/material.interface.ts';
 
 interface Props {
     jobId: number;
@@ -24,7 +24,6 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMaterialId, setSelectedMaterialId] = useState('');
     const [quantity, setQuantity] = useState('');
-    const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
 
     const { data: materialsData } = useQuery({
         queryKey: ['materials'],
@@ -56,7 +55,6 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             }
             setSelectedMaterialId('');
             setQuantity('');
-            setSelectedMaterial(null);
             setModalOpen(false);
 
             return { previous };
@@ -101,11 +99,10 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     });
 
     const addedIds = new Set(workMaterials.map((wm) => wm.materialId));
-    const availableMaterials = materialsData?.data.filter((m) => m.isActive && !addedIds.has(m.id)) ?? [];
+    const availableMaterials = materialsData?.data.filter((m) => !addedIds.has(m.id)) ?? [];
 
     const handleMaterialChange = (materialId: string) => {
         setSelectedMaterialId(materialId);
-        setSelectedMaterial(availableMaterials.find((m) => m.id === materialId) ?? null);
     };
 
     const handleAdd = () => {
@@ -176,7 +173,6 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                         type="number"
                         value={quantity}
                         onChange={(e) => setQuantity(e.target.value)}
-                        step={selectedMaterial?.allowsDecimals ? '0.01' : '1'}
                         min="0"
                         placeholder={i18n('pages.jobDetail.materials.quantity')}
                         className={INPUT_CLASS}

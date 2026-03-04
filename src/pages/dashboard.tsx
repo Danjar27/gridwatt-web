@@ -92,7 +92,7 @@ const DashboardPage = () => {
         'notes',
     ];
 
-    const materialFields = ['id', 'name', 'type', 'description', 'unit', 'allowsDecimals', 'isActive'];
+    const materialFields = ['id', 'name', 'type', 'description', 'unit', 'isActive'];
     const activityFields = ['id', 'name', 'description', 'isActive'];
     const sealFields = ['id', 'name', 'type', 'description', 'isActive'];
 
