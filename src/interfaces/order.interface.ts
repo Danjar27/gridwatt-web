@@ -3,7 +3,7 @@ import type { User } from '@interfaces/user.interface.ts';
 import type { Job } from '@interfaces/job.interface.ts';
 
 export interface Order {
-    id: number;
+    id: string;
     technicianId?: number;
     serviceType: string;
     meterNumber: string;
@@ -20,6 +20,19 @@ export interface Order {
     latitude?: number;
     longitude?: number;
     observations?: string;
+    panelTowerBlock?: string;
+    coordinateX?: number;
+    coordinateY?: number;
+    appliedTariff?: string;
+    transformerNumber?: string;
+    distributionNetwork?: string;
+    transformerOwnership?: string;
+    sharedSubstation?: string;
+    normalLoad?: string;
+    fluctuatingLoad?: string;
+    plannerGroup?: string;
+    workPosition?: string;
+    lockerSequence?: string;
     technician?: User;
     jobs?: Array<Job>;
 }

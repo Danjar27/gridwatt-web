@@ -28,10 +28,10 @@ function CardView<T>({ table }: CardViewProps<T>) {
                 const actionCell = cells.find((c) => c.column.id === 'actions');
 
                 return (
-                    <div key={row.id} className="overflow-hidden rounded-lg border border-neutral-800">
+                    <div key={row.id} className="overflow-hidden rounded-xl border border-neutral-800">
                         {/* Primary identifier */}
                         {primaryCell && (
-                            <div className="flex items-center justify-between gap-3 border-b border-neutral-800 bg-neutral-600 px-4 py-3 text-sm font-semibold">
+                            <div className="flex items-center justify-between gap-3 border-b border-neutral-800 bg-neutral-700 px-4 py-3 text-sm font-semibold">
                                 <div className="min-w-0 flex-1">
                                     {flexRender(primaryCell.column.columnDef.cell, primaryCell.getContext())}
                                 </div>
@@ -72,7 +72,7 @@ function CardView<T>({ table }: CardViewProps<T>) {
 
                         {/* Actions footer */}
                         {actionCell && (
-                            <div className="flex justify-end border-t border-neutral-800 bg-neutral-600/50 px-4 py-2.5">
+                            <div className="flex justify-end border-t border-neutral-800 bg-neutral-700/50 px-4 py-2.5">
                                 {flexRender(actionCell.column.columnDef.cell, actionCell.getContext())}
                             </div>
                         )}

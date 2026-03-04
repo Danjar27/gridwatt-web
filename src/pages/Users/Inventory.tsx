@@ -4,6 +4,8 @@ import { useUsersActions } from './utils/context';
 import { Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 
+import ToolbarButton from '@components/PageToolbar/ToolbarButton';
+import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ViewTable from '@pages/Users/tables/View';
 import Create from '@pages/Users/forms/Create';
 import Update from '@pages/Users/forms/Update';
@@ -11,7 +13,6 @@ import Delete from '@pages/Users/forms/Delete';
 import ResetPassword from '@pages/Users/forms/ResetPassword';
 import ChangeRole from '@pages/Users/forms/ChangeRole';
 import Summary from '@components/Summary/Summary';
-import Button from '@components/Button/Button';
 
 const Inventory = () => {
     const i18n = useTranslations();
@@ -26,11 +27,11 @@ const Inventory = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <Button icon={PlusCircleIcon} onClick={openCreate}>
+            <PageToolbar>
+                <ToolbarButton icon={PlusCircleIcon} variant="primary" onClick={openCreate}>
                     {i18n('pages.users.action')}
-                </Button>
-            </div>
+                </ToolbarButton>
+            </PageToolbar>
 
             <Summary
                 icon={UsersIcon}

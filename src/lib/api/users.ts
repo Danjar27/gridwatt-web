@@ -25,7 +25,7 @@ export const updateUser = async (id: number, data: Partial<User> & { password?: 
     );
 
 export const getTechnicians = async () =>
-    request<Array<User>>('/users/technicians');
+    request<PaginatedResponse<User>>('/users/technicians');
 
 export const getProfile = async () =>
     request<User>('/users/profile');

@@ -1,14 +1,11 @@
 export interface Seal {
-    id: string;
-    name: string;
-    description?: string;
+    id: number;
     type: string;
-    isActive: boolean;
 }
 
 export interface JobSeal {
     id: string;
     jobId: number;
-    sealId: string;
+    sealId: number;
     seal?: Seal;
 }

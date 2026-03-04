@@ -1,11 +1,14 @@
+export interface Stock {
+    id: string;
+    availableQuantity: number;
+    minimumStock: number;
+}
+
 export interface Material {
     id: string;
     name: string;
-    type: string;
-    description?: string;
     unit: string;
-    allowsDecimals: boolean;
-    isActive?: boolean;
+    totalStock?: number;
 }
 export interface WorkMaterial {
     id: string;

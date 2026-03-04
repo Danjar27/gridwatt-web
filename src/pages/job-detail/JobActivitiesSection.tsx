@@ -6,7 +6,7 @@ import { addJobActivity, removeJobActivity } from '@lib/api/jobs.ts';
 import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
+import Dropdown from '@components/Dropdown/Dropdown';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
 import type { Job } from "@interfaces/job.interface.ts";
@@ -94,7 +94,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
     });
 
     const addedIds = new Set(jobActivities.map((ja) => ja.activityId));
-    const availableActivities = activitiesData?.data.filter((a) => a.isActive && !addedIds.has(a.id)) ?? [];
+    const availableActivities = activitiesData?.data.filter((a) => !addedIds.has(a.id)) ?? [];
 
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
@@ -134,18 +134,14 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             <Modal id="job-activities-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
                 <Window title={i18n('pages.jobDetail.activities.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
-                    <select
+                    <Dropdown
                         value={selectedActivityId}
-                        onChange={(e) => setSelectedActivityId(e.target.value)}
-                        className={INPUT_CLASS}
-                    >
-                        <option value="">{i18n('pages.jobDetail.activities.select')}</option>
-                        {availableActivities.map((a) => (
-                            <option key={a.id} value={a.id}>
-                                {a.name}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => setSelectedActivityId(v as string)}
+                        options={[
+                            { label: i18n('pages.jobDetail.activities.select'), value: '' },
+                            ...availableActivities.map((a) => ({ label: a.name, value: a.id })),
+                        ]}
+                    />
                     <button
                         onClick={() => selectedActivityId && addMutation.mutate(selectedActivityId)}
                         disabled={!selectedActivityId || addMutation.isPending}

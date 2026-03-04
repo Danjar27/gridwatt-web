@@ -1,15 +1,21 @@
 import type { ColumnDef } from '@tanstack/react-table';
+import type { FC } from 'react';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
-import { PencilSimpleIcon, TrashIcon } from '@phosphor-icons/react';
+import { PencilSimpleIcon, TrashIcon, UserPlusIcon, ArrowLineDownIcon } from '@phosphor-icons/react';
 import { useInventoryActions } from '../utils/context.ts';
 import { getMaterials } from '@lib/api/materials.ts';
 import { useTranslations } from 'use-intl';
 
 import Table from '@components/Table/Table';
-import type {Material} from "@interfaces/material.interface.ts";
+import type { Material } from '@interfaces/material.interface.ts';
 
-const ViewTable = () => {
+interface ViewTableProps {
+    onAssign?: (material: Material) => void;
+    onIngress?: (material: Material) => void;
+}
+
+const ViewTable: FC<ViewTableProps> = ({ onAssign, onIngress }) => {
     const i18n = useTranslations();
     const { select, openUpdate, openDelete } = useInventoryActions();
 
@@ -21,6 +27,16 @@ const ViewTable = () => {
     const handleRemove = (material: Material) => {
         select(material);
         openDelete();
+    };
+
+    const handleAssign = (material: Material) => {
+        select(material);
+        onAssign?.(material);
+    };
+
+    const handleIngress = (material: Material) => {
+        select(material);
+        onIngress?.(material);
     };
 
     const columns: Array<ColumnDef<Material>> = [
@@ -35,29 +51,30 @@ const ViewTable = () => {
             cell: ({ row }) => <div className="font-medium">{row.original.name}</div>,
         },
         {
-            accessorKey: 'description',
-            header: i18n('pages.materials.form.description'),
-            cell: ({ row }) => <div className="text-sm text-muted-foreground">{row.original.description}</div>,
-        },
-        {
-            accessorKey: 'type',
-            header: i18n('pages.materials.form.type'),
-            cell: ({ row }) => (
-                <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
-                    {row.original.type}
-                </span>
-            ),
-        },
-        {
             accessorKey: 'unit',
             header: i18n('pages.materials.form.unit'),
             cell: ({ row }) => <div className="text-sm">{row.original.unit}</div>,
+        },
+        {
+            accessorKey: 'totalStock',
+            header: i18n('pages.materials.form.totalStock'),
+            cell: ({ row }) => (
+                <div className="text-sm">
+                    {row.original.totalStock ?? 0} {row.original.unit}
+                </div>
+            ),
         },
         {
             id: 'actions',
             header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
+                    <button onClick={() => handleIngress(row.original)} className="cursor-pointer" title={i18n('pages.materials.form.ingress')}>
+                        <ArrowLineDownIcon weight="duotone" className="text-blue-400" width={20} height={20} />
+                    </button>
+                    <button onClick={() => handleAssign(row.original)} className="cursor-pointer" title={i18n('pages.materials.form.assign')}>
+                        <UserPlusIcon weight="duotone" className="text-green-500" width={20} height={20} />
+                    </button>
                     <button onClick={() => handleEdit(row.original)} className="cursor-pointer">
                         <PencilSimpleIcon
                             weight="duotone"

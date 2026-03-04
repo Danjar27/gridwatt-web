@@ -7,11 +7,11 @@
     --sidebar-mobile-width: 16rem;
     --sidebar-collapsed-width: 4rem;
 
-    --neutral-500: #F5F5F5;
-    --neutral-600: #EBEBEB;
-    --neutral-700: #D6D6D6;
-    --neutral-800: #B8B8B8;
-    --neutral-900: #8F8F8F;
+    --neutral-500: #FFFFFF;
+    --neutral-600: #F0F3FA;
+    --neutral-700: #E0E5F0;
+    --neutral-800: #C4CCDE;
+    --neutral-900: #8890A8;
 
     --primary-500: #3D3D3D;
     --primary-600: #292929;
@@ -121,7 +121,7 @@ html, body, #root {
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
     padding-top: env(safe-area-inset-top);
-    background-color: #EBEBEB;
+    background-color: #E4E9F4;
 }
 
 body.dark, body.dark #root {

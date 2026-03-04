@@ -10,34 +10,34 @@ export const getOrders = async (params?: PaginatedQuery & { technicianId?: numbe
 export const getMyOrders = async () =>
     request<Array<Order>>('/orders/my');
 
-export const getOrder = async (id: number) =>
+export const getOrder = async (id: string) =>
     request<Order>(`/orders/${id}`);
 
 export const createOrder = async (data: Partial<Order>) =>
     mutationRequest<Order>(
         '/orders',
         { method: 'POST', body: JSON.stringify(data) },
-        { type: 'order', action: 'create', optimisticData: { id: -Date.now(), ...data } }
+        { type: 'order', action: 'create', optimisticData: { id: String(-Date.now()), ...data } }
     );
 
-export const updateOrder = async (id: number, data: Partial<Order>) =>
+export const updateOrder = async (id: string, data: Partial<Order>) =>
     mutationRequest<Order>(
         `/orders/${id}`,
         { method: 'PUT', body: JSON.stringify(data) },
         { type: 'order', action: 'update', optimisticData: { id, ...data } }
     );
 
-export const assignOrder = async (id: number, technicianId: number | null) =>
+export const assignOrder = async (id: string, technicianId: number | null) =>
     mutationRequest<Order>(
         `/orders/${id}/assign`,
         { method: 'PUT', body: JSON.stringify({ technicianId }) },
         { type: 'order', action: 'update', optimisticData: { id, technicianId } }
     );
 
-export const bulkAssignOrders = async (orderIds: Array<number>, technicianId: number) =>
+export const bulkAssignOrders = async (orderIds: Array<string>, technicianId: number) =>
     mutationRequest<Array<Order>>(
         '/orders/assign',
-        { method: 'PUT', body: JSON.stringify({ orderIds: orderIds.map(String), technicianId }) },
+        { method: 'PUT', body: JSON.stringify({ orderIds, technicianId }) },
         { type: 'order', action: 'update', optimisticData: orderIds.map((id) => ({ id, technicianId })) }
     );
 

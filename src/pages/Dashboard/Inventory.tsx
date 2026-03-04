@@ -31,9 +31,9 @@ const exportTargetRouteKeys: Record<ExportTarget, 'routes.orders' | 'routes.jobs
 
 const orderFields = ['id', 'firstName', 'lastName', 'email', 'serviceType', 'orderStatus', 'issueDate', 'issueTime', 'meterNumber', 'accountNumber'];
 const jobFields = ['id', 'orderId', 'jobType', 'jobStatus', 'startDateTime', 'endDateTime', 'technicianId', 'gpsLocation', 'meterReading', 'notes'];
-const materialFields = ['id', 'name', 'type', 'description', 'unit', 'allowsDecimals', 'isActive'];
-const activityFields = ['id', 'name', 'description', 'isActive'];
-const sealFields = ['id', 'name', 'type', 'description', 'isActive'];
+const materialFields = ['id', 'name', 'unit'];
+const activityFields = ['id', 'name', 'contractPrice', 'technicianPrice'];
+const sealFields = ['id', 'name', 'type'];
 
 function downloadCsv(filename: string, rows: Array<Record<string, unknown>>) {
     const csv = Papa.unparse(rows);

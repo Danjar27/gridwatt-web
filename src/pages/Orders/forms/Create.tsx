@@ -30,7 +30,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
             setError(null);
             onSubmit?.();
         },
-        onError: (err: Error) => setError(err.message || 'Failed to create order'),
+        onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const handleSubmit = (data: Order) => {

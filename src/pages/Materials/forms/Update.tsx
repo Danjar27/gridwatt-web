@@ -4,8 +4,6 @@ import type { UpdateQuery } from '@interfaces/query.interface';
 import type { FC } from 'react';
 
 import TextInput from '@components/Form/blocks/TextInput';
-import TextArea from '@components/Form/blocks/TextArea';
-import Select from '@components/Form/blocks/Select';
 import Actions from '@components/Form/blocks/Actions';
 import FormError from '@components/Form/blocks/Error';
 import Window from '@components/Modal/blocks/Window';
@@ -55,32 +53,13 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         <Modal id="update-material" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
             <Window title={i18n('pages.materials.form.update')} className="w-full max-w-150 px-4" icon={PackageIcon}>
                 <FormError message={error} />
-                <Form key={selected.id} onSubmit={handleSubmit} defaultValues={selected}>
+                <Form key={selected.id} onSubmit={handleSubmit} defaultValues={{ name: selected.name, unit: selected.unit }}>
                     <Field name="name" label={i18n('pages.materials.form.name')} required>
                         <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Field name="type" label={i18n('pages.materials.form.type')} required>
-                            <TextInput name="type" rules={{ required: i18n('errors.required') }} />
-                        </Field>
-                        <Field name="unit" label={i18n('pages.materials.form.unit')} required>
-                            <TextInput name="unit" rules={{ required: i18n('errors.required') }} />
-                        </Field>
-                    </div>
-                    <Field name="description" label={i18n('pages.materials.form.description')}>
-                        <TextArea name="description" rows={3} />
+                    <Field name="unit" label={i18n('pages.materials.form.unit')} required>
+                        <TextInput name="unit" rules={{ required: i18n('errors.required') }} />
                     </Field>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Field name="allowsDecimals" label={i18n('pages.materials.form.allowsDecimals')}>
-                            <Select
-                                name="allowsDecimals"
-                                options={[
-                                    { label: i18n('literal.yes'), value: 'true' },
-                                    { label: i18n('literal.no'), value: 'false' },
-                                ]}
-                            />
-                        </Field>
-                    </div>
                     <Actions
                         submitLabel={i18n('literal.update')}
                         onCancel={handleCancel}

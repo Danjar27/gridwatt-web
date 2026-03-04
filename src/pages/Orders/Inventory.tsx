@@ -5,19 +5,22 @@ import { useTranslations } from 'use-intl';
 import { useMemo, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
-import { bulkAssignOrders, getMyOrders, getOrders } from '@lib/api/orders.ts';
+import { getMyOrders, getOrders } from '@lib/api/orders.ts';
 import { getTechnicians } from '@lib/api/users.ts';
+import { getAreas, deleteArea, updateArea } from '@lib/api/areas.ts';
 import { OrdersMap } from '@/components/orders/OrdersMap';
 import { queryClient } from '@lib/query-client';
-import { isOnline } from '@/lib/offline-store';
 
+import PageToolbar from '@components/PageToolbar/PageToolbar';
+import ToolbarButton from '@components/PageToolbar/ToolbarButton';
+import ToolbarDivider from '@components/PageToolbar/ToolbarDivider';
+import ToolbarSelect from '@components/PageToolbar/ToolbarSelect';
 import TechnicianView from '@pages/Orders/tables/TechnicianView';
 import AdminView from '@pages/Orders/tables/AdminView';
 import Summary from '@components/Summary/Summary';
-import Button from '@components/Button/Button';
-import type {User} from "@interfaces/user.interface.ts";
-import type { Order } from '@interfaces/order.interface.ts';
+import AreaForm from '@pages/Orders/forms/AreaForm.tsx';
+import type { User } from '@interfaces/user.interface.ts';
+import type { MapArea, AreaCoordinate } from '@interfaces/area.interface.ts';
 
 const Inventory = () => {
     const i18n = useTranslations();
@@ -28,6 +31,8 @@ const Inventory = () => {
 
     const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
     const [filterTechnicianId, setFilterTechnicianId] = useState<number | null>(null);
+    const [pendingCoords, setPendingCoords] = useState<AreaCoordinate[] | null>(null);
+    const [editingArea, setEditingArea] = useState<MapArea | null>(null);
 
     const { data: myOrders = [], isLoading: myLoading } = useQuery({
         queryKey: ['orders', 'my'],
@@ -56,54 +61,26 @@ const Inventory = () => {
     });
     const allOrders = allOrdersResponse?.data || [];
 
-    const bulkAssignMutation = useMutation({
-        mutationFn: ({ orderIds, technicianId }: { orderIds: Array<number>; technicianId: number }) =>
-            bulkAssignOrders(orderIds, technicianId),
-        onMutate: async ({ orderIds, technicianId }) => {
-            await queryClient.cancelQueries({ queryKey: ['orders', 'all-map'] });
-
-            const previous = queryClient.getQueryData<{ data: Array<Order> }>(['orders', 'all-map']);
-
-            const tech = technicians.find((t) => t.id === technicianId);
-
-            queryClient.setQueryData<{ data: Array<Order> } | undefined>(['orders', 'all-map'], (old) => {
-                if (!old) {
-                    return old;
-                }
-
-                return {
-                    ...old,
-                    data: old.data.map((order) =>
-                        orderIds.includes(order.id)
-                            ? {
-                                  ...order,
-                                  technicianId,
-                                  technician: tech ? (tech as Order['technician']) : order.technician,
-                              }
-                            : order
-                    ),
-                };
-            });
-
-            return { previous };
-        },
-        onError: (_err, _vars, context) => {
-            if (context?.previous) {
-                queryClient.setQueryData(['orders', 'all-map'], context.previous);
-            }
-        },
-        onSettled: () => {
-            if (isOnline()) {
-                queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
-                queryClient.invalidateQueries({ queryKey: ['orders', 'all'] });
-                queryClient.invalidateQueries({ queryKey: ['jobs'] });
-            }
-        },
+    const { data: areas = [] } = useQuery({
+        queryKey: ['areas'],
+        queryFn: getAreas,
+        select: (res) => (Array.isArray(res) ? res : ((res as any)?.data ?? [])),
+        enabled: viewMode === 'map' && !isTechnician,
     });
 
-    const handleBulkAssign = (orderIds: Array<number>, technicianId: number) => {
-        bulkAssignMutation.mutate({ orderIds, technicianId });
-    };
+    const deleteAreaMutation = useMutation({
+        mutationFn: (id: number) => deleteArea(id),
+        onSettled: () => queryClient.invalidateQueries({ queryKey: ['areas'] }),
+    });
+
+    const updateAreaShapeMutation = useMutation({
+        mutationFn: ({ id, coords }: { id: number; coords: AreaCoordinate[] }) =>
+            updateArea(id, { coordinates: coords }),
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['areas'] });
+            queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
+        },
+    });
 
     const orders = useMemo(() => (isTechnician ? myOrders : []), [isTechnician, myOrders]);
 
@@ -122,78 +99,88 @@ const Inventory = () => {
     }
 
     return (
-        <div className={`space-y-6 ${viewMode === 'map' ? 'flex flex-col flex-1 min-h-0' : ''}`}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
+        <>
+            <div className={`space-y-6 ${viewMode === 'map' ? 'flex flex-col flex-1 min-h-0' : ''}`}>
+                <PageToolbar>
                     {!isTechnician && (
                         <>
-                            <Button as="a" icon={PlusCircleIcon} to="/orders/new">
+                            <ToolbarButton as="a" icon={PlusCircleIcon} variant="primary" to="/orders/new">
                                 {i18n('pages.orders.action')}
-                            </Button>
-                            <Button as="a" icon={UploadSimpleIcon} variant="outline" to="/orders/import">
+                            </ToolbarButton>
+                            <ToolbarButton as="a" icon={UploadSimpleIcon} to="/orders/import">
                                 {i18n('pages.orders.import')}
-                            </Button>
-
+                            </ToolbarButton>
+                            <ToolbarDivider />
+                            <ToolbarSelect<'table' | 'map'>
+                                value={viewMode}
+                                onChange={setViewMode}
+                                options={[
+                                    { label: i18n('pages.orders.viewMode.table'), value: 'table' },
+                                    { label: i18n('pages.orders.viewMode.map'), value: 'map' },
+                                ]}
+                            />
                             {viewMode === 'map' && (
-                                <select
-                                    className={INPUT_CLASS}
-                                    value={filterTechnicianId ?? ''}
-                                    onChange={(e) =>
-                                        setFilterTechnicianId(e.target.value ? Number(e.target.value) : null)
-                                    }
-                                >
-                                    <option value="">{i18n('pages.orders.filter.allTechnicians')}</option>
-                                    {technicians.map((tech) => (
-                                        <option key={tech.id} value={tech.id}>
-                                            {tech.name} {tech.lastName}
-                                        </option>
-                                    ))}
-                                </select>
+                                <ToolbarSelect<number | null>
+                                    value={filterTechnicianId}
+                                    onChange={setFilterTechnicianId}
+                                    options={[
+                                        { label: i18n('pages.orders.filter.allTechnicians'), value: null },
+                                        ...technicians.map((tech) => ({
+                                            label: `${tech.name} ${tech.lastName}`,
+                                            value: tech.id,
+                                        })),
+                                    ]}
+                                />
                             )}
                         </>
                     )}
-                </div>
-                <select
-                    className={INPUT_CLASS}
-                    value={viewMode}
-                    onChange={(e) => setViewMode(e.target.value as 'table' | 'map')}
-                    data-testid="view-mode-dropdown"
-                >
-                    <option value="table">{i18n('pages.orders.viewMode.table')}</option>
-                    <option value="map">{i18n('pages.orders.viewMode.map')}</option>
-                </select>
+                </PageToolbar>
+
+                {viewMode === 'table' ? (
+                    !isTechnician ? (
+                        <Summary
+                            icon={TruckIcon}
+                            title={i18n('pages.orders.summary.title')}
+                            subtitle={i18n('pages.orders.summary.subtitle')}
+                        >
+                            <AdminView />
+                        </Summary>
+                    ) : (
+                        <Summary
+                            icon={TruckIcon}
+                            title={i18n('pages.orders.summary.title')}
+                            subtitle={i18n('pages.orders.summary.subtitle')}
+                            legend={i18n('pages.orders.summary.total', { count: orders.length })}
+                        >
+                            <TechnicianView orders={orders} />
+                        </Summary>
+                    )
+                ) : (
+                    <div className="flex-1 min-h-0">
+                        <OrdersMap
+                            orders={isTechnician ? orders : allOrders}
+                            technicians={technicians}
+                            areas={areas}
+                            onDrawComplete={(coords) => setPendingCoords(coords)}
+                            onAreaEditRequest={(area) => setEditingArea(area)}
+                            onAreaShapeUpdate={(id, coords) => updateAreaShapeMutation.mutate({ id, coords })}
+                            onAreaDelete={(id) => deleteAreaMutation.mutate(id)}
+                            isAreaMutating={deleteAreaMutation.isPending || updateAreaShapeMutation.isPending}
+                        />
+                    </div>
+                )}
             </div>
 
-            {viewMode === 'table' ? (
-                !isTechnician ? (
-                    <Summary
-                        icon={TruckIcon}
-                        title={i18n('pages.orders.summary.title')}
-                        subtitle={i18n('pages.orders.summary.subtitle')}
-                    >
-                        <AdminView />
-                    </Summary>
-                ) : (
-                    <Summary
-                        icon={TruckIcon}
-                        title={i18n('pages.orders.summary.title')}
-                        subtitle={i18n('pages.orders.summary.subtitle')}
-                        legend={i18n('pages.orders.summary.total', { count: orders.length })}
-                    >
-                        <TechnicianView orders={orders} />
-                    </Summary>
-                )
-            ) : (
-                <div className="flex-1 min-h-0">
-                    <OrdersMap
-                        orders={isTechnician ? orders : allOrders}
-                        technicians={technicians}
-                        onBulkAssign={handleBulkAssign}
-                        isAssigning={bulkAssignMutation.isPending}
-                    />
-                </div>
-            )}
-        </div>
+            <AreaForm
+                isOpen={!!pendingCoords || !!editingArea}
+                onClose={() => {
+                    setPendingCoords(null);
+                    setEditingArea(null);
+                }}
+                pendingCoords={pendingCoords}
+                editingArea={editingArea}
+            />
+        </>
     );
 };
 

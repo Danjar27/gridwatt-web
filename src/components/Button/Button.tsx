@@ -17,11 +17,12 @@ const Button: FC<PropsWithChildren<ButtonProps>> = ({
         onClick,
         disabled,
         className: classnames(
-            'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium hover:bg-primary/90',
+            'flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium',
             'cursor-pointer disabled:opacity-20 disabled:cursor-not-allowed',
             {
-                'bg-primary-500 hover:bg-primary-600 text-white': variant === 'solid',
-                'border border-primary-500 hover:bg-neutral-600': variant === 'outline',
+                'bg-primary-500 hover:bg-primary-600 text-white px-4 py-2': variant === 'solid',
+                'border border-primary-500 hover:bg-neutral-600 px-4 py-2': variant === 'outline',
+                'hover:bg-neutral-600 text-primary-500': variant === 'ghost',
             }
         ),
     };
@@ -35,7 +36,7 @@ const Button: FC<PropsWithChildren<ButtonProps>> = ({
                     weight={variant === 'solid' ? 'fill' : 'duotone'}
                     className={classnames({
                         'text-white/80': variant === 'solid',
-                        'text-primary-500': variant === 'outline',
+                        'text-primary-500': variant === 'outline' || variant === 'ghost',
                     })}
                 />
             )}

@@ -36,14 +36,14 @@ const Checkbox: FC<CheckboxProps> = ({ indeterminate, className, checked, ...pro
                 {isChecked && (
                     <svg
                         viewBox="0 0 12 10"
-                        className="h-[9px] w-[9px] fill-none stroke-white stroke-[2.5px]"
+                        className="h-2.25 w-2.25 fill-none stroke-white stroke-[2.5px]"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     >
                         <polyline points="1,5 4.5,8.5 11,1" />
                     </svg>
                 )}
-                {isIndeterminate && <span className="h-[2px] w-[9px] rounded-full bg-white" />}
+                {isIndeterminate && <span className="h-0.5 w-2.25 rounded-full bg-white" />}
             </span>
         </label>
     );

@@ -2,9 +2,7 @@ import type { MutationForm } from '@interfaces/form.interface';
 import type { Seal } from '@interfaces/seal.interface.ts';
 import type { FC } from 'react';
 
-import PrefixedIdInput from '@components/Form/blocks/PrefixedIdInput';
-import TextInput from '@components/Form/blocks/TextInput';
-import TextArea from '@components/Form/blocks/TextArea';
+import NumberInput from '@components/Form/blocks/NumberInput';
 import FormError from '@components/Form/blocks/Error';
 import Actions from '@components/Form/blocks/Actions';
 import Window from '@components/Modal/blocks/Window';
@@ -19,6 +17,7 @@ import { queryClient } from '@lib/query-client';
 import { createSeal } from '@lib/api/seals.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
+import TextInput from '@components/Form/blocks/TextInput';
 
 const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -52,16 +51,10 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit}>
                     <Field name="id" label={i18n('pages.seals.form.id')} required>
-                        <PrefixedIdInput name="id" prefix="SEL" rules={{ required: i18n('errors.required') }} />
-                    </Field>
-                    <Field name="name" label={i18n('pages.seals.form.name')} required>
-                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
+                        <NumberInput name="id" step="1" min={1} rules={{ required: i18n('errors.required'), min: { value: 1, message: '≥ 1' } }} />
                     </Field>
                     <Field name="type" label={i18n('pages.seals.form.type')} required>
                         <TextInput name="type" rules={{ required: i18n('errors.required') }} />
-                    </Field>
-                    <Field name="description" label={i18n('pages.seals.form.description')}>
-                        <TextArea name="description" rows={3} />
                     </Field>
                     <Actions
                         submitLabel={i18n('literal.create')}
@@ -75,3 +68,4 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 };
 
 export default Create;
+

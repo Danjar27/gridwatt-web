@@ -6,7 +6,7 @@ import { getSeals } from '@lib/api/seals.ts';
 import { isOnline } from '@/lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
-import { INPUT_CLASS } from '@components/Form/utils/constants';
+import Dropdown from '@components/Dropdown/Dropdown';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
 import type { Job } from "@interfaces/job.interface.ts";
@@ -21,7 +21,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     const queryClient = useQueryClient();
     const i18n = useTranslations();
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedSealId, setSelectedSealId] = useState('');
+    const [selectedSealId, setSelectedSealId] = useState<number | ''>('');
 
     const { data: sealsData } = useQuery({
         queryKey: ['seals'],
@@ -31,7 +31,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
-        mutationFn: (sealId: string) => addJobSeal(jobId, sealId),
+        mutationFn: (sealId: number) => addJobSeal(jobId, String(sealId)),
         onMutate: async (sealId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
@@ -39,7 +39,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
             const tempJobSeal: JobSeal = {
                 id: `temp-${Date.now()}`,
                 jobId,
-                sealId,
+                sealId: Number(sealId),
                 seal: seal ?? undefined,
             };
             const pendingSync = !isOnline();
@@ -94,7 +94,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     });
 
     const addedIds = new Set(jobSeals.map((js) => js.sealId));
-    const availableSeals = sealsData?.data.filter((s) => s.isActive && !addedIds.has(s.id)) ?? [];
+    const availableSeals = sealsData?.data.filter((s) => !addedIds.has(s.id)) ?? [];
 
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
@@ -116,7 +116,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                             key={js.id}
                             className="flex items-center gap-1 rounded-full bg-primary-500/20 px-3 py-1 text-sm text-primary-500"
                         >
-                            {js.seal?.name}
+                            {js.seal ? `#${js.seal.id} — ${js.seal.type}` : `#${js.sealId}`}
                             <button
                                 onClick={() => removeMutation.mutate(js.id)}
                                 disabled={removeMutation.isPending}
@@ -134,21 +134,17 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
             <Modal id="job-seals-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
                 <Window title={i18n('pages.jobDetail.seals.modal')} className="w-full max-w-sm px-4">
                 <div className="space-y-4">
-                    <select
+                    <Dropdown
                         value={selectedSealId}
-                        onChange={(e) => setSelectedSealId(e.target.value)}
-                        className={INPUT_CLASS}
-                    >
-                        <option value="">{i18n('pages.jobDetail.seals.select')}</option>
-                        {availableSeals.map((s) => (
-                            <option key={s.id} value={s.id}>
-                                {s.name}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => setSelectedSealId(v === '' ? '' : v as number)}
+                        options={[
+                            { label: i18n('pages.jobDetail.seals.select'), value: '' },
+                            ...availableSeals.map((s) => ({ label: `#${s.id} — ${s.type}`, value: s.id })),
+                        ]}
+                    />
                     <button
-                        onClick={() => selectedSealId && addMutation.mutate(selectedSealId)}
-                        disabled={!selectedSealId || addMutation.isPending}
+                        onClick={() => selectedSealId !== '' && addMutation.mutate(Number(selectedSealId))}
+                        disabled={selectedSealId === '' || addMutation.isPending}
                         className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
                     >
                         {i18n('literal.add')}

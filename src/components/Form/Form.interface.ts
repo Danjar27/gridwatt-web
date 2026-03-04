@@ -34,10 +34,11 @@ export interface SelectProps extends InputProps {
     options: Array<SelectOption>;
 }
 
-export interface NumberInputProps extends InputProps {
+export interface NumberInputProps extends Omit<InputProps, 'rules'> {
     step?: string;
     min?: number;
     max?: number;
+    rules?: Omit<RegisterOptions, 'valueAsNumber' | 'valueAsDate' | 'setValueAs' | 'pattern'>;
 }
 
 export interface PrefixedIdInputProps {

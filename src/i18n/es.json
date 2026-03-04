@@ -15,7 +15,8 @@
         "inactive": "Inactivo",
         "add": "Agregar",
         "edit": "Editar",
-        "refresh": "Actualizar datos"
+        "refresh": "Actualizar datos",
+        "close": "Cerrar"
     },
     "common": {
         "confirmation": "Esta acción no se puede deshacer. ¿Deseas continuar?"
@@ -25,6 +26,35 @@
         "common": "Ocurrió un Error. Por favor, intenta de nuevo",
         "required": "Este campo es requerido",
         "minLength": "Mínimo {min} caracteres"
+    },
+    "import": {
+        "hint": "Arrastra un archivo CSV o Excel, o haz clic para seleccionar",
+        "submit": "Importar",
+        "success": "Importación completada",
+        "created": "Creados",
+        "updated": "Actualizados",
+        "errors": "Errores",
+        "noFile": "Selecciona un archivo para continuar",
+        "preview": "Previsualizar",
+        "previewing": "Procesando...",
+        "commit": "Confirmar importación",
+        "committing": "Importando...",
+        "rowsFound": "{count} filas encontradas",
+        "rowsValid": "{count} válidas",
+        "rowsWithErrors": "{count} con errores",
+        "filterErrors": "Solo con errores",
+        "showAll": "Mostrar todos",
+        "wizard": {
+            "upload": "Subir",
+            "review": "Revisar",
+            "done": "Listo"
+        },
+        "done": {
+            "title": "Importación completada",
+            "subtitle": "Los registros han sido guardados exitosamente.",
+            "importMore": "Importar más",
+            "close": "Cerrar"
+        }
     },
     "brand": "Grid Watt",
     "routes": {
@@ -116,13 +146,15 @@
             "title": "Actividades",
             "subtitle": "Administra las actividades y tareas de tu empresa",
             "action": "Agregar actividad",
+            "import": "Importar",
             "form": {
                 "create": "Nueva Actividad",
                 "update": "Actualizar Actividad",
                 "delete": "Eliminar Actividad",
                 "id": "Identificador",
                 "name": "Nombre",
-                "description": "Descripción"
+                "contractPrice": "Precio contractual",
+                "technicianPrice": "Precio técnico"
             },
             "summary": {
                 "title": "Todas las actividades",
@@ -134,17 +166,29 @@
             "title": "Materiales",
             "subtitle": "Administra los materiales de inventario y proveedores",
             "action": "Agregar material",
+            "import": "Importar",
+            "ingress": "Registrar ingreso",
             "form": {
                 "create": "Nuevo Material",
                 "update": "Actualizar Material",
                 "delete": "Eliminar Material",
                 "id": "Identificador",
                 "name": "Nombre",
-                "type": "Tipo",
                 "unit": "Unidad",
-                "description": "Descripción",
-                "allowsDecimals": "Permite decimales",
-                "isActive": "Estado"
+                "totalStock": "Disponible",
+                "assign": "Asignar a técnico",
+                "technician": "Técnico",
+                "quantity": "Cantidad",
+                "available": "Disponible",
+                "noStock": "Sin stock disponible para este material",
+                "ingress": "Registrar ingreso de stock",
+                "ingressNew": "Nuevo lote de stock",
+                "stockBatch": "Lote de stock",
+                "stockBatchId": "Identificador del lote",
+                "minimumStock": "Stock mínimo",
+                "notes": "Notas",
+                "ingressQty": "Cantidad a ingresar",
+                "newBatchLabel": "Sin lotes existentes, se creará uno nuevo"
             },
             "summary": {
                 "title": "Todos los materiales",
@@ -156,15 +200,23 @@
             "title": "Sellos",
             "subtitle": "Administra los tipos de sellos y configuraciones",
             "action": "Agregar sello",
+            "range": "Crear rango",
+            "assignMultiple": "Asignar rango",
             "form": {
                 "create": "Nuevo Sello",
                 "update": "Actualizar Sello",
                 "delete": "Eliminar Sello",
-                "id": "Identificador",
-                "name": "Nombre",
+                "range": "Nuevo rango de sellos",
+                "id": "Número de sello",
                 "type": "Tipo",
-                "description": "Descripción",
-                "isActive": "Estado"
+                "fromNumber": "Desde",
+                "toNumber": "Hasta",
+                "assign": "Asignar sello",
+                "assignMultiple": "Asignar rango de sellos",
+                "technician": "Técnico",
+                "fromSealNumber": "Número inicial",
+                "toSealNumber": "Número final",
+                "rangeLabel": "Rango de sellos"
             },
             "summary": {
                 "title": "Todos los sellos",
@@ -218,9 +270,7 @@
                     "lockerSequence": "Secuencia del casillero",
                     "observations": "Observaciones",
                     "latitude": "Latitud",
-                    "longitude": "Longitud",
-                    "coordinateX": "Coordenada X",
-                    "coordinateY": "Coordenada Y"
+                    "longitude": "Longitud"
                 }
             },
             "table": {
@@ -239,6 +289,24 @@
                 "title": "Todas las órdenes",
                 "subtitle": "Lista de órdenes registradas",
                 "total": "Total de órdenes: {count}"
+            },
+            "map": {
+                "drawArea": "Dibujar área",
+                "cancelDraw": "Cancelar dibujo",
+                "drawHint": "Clic para vértices · Mantén y arrastra para forma libre · Doble clic para cerrar",
+                "editShapeHint": "Arrastra los vértices para editar la forma",
+                "saveShape": "Guardar forma",
+                "cancelEdit": "Cancelar",
+                "unassigned": "Sin asignar"
+            },
+            "areas": {
+                "title": "Configurar área",
+                "editTitle": "Modificar área",
+                "technician": "Técnico asignado",
+                "noTechnician": "Sin técnico asignado",
+                "deleteConfirm": "¿Eliminar esta área? Las órdenes asignadas a través de ella serán desasignadas.",
+                "editShape": "Editar forma",
+                "delete": "Eliminar área"
             }
         },
         "jobs": {
@@ -274,8 +342,12 @@
                 "create": "Nuevo Usuario",
                 "update": "Actualizar Usuario",
                 "delete": "Eliminar Usuario",
-                "passwordReset": { "title": "Restablecer contraseña" },
-                "changeRole": { "title": "Cambiar rol" },
+                "passwordReset": {
+                    "title": "Restablecer contraseña"
+                },
+                "changeRole": {
+                    "title": "Cambiar rol"
+                },
                 "name": "Nombre",
                 "lastName": "Apellido",
                 "email": "Correo electrónico",
@@ -404,6 +476,9 @@
         },
         "orderDetail": {
             "notFound": "Orden no encontrada",
+            "orderTitle": "Orden #{id}",
+            "jobItem": "Trabajo #{id}",
+            "technicalDetails": "Detalles técnicos",
             "customerInfo": "Información del cliente",
             "name": "Nombre",
             "email": "Correo electrónico",
@@ -432,17 +507,31 @@
             "selectFiles": "Seleccionar archivos",
             "supported": "Admitidos: .csv, .xlsx, .xls, .xml, .pdf",
             "chooseFiles": "Elegir archivos",
+            "dropHere": "Suelta tus archivos aquí",
+            "removeFile": "Eliminar archivo",
+            "clearAll": "Borrar todo",
+            "addMore": "Agregar más",
+            "filesSelected": "{count} archivos seleccionados",
             "parseFiles": "Procesar archivos",
             "parsing": "Procesando...",
             "importValid": "Importar órdenes válidas",
             "importing": "Importando...",
             "importedSuccess": "{count} órdenes importadas exitosamente.",
+            "validReadyToImport": "{count} órdenes válidas listas para importar",
+            "doneSubtitle": "Las órdenes han sido guardadas y están listas para ser asignadas.",
+            "importMoreFiles": "Importar más archivos",
+            "goToOrders": "Ir a órdenes",
             "fileWarnings": "Advertencias de archivo",
             "totalParsed": "Total procesado",
             "validOrders": "Órdenes válidas",
             "needsReview": "Requiere revisión",
             "row": "Fila",
             "ok": "OK",
+            "wizard": {
+                "upload": "Subir",
+                "review": "Revisar",
+                "done": "Listo"
+            },
             "table": {
                 "source": "Fuente",
                 "customer": "Cliente",
@@ -466,6 +555,12 @@
             "selected": "{count} órdenes seleccionadas",
             "importSelected": "Importar seleccionadas ({count})",
             "removeFromBatch": "Eliminar del lote",
+            "filterErrors": "Con errores",
+            "showAll": "Mostrar todos",
+            "cancel": "Cancelar",
+            "editRow": "Editar fila",
+            "saveRow": "Guardar cambios",
+            "cancelEdit": "Cancelar edición",
             "errors": {
                 "noFiles": "Selecciona al menos un archivo para procesar.",
                 "parseFiles": "Error al procesar los archivos.",
