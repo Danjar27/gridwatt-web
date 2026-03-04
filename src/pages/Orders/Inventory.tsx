@@ -57,7 +57,7 @@ const Inventory = () => {
     const allOrders = allOrdersResponse?.data || [];
 
     const bulkAssignMutation = useMutation({
-        mutationFn: ({ orderIds, technicianId }: { orderIds: Array<number>; technicianId: number }) =>
+        mutationFn: ({ orderIds, technicianId }: { orderIds: Array<string>; technicianId: number }) =>
             bulkAssignOrders(orderIds, technicianId),
         onMutate: async ({ orderIds, technicianId }) => {
             await queryClient.cancelQueries({ queryKey: ['orders', 'all-map'] });
@@ -101,7 +101,7 @@ const Inventory = () => {
         },
     });
 
-    const handleBulkAssign = (orderIds: Array<number>, technicianId: number) => {
+    const handleBulkAssign = (orderIds: Array<string>, technicianId: number) => {
         bulkAssignMutation.mutate({ orderIds, technicianId });
     };
 

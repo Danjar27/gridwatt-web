@@ -1,5 +1,20 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { CheckCircle, UploadCloud, AlertTriangle } from 'lucide-react';
+import {
+    UploadSimpleIcon,
+    CheckCircleIcon,
+    WarningCircleIcon,
+    WarningIcon,
+    TrashIcon,
+    XIcon,
+    FilePdfIcon,
+    FileXlsIcon,
+    FileCsvIcon,
+    ArrowRightIcon,
+    ListBulletsIcon,
+    CheckSquareIcon,
+    FunnelIcon,
+    PencilSimpleIcon,
+} from '@phosphor-icons/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useReactTable, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import type { ColumnDef, RowSelectionState, PaginationState } from '@tanstack/react-table';
@@ -8,11 +23,41 @@ import { classnames } from '@utils/classnames.ts';
 import { useAuthContext } from '@context/auth/context.ts';
 import { useTranslations } from 'use-intl';
 import Button from '@components/Button/Button';
+import FileUploader from '@components/FileUploader/FileUploader';
 import Table from '@components/Table/Table';
 import Checkbox from '@components/atoms/Checkbox';
-import type { OrderImportData, OrderImportPreviewItem, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
+import Stepper from '@components/Stepper/Stepper.tsx';
+import { useStepper } from '@hooks/useStepper.ts';
+import type {
+    OrderImportData,
+    OrderImportPreviewItem,
+    OrdersImportPreviewResponse,
+} from '@interfaces/order.interface.ts';
 
-const CELL_INPUT = 'w-full rounded border border-neutral-800 bg-neutral-500/60 px-1 py-0.5 text-sm';
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type WizardStep = 'upload' | 'review' | 'done';
+
+const WIZARD_STEP_IDS = ['upload', 'review', 'done'] as const satisfies ReadonlyArray<WizardStep>;
+
+const CELL_INPUT =
+    'w-full rounded-lg border border-neutral-800 bg-neutral-500/60 px-2 py-1.5 text-sm outline-none transition focus:border-primary-500';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function FileTypeIcon({ filename }: { filename: string }) {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    if (ext === 'pdf') {
+        return <FilePdfIcon size={14} weight="fill" className="shrink-0 text-error-500" />;
+    }
+    if (ext === 'csv') {
+        return <FileCsvIcon size={14} weight="fill" className="shrink-0 text-success-500" />;
+    }
+
+    return <FileXlsIcon size={14} weight="fill" className="shrink-0 text-secondary-500" />;
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export function OrdersImportPage() {
     const { user } = useAuthContext();
@@ -21,7 +66,18 @@ export function OrdersImportPage() {
     const userRole = user?.role?.name;
     const isRestricted = userRole === 'technician' || userRole === 'admin';
 
+    const stepperSteps = useMemo(
+        () => [
+            { id: 'upload', label: i18n('pages.ordersImport.wizard.upload') },
+            { id: 'review', label: i18n('pages.ordersImport.wizard.review') },
+            { id: 'done', label: i18n('pages.ordersImport.wizard.done') },
+        ],
+        [i18n]
+    );
+
+    const { current: step, currentIndex, goTo, reset: resetStep } = useStepper(WIZARD_STEP_IDS);
     const [files, setFiles] = useState<Array<File>>([]);
+    const [isDragging, setIsDragging] = useState(false);
     const [preview, setPreview] = useState<OrdersImportPreviewResponse | null>(null);
     const [localOrders, setLocalOrders] = useState<Array<OrderImportPreviewItem>>([]);
     const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -30,6 +86,8 @@ export function OrdersImportPage() {
     const [isParsing, setIsParsing] = useState(false);
     const [isCommitting, setIsCommitting] = useState(false);
     const [commitResult, setCommitResult] = useState<number | null>(null);
+    const [filterErrors, setFilterErrors] = useState(false);
+    const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
 
     useEffect(() => {
         if (preview) {
@@ -39,13 +97,29 @@ export function OrdersImportPage() {
         }
     }, [preview]);
 
-    const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const selected = Array.from(event.target.files || []);
-        setFiles(selected);
-        setPreview(null);
-        setCommitResult(null);
+    // ── File management ────────────────────────────────────────────────────────
+
+    const addFiles = (newFiles: Array<File>) => {
+        setFiles((prev) => {
+            const existing = new Set(prev.map((f) => f.name));
+
+            return [...prev, ...newFiles.filter((f) => !existing.has(f.name))];
+        });
         setError(null);
     };
+
+    const removeFile = (name: string) => {
+        setFiles((prev) => prev.filter((f) => f.name !== name));
+    };
+
+    const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const accepted = Array.from(e.dataTransfer.files).filter((f) => /\.(csv|xlsx|xls|pdf)$/i.test(f.name));
+        addFiles(accepted);
+    };
+
+    // ── Wizard navigation ──────────────────────────────────────────────────────
 
     const parseFiles = async () => {
         if (files.length === 0) {
@@ -59,11 +133,22 @@ export function OrdersImportPage() {
         try {
             const result = await previewOrdersImport(files);
             setPreview(result);
+            goTo('review');
         } catch (err) {
             setError(err instanceof Error ? err.message : i18n('pages.ordersImport.errors.parseFiles'));
         } finally {
             setIsParsing(false);
         }
+    };
+
+    const resetWizard = () => {
+        resetStep();
+        setFiles([]);
+        setPreview(null);
+        setLocalOrders([]);
+        setRowSelection({});
+        setCommitResult(null);
+        setError(null);
     };
 
     const handleEdit = useCallback((rowIndex: number, field: keyof OrderImportData, value: string) => {
@@ -72,17 +157,21 @@ export function OrdersImportPage() {
         );
     }, []);
 
-    const commitOrders = async (selectedOnly = false) => {
-        if (localOrders.length === 0) {return;}
+    // ── Order editing ──────────────────────────────────────────────────────────
 
-        let ordersToProcess = localOrders;
+    const commitOrders = async (selectedOnly = false) => {
+        if (localOrders.length === 0) {
+            return;
+        }
+
         let selectedIndices: Set<number> | null = null;
+        let ordersToProcess = localOrders;
 
         if (selectedOnly) {
             selectedIndices = new Set(
                 Object.entries(rowSelection)
                     .filter(([, v]) => v)
-                    .map(([k]) => Number(k)),
+                    .map(([k]) => Number(k))
             );
             ordersToProcess = localOrders.filter((_, i) => selectedIndices!.has(i));
         }
@@ -101,21 +190,20 @@ export function OrdersImportPage() {
             setCommitResult(response.createdCount);
             queryClient.invalidateQueries({ queryKey: ['orders'] });
 
-            // Remove successfully imported orders from the table
             if (selectedOnly && selectedIndices) {
-                // Only remove valid ones from the selection; invalid selected stay for review
                 const validSelectedIndices = new Set(
                     localOrders
                         .map((o, i) => ({ o, i }))
                         .filter(({ o, i }) => selectedIndices!.has(i) && (!o.errors || o.errors.length === 0))
-                        .map(({ i }) => i),
+                        .map(({ i }) => i)
                 );
                 setLocalOrders((prev) => prev.filter((_, i) => !validSelectedIndices.has(i)));
             } else {
-                // Remove all valid orders; invalid ones stay for review
                 setLocalOrders((prev) => prev.filter((o) => o.errors && o.errors.length > 0));
             }
+
             setRowSelection({});
+            goTo('done');
         } catch (err) {
             setError(err instanceof Error ? err.message : i18n('pages.ordersImport.errors.importFailed'));
         } finally {
@@ -133,17 +221,22 @@ export function OrdersImportPage() {
         setRowSelection({});
     };
 
+    // ── Derived state ──────────────────────────────────────────────────────────
+
     const selectedCount = useMemo(() => Object.values(rowSelection).filter(Boolean).length, [rowSelection]);
 
-    const summary = useMemo(
-        () =>
-            localOrders.length > 0
-                ? {
-                      total: localOrders.length,
-                      invalid: localOrders.filter((o) => o.errors && o.errors.length > 0).length,
-                  }
-                : null,
-        [localOrders]
+    const summary = useMemo(() => {
+        if (localOrders.length === 0) {
+            return null;
+        }
+        const invalid = localOrders.filter((o) => o.errors && o.errors.length > 0).length;
+
+        return { total: localOrders.length, valid: localOrders.length - invalid, invalid };
+    }, [localOrders]);
+
+    const tableData = useMemo(
+        () => (filterErrors ? localOrders.filter((o) => o.errors && o.errors.length > 0) : localOrders),
+        [localOrders, filterErrors]
     );
 
     const columns = useMemo<Array<ColumnDef<OrderImportPreviewItem>>>(
@@ -159,33 +252,36 @@ export function OrdersImportPage() {
                         onChange={table.getToggleAllPageRowsSelectedHandler()}
                     />
                 ),
-                cell: ({ row }) => (
-                    <Checkbox
-                        checked={row.getIsSelected()}
-                        onChange={row.getToggleSelectedHandler()}
-                    />
-                ),
+                cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onChange={row.getToggleSelectedHandler()} />,
             },
             {
                 id: 'source',
+                size: 170,
                 header: i18n('pages.ordersImport.table.source'),
                 cell: ({ row }) => {
                     const hasErrors = !!row.original.errors?.length;
                     const hasWarnings = !!row.original.warnings?.length;
 
                     return (
-                        <div className="flex items-start gap-2">
-                            <span
-                                className={classnames('mt-1 h-2 w-2 shrink-0 rounded-full', {
-                                    'bg-error-500': hasErrors,
-                                    'bg-secondary-500': !hasErrors && hasWarnings,
-                                    'bg-success-500': !hasErrors && !hasWarnings,
-                                })}
-                            />
-                            <div className="min-w-0">
-                                <div className="truncate font-medium">{row.original.fileName}</div>
+                        <div className="flex w-full min-w-0 items-start gap-2">
+                            <div className="mt-0.5 shrink-0">
+                                {hasErrors ? (
+                                    <WarningCircleIcon size={15} weight="fill" className="text-error-500" />
+                                ) : hasWarnings ? (
+                                    <WarningIcon size={15} weight="fill" className="text-secondary-500" />
+                                ) : (
+                                    <CheckCircleIcon size={15} weight="fill" className="text-success-500" />
+                                )}
+                            </div>
+                            <div className="min-w-0 overflow-hidden">
+                                <div className="flex items-center gap-1 overflow-hidden">
+                                    <FileTypeIcon filename={row.original.fileName} />
+                                    <span className="truncate text-xs font-medium" title={row.original.fileName}>
+                                        {row.original.fileName}
+                                    </span>
+                                </div>
                                 <div className="text-xs text-neutral-900">
-                                    {i18n('pages.ordersImport.row')} {row.original.rowNumber ?? 'n/a'}
+                                    {i18n('pages.ordersImport.row')} {row.original.rowNumber ?? '—'}
                                 </div>
                             </div>
                         </div>
@@ -198,30 +294,43 @@ export function OrdersImportPage() {
                 cell: ({ row }) => {
                     const idx = row.index;
                     const d = row.original.data;
+                    if (editingRowIndex !== idx) {
+                        return (
+                            <div className="space-y-0.5">
+                                <p className="text-sm font-medium">
+                                    {[d.firstName, d.lastName].filter(Boolean).join(' ') || '—'}
+                                </p>
+                                <p className="text-xs text-neutral-900">{d.email || '—'}</p>
+                                <p className="text-xs text-neutral-900">{d.phone || '—'}</p>
+                            </div>
+                        );
+                    }
 
                     return (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
+                            <div className="flex gap-1.5">
+                                <input
+                                    className={CELL_INPUT}
+                                    value={d.firstName ?? ''}
+                                    onChange={(e) => handleEdit(idx, 'firstName', e.target.value)}
+                                    placeholder={i18n('pages.ordersImport.placeholders.firstName')}
+                                />
+                                <input
+                                    className={CELL_INPUT}
+                                    value={d.lastName ?? ''}
+                                    onChange={(e) => handleEdit(idx, 'lastName', e.target.value)}
+                                    placeholder={i18n('pages.ordersImport.placeholders.lastName')}
+                                />
+                            </div>
                             <input
                                 className={CELL_INPUT}
-                                value={String(d.firstName ?? '')}
-                                onChange={(e) => handleEdit(idx, 'firstName', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.firstName')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={String(d.lastName ?? '')}
-                                onChange={(e) => handleEdit(idx, 'lastName', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.lastName')}
-                            />
-                            <input
-                                className={classnames('text-xs', CELL_INPUT)}
-                                value={String(d.email ?? '')}
+                                value={d.email ?? ''}
                                 onChange={(e) => handleEdit(idx, 'email', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.email')}
                             />
                             <input
-                                className={classnames('text-xs', CELL_INPUT)}
-                                value={String(d.phone ?? '')}
+                                className={CELL_INPUT}
+                                value={d.phone ?? ''}
                                 onChange={(e) => handleEdit(idx, 'phone', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.phone')}
                             />
@@ -235,18 +344,26 @@ export function OrdersImportPage() {
                 cell: ({ row }) => {
                     const idx = row.index;
                     const d = row.original.data;
+                    if (editingRowIndex !== idx) {
+                        return (
+                            <div className="space-y-0.5">
+                                <p className="text-sm font-medium">{d.accountNumber || '—'}</p>
+                                <p className="text-xs text-neutral-900">{d.meterNumber || '—'}</p>
+                            </div>
+                        );
+                    }
 
                     return (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                             <input
                                 className={CELL_INPUT}
-                                value={String(d.accountNumber ?? '')}
+                                value={d.accountNumber ?? ''}
                                 onChange={(e) => handleEdit(idx, 'accountNumber', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.accountNumber')}
                             />
                             <input
                                 className={CELL_INPUT}
-                                value={String(d.meterNumber ?? '')}
+                                value={d.meterNumber ?? ''}
                                 onChange={(e) => handleEdit(idx, 'meterNumber', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.meterNumber')}
                             />
@@ -260,18 +377,26 @@ export function OrdersImportPage() {
                 cell: ({ row }) => {
                     const idx = row.index;
                     const d = row.original.data;
+                    if (editingRowIndex !== idx) {
+                        return (
+                            <div className="space-y-0.5">
+                                <p className="text-sm font-medium">{d.serviceType || '—'}</p>
+                                <p className="text-xs text-neutral-900">{d.orderStatus || '—'}</p>
+                            </div>
+                        );
+                    }
 
                     return (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                             <input
                                 className={CELL_INPUT}
-                                value={String(d.serviceType ?? '')}
+                                value={d.serviceType ?? ''}
                                 onChange={(e) => handleEdit(idx, 'serviceType', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.serviceType')}
                             />
                             <input
                                 className={CELL_INPUT}
-                                value={String(d.orderStatus ?? '')}
+                                value={d.orderStatus ?? ''}
                                 onChange={(e) => handleEdit(idx, 'orderStatus', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.orderStatus')}
                             />
@@ -285,18 +410,26 @@ export function OrdersImportPage() {
                 cell: ({ row }) => {
                     const idx = row.index;
                     const d = row.original.data;
+                    if (editingRowIndex !== idx) {
+                        return (
+                            <div className="space-y-0.5">
+                                <p className="text-sm font-medium">{d.issueDate || '—'}</p>
+                                <p className="text-xs text-neutral-900">{d.issueTime || '—'}</p>
+                            </div>
+                        );
+                    }
 
                     return (
-                        <div className="space-y-1">
+                        <div className="space-y-1.5">
                             <input
-                                className={classnames('text-xs', CELL_INPUT)}
-                                value={String(d.issueDate ?? '')}
+                                className={CELL_INPUT}
+                                value={d.issueDate ?? ''}
                                 onChange={(e) => handleEdit(idx, 'issueDate', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.issueDate')}
                             />
                             <input
-                                className={classnames('text-xs', CELL_INPUT)}
-                                value={String(d.issueTime ?? '')}
+                                className={CELL_INPUT}
+                                value={d.issueTime ?? ''}
                                 onChange={(e) => handleEdit(idx, 'issueTime', e.target.value)}
                                 placeholder={i18n('pages.ordersImport.placeholders.issueTime')}
                             />
@@ -308,29 +441,96 @@ export function OrdersImportPage() {
                 id: 'issues',
                 header: i18n('pages.ordersImport.table.issues'),
                 cell: ({ row }) => {
-                    const hasErrors = !!row.original.errors?.length;
-                    const hasWarnings = !!row.original.warnings?.length;
-                    if (hasErrors) {
+                    const errors = row.original.errors;
+                    const warnings = row.original.warnings;
+
+                    if (errors && errors.length > 0) {
                         return (
-                            <div className="flex items-start gap-1.5 text-xs text-error-500">
-                                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                                <span>{row.original.errors?.join(' ')}</span>
+                            <div className="space-y-1">
+                                {errors.map((msg, i) => (
+                                    <span
+                                        key={i}
+                                        className="block rounded bg-error-500/10 px-1.5 py-0.5 text-xs text-error-500"
+                                    >
+                                        {msg}
+                                    </span>
+                                ))}
                             </div>
                         );
                     }
-                    if (hasWarnings) {
-                        return <div className="text-xs text-secondary-500">{row.original.warnings?.join(' ')}</div>;
+                    if (warnings && warnings.length > 0) {
+                        return (
+                            <div className="space-y-1">
+                                {warnings.map((msg, i) => (
+                                    <span
+                                        key={i}
+                                        className="block rounded bg-secondary-500/10 px-1.5 py-0.5 text-xs text-secondary-500"
+                                    >
+                                        {msg}
+                                    </span>
+                                ))}
+                            </div>
+                        );
                     }
 
-                    return <div className="text-xs text-neutral-900">{i18n('pages.ordersImport.ok')}</div>;
+                    return (
+                        <span className="flex items-center gap-1 text-xs text-success-500">
+                            <CheckCircleIcon size={14} weight="fill" />
+                            {i18n('pages.ordersImport.ok')}
+                        </span>
+                    );
+                },
+            },
+            {
+                id: 'actions',
+                size: 64,
+                meta: { fixed: true },
+                header: () => null,
+                cell: ({ row }) => {
+                    const idx = row.index;
+                    if (editingRowIndex === idx) {
+                        return (
+                            <div className="flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingRowIndex(null)}
+                                    className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-success-500 transition hover:bg-success-500/10"
+                                    aria-label={i18n('pages.ordersImport.saveRow')}
+                                >
+                                    <CheckCircleIcon size={16} weight="fill" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingRowIndex(null)}
+                                    className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-error-500"
+                                    aria-label={i18n('pages.ordersImport.cancelEdit')}
+                                >
+                                    <XIcon size={16} />
+                                </button>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <button
+                            type="button"
+                            onClick={() => setEditingRowIndex(idx)}
+                            className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-primary-500"
+                            aria-label={i18n('pages.ordersImport.editRow')}
+                        >
+                            <PencilSimpleIcon size={16} weight="duotone" />
+                        </button>
+                    );
                 },
             },
         ],
-        [i18n, handleEdit]
+        [i18n, handleEdit, editingRowIndex, setEditingRowIndex]
     );
 
+    // ── Table setup ──────────────────────────────────────────────────────────
+
     const table = useReactTable({
-        data: localOrders,
+        data: tableData,
         columns,
         state: { rowSelection, pagination },
         enableRowSelection: true,
@@ -340,6 +540,8 @@ export function OrdersImportPage() {
         getPaginationRowModel: getPaginationRowModel(),
     });
 
+    // ── Restricted access guard ────────────────────────────────────────────────
+
     if (isRestricted) {
         return (
             <div className="flex h-64 items-center justify-center rounded-lg border border-neutral-800 bg-neutral-600/60">
@@ -348,120 +550,210 @@ export function OrdersImportPage() {
         );
     }
 
+    // ── Render ───────────────────────────────────────────────────────────────────
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-5">
+            {/* Page header */}
             <div>
                 <h1 className="text-2xl font-bold">{i18n('pages.ordersImport.title')}</h1>
-                <p className="text-neutral-900">{i18n('pages.ordersImport.subtitle')}</p>
+                <p className="mt-0.5 text-sm text-neutral-900">{i18n('pages.ordersImport.subtitle')}</p>
             </div>
 
-            {/* Upload card */}
-            <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
-                        <div className="text-sm font-medium">{i18n('pages.ordersImport.selectFiles')}</div>
-                        <p className="text-sm text-neutral-900">{i18n('pages.ordersImport.supported')}</p>
+            {/* Step indicator */}
+            <Stepper steps={stepperSteps} currentStep={currentIndex} />
+
+            {/* ── Step 1: Upload ─────────────────────────────────────────────────────── */}
+            {step === 'upload' && (
+                <div className="space-y-3">
+                    {/* Toolbar */}
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex-1">
+                            {error && (
+                                <p className="text-xs text-error-500">{error}</p>
+                            )}
+                        </div>
+                        <button
+                            type="button"
+                            onClick={parseFiles}
+                            disabled={isParsing || files.length === 0}
+                            className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary-500 bg-primary-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                            <UploadSimpleIcon size={11} weight="duotone" />
+                            {isParsing ? i18n('pages.ordersImport.parsing') : i18n('pages.ordersImport.parseFiles')}
+                        </button>
                     </div>
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-800 px-3 py-2 text-sm font-medium text-neutral-900 transition hover:border-primary-500 hover:text-primary-500">
-                        <UploadCloud className="h-4 w-4" />
-                        {i18n('pages.ordersImport.chooseFiles')}
-                        <input
-                            type="file"
-                            multiple
-                            accept=".csv,.xlsx,.xls,.xml,.pdf"
-                            onChange={onFileChange}
-                            className="hidden"
-                        />
-                    </label>
+
+                    <FileUploader
+                        files={files}
+                        isDragging={isDragging}
+                        onAdd={addFiles}
+                        onRemove={removeFile}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            setIsDragging(true);
+                        }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={onDrop}
+                    />
                 </div>
+            )}
 
-                {files.length > 0 && (
-                    <div className="mt-4 rounded-md bg-neutral-700/40 p-3 text-sm text-neutral-900">
-                        {files.map((file) => (
-                            <div key={file.name}>{file.name}</div>
-                        ))}
-                    </div>
-                )}
-
-                <div className="mt-4 flex flex-wrap gap-3">
-                    <Button onClick={parseFiles} disabled={isParsing}>
-                        {isParsing ? i18n('pages.ordersImport.parsing') : i18n('pages.ordersImport.parseFiles')}
-                    </Button>
-                    {localOrders.length > 0 && (
-                        <Button variant="outline" onClick={() => commitOrders()} disabled={isCommitting}>
-                            {isCommitting
-                                ? i18n('pages.ordersImport.importing')
-                                : i18n('pages.ordersImport.importValid')}
-                        </Button>
-                    )}
-                </div>
-
-                {error && (
-                    <div className="mt-4 rounded-md border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-500">
-                        {error}
-                    </div>
-                )}
-
-                {commitResult !== null && (
-                    <div className="mt-4 flex items-center gap-2 rounded-md border border-success-500/30 bg-success-500/10 p-3 text-sm text-success-500">
-                        <CheckCircle className="h-4 w-4" />
-                        {i18n('pages.ordersImport.importedSuccess', { count: commitResult })}
-                    </div>
-                )}
-            </div>
-
-            {/* Preview section */}
-            {preview && (
+            {/* ── Step 2: Review ────────────────────────────────────────────────────── */}
+            {step === 'review' && (
                 <div className="space-y-4">
-                    {preview.fileErrors.length > 0 && (
-                        <div className="rounded-lg border border-secondary-500/30 bg-secondary-500/10 p-4 text-sm text-secondary-500">
-                            <div className="mb-2 font-medium">{i18n('pages.ordersImport.fileWarnings')}</div>
-                            {preview.fileErrors.map((fileError) => (
-                                <div key={fileError.fileName}>
-                                    {fileError.fileName}: {fileError.message}
-                                </div>
-                            ))}
+                    {/* File-level errors */}
+                    {preview && preview.fileErrors.length > 0 && (
+                        <div className="rounded-lg border border-secondary-500/30 bg-secondary-500/10 px-4 py-3 text-sm text-secondary-500">
+                            <p className="mb-2 font-semibold">{i18n('pages.ordersImport.fileWarnings')}</p>
+                            <div className="space-y-1">
+                                {preview.fileErrors.map((fe) => (
+                                    <div key={fe.fileName} className="flex items-start gap-2">
+                                        <WarningIcon size={14} weight="fill" className="mt-0.5 shrink-0" />
+                                        <span>
+                                            <span className="font-medium">{fe.fileName}:</span> {fe.message}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
-                    {/* Summary stats */}
+                    {/* Unified action toolbar */}
                     {summary && (
-                        <div className="flex flex-wrap gap-4">
-                            <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 px-4 py-3">
-                                <div className="text-sm text-neutral-900">{i18n('pages.ordersImport.totalParsed')}</div>
-                                <div className="text-xl font-semibold">{summary.total}</div>
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            {/* Left: stats */}
+                            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
+                                <span className="flex items-center gap-2">
+                                    <ListBulletsIcon size={14} weight="duotone" className="text-neutral-900" />
+                                    <span className="font-semibold">{summary.total}</span>
+                                    <span className="text-xs text-neutral-900">
+                                        {i18n('pages.ordersImport.totalParsed')}
+                                    </span>
+                                </span>
+                                <span className="h-3 w-px bg-neutral-800" />
+                                <span className="flex items-center gap-2">
+                                    <CheckCircleIcon size={14} weight="duotone" className="text-success-500" />
+                                    <span className="font-semibold text-success-500">{summary.valid}</span>
+                                    <span className="text-xs text-neutral-900">
+                                        {i18n('pages.ordersImport.validOrders')}
+                                    </span>
+                                </span>
+                                <span className="h-3 w-px bg-neutral-800" />
+                                <span className="flex items-center gap-2">
+                                    <WarningCircleIcon
+                                        size={14}
+                                        weight="duotone"
+                                        className={summary.invalid > 0 ? 'text-secondary-500' : 'text-neutral-900'}
+                                    />
+                                    <span
+                                        className={classnames('font-semibold', {
+                                            'text-secondary-500': summary.invalid > 0,
+                                        })}
+                                    >
+                                        {summary.invalid}
+                                    </span>
+                                    <span className="text-xs text-neutral-900">
+                                        {i18n('pages.ordersImport.needsReview')}
+                                    </span>
+                                </span>
                             </div>
-                            <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 px-4 py-3">
-                                <div className="text-sm text-neutral-900">{i18n('pages.ordersImport.validOrders')}</div>
-                                <div className="text-xl font-semibold">{summary.total - summary.invalid}</div>
-                            </div>
-                            <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 px-4 py-3">
-                                <div className="text-sm text-neutral-900">{i18n('pages.ordersImport.needsReview')}</div>
-                                <div className="text-xl font-semibold">{summary.invalid}</div>
-                            </div>
-                        </div>
-                    )}
 
-                    {/* Selection toolbar */}
-                    {selectedCount > 0 && (
-                        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-primary-500/30 bg-primary-500/10 px-4 py-3">
-                            <span className="text-sm font-medium text-primary-500">
-                                {i18n('pages.ordersImport.selected', { count: selectedCount })}
-                            </span>
-                            <div className="flex flex-wrap gap-2">
-                                <Button onClick={() => commitOrders(true)} disabled={isCommitting}>
-                                    {i18n('pages.ordersImport.importSelected', { count: selectedCount })}
-                                </Button>
-                                <Button variant="outline" onClick={removeSelected}>
-                                    {i18n('pages.ordersImport.removeFromBatch')}
-                                </Button>
+                            {/* Right: filter toggle + actions */}
+                            <div className="flex flex-wrap items-center gap-1.5">
+                                <button
+                                    type="button"
+                                    onClick={() => setFilterErrors((v) => !v)}
+                                    className={classnames(
+                                        'flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-medium transition',
+                                        {
+                                            'border-secondary-500 bg-secondary-500/10 text-secondary-500': filterErrors,
+                                            'border-neutral-800 text-neutral-900 hover:border-neutral-700 hover:text-neutral-500':
+                                                !filterErrors,
+                                        }
+                                    )}
+                                >
+                                    <FunnelIcon size={11} weight={filterErrors ? 'fill' : 'duotone'} />
+                                    {filterErrors
+                                        ? i18n('pages.ordersImport.showAll')
+                                        : i18n('pages.ordersImport.filterErrors')}
+                                </button>
+                                {selectedCount > 0 && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={() => commitOrders(true)}
+                                            disabled={isCommitting}
+                                            className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary-500 bg-primary-500/10 px-3 py-1 text-xs font-medium text-primary-500 transition hover:bg-primary-500/20 disabled:cursor-not-allowed disabled:opacity-40"
+                                        >
+                                            <CheckSquareIcon size={11} weight="duotone" />
+                                            {i18n('pages.ordersImport.importSelected', { count: selectedCount })}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={removeSelected}
+                                            className="flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-800 px-3 py-1 text-xs font-medium text-neutral-900 transition hover:border-error-500/50 hover:text-error-500"
+                                        >
+                                            <TrashIcon size={11} weight="duotone" />
+                                            {i18n('pages.ordersImport.removeFromBatch')}
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => commitOrders(false)}
+                                    disabled={isCommitting || summary.valid === 0}
+                                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary-500 bg-primary-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    <UploadSimpleIcon size={11} weight="duotone" />
+                                    {isCommitting
+                                        ? i18n('pages.ordersImport.importing')
+                                        : i18n('pages.ordersImport.importValid')}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={resetWizard}
+                                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-800 px-3 py-1 text-xs font-medium text-neutral-900 transition hover:border-neutral-700 hover:text-neutral-500"
+                                >
+                                    <XIcon size={11} />
+                                    {i18n('pages.ordersImport.cancel')}
+                                </button>
                             </div>
                         </div>
                     )}
 
                     {/* Preview table */}
-                    <div className="overflow-hidden rounded-lg border border-neutral-800 shadow-sm">
+                    <div className="overflow-hidden rounded-lg border border-neutral-800">
                         <Table table={table} total={localOrders.length} />
+                    </div>
+
+                    {error && (
+                        <div className="rounded-lg border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-500">
+                            {error}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* ── Step 3: Done ──────────────────────────────────────────────────────── */}
+            {step === 'done' && (
+                <div className="flex flex-col items-center justify-center gap-6 rounded-lg border border-neutral-800 bg-neutral-600/60 px-6 py-16">
+                    <div className="rounded-full bg-success-500/20 p-5">
+                        <CheckCircleIcon size={52} weight="fill" className="text-success-500" />
+                    </div>
+                    <div className="text-center">
+                        <h2 className="text-xl font-bold">
+                            {i18n('pages.ordersImport.importedSuccess', { count: commitResult ?? 0 })}
+                        </h2>
+                        <p className="mt-1 text-sm text-neutral-900">{i18n('pages.ordersImport.doneSubtitle')}</p>
+                    </div>
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <Button variant="outline" icon={UploadSimpleIcon} onClick={resetWizard}>
+                            {i18n('pages.ordersImport.importMoreFiles')}
+                        </Button>
+                        <Button icon={ArrowRightIcon} as="a" to="/orders">
+                            {i18n('pages.ordersImport.goToOrders')}
+                        </Button>
                     </div>
                 </div>
             )}

@@ -8,17 +8,17 @@ import type { Order } from '@interfaces/order.interface.ts';
 interface OrdersMapProps {
     orders: Array<Order>;
     technicians: Array<User>;
-    onBulkAssign?: (orderIds: Array<number>, technicianId: number) => void;
+    onBulkAssign?: (orderIds: Array<string>, technicianId: number) => void;
     isAssigning?: boolean;
 }
 
 export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: OrdersMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
     const leafletMapRef = useRef<L.Map | null>(null);
-    const markersRef = useRef<Map<number, L.Marker>>(new Map());
+    const markersRef = useRef<Map<string, L.Marker>>(new Map());
     const hasFittedRef = useRef(false);
     const prevDataLenRef = useRef(0);
-    const [selectedOrderIds, setSelectedOrderIds] = useState<Set<number>>(new Set());
+    const [selectedOrderIds, setSelectedOrderIds] = useState<Set<string>>(new Set());
     const [assignTechnicianId, setAssignTechnicianId] = useState<number | null>(null);
     const [selectMode, setSelectMode] = useState(false);
 
@@ -143,7 +143,7 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
             map.dragging.enable();
 
             // Find markers within drawn rectangle
-            const idsInBounds: Array<number> = [];
+            const idsInBounds: Array<string> = [];
             markersRef.current.forEach((marker, id) => {
                 if (bounds.contains(marker.getLatLng())) {
                     idsInBounds.push(id);
@@ -283,7 +283,7 @@ export function OrdersMap({ orders, technicians, onBulkAssign, isAssigning }: Or
             selRectRef.current = null;
             selStartRef.current = null;
 
-            const idsInBounds: Array<number> = [];
+            const idsInBounds: Array<string> = [];
             markersRef.current.forEach((marker, id) => {
                 if (bounds.contains(marker.getLatLng())) {
                     idsInBounds.push(id);
