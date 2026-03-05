@@ -22,7 +22,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     const queryClient = useQueryClient();
     const i18n = useTranslations();
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedSealId, setSelectedSealId] = useState<number | ''>('');
+    const [selectedSealId, setSelectedSealId] = useState<string>('');
 
     const { data: sealsData } = useQuery({
         queryKey: ['seals'],
@@ -32,16 +32,15 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     const jobKey = ['job', String(jobId)];
 
     const addMutation = useMutation({
-        mutationFn: (sealId: number) => addJobSeal(jobId, String(sealId)),
+        mutationFn: (sealId: string) => addJobSeal(jobId, sealId),
         onMutate: async (sealId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
-            const seal = sealsData?.data.find((s) => s.id === sealId);
+            const seal = sealsData?.data.find((s) => String(s.id) === sealId);
             const tempJobSeal: JobSeal = {
-                id: `temp-${Date.now()}`,
+                id: -Date.now(),
                 jobId,
-                sealId: Number(sealId),
-                seal: seal ?? undefined,
+                seal: seal ?? { id: Number(sealId), type: '' },
             };
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
@@ -74,8 +73,8 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     });
 
     const removeMutation = useMutation({
-        mutationFn: (jobSealId: string) => removeJobSeal(jobSealId),
-        onMutate: async (jobSealId) => {
+        mutationFn: (sealId: string) => removeJobSeal(jobId, sealId),
+        onMutate: async (sealId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
             const pendingSync = !isOnline();
@@ -83,7 +82,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                 old
                     ? {
                           ...old,
-                          jobSeals: old.jobSeals?.filter((js) => js.id !== jobSealId),
+                          jobSeals: old.jobSeals?.filter((js) => String(js.seal.id) !== sealId),
                           ...(pendingSync ? { _pendingSync: true } : {}),
                       }
                     : old
@@ -106,7 +105,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
         },
     });
 
-    const addedIds = new Set(jobSeals.map((js) => js.sealId));
+    const addedIds = new Set(jobSeals.map((js) => js.seal.id));
     const availableSeals = sealsData?.data.filter((s) => !addedIds.has(s.id)) ?? [];
 
     return (
@@ -125,9 +124,9 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                             key={js.id}
                             className="flex items-center gap-1 rounded-full bg-primary-500/20 px-3 py-1 text-sm text-primary-500"
                         >
-                            {js.seal ? `#${js.seal.id} — ${js.seal.type}` : `#${js.sealId}`}
+                            {`#${js.seal.id} — ${js.seal.type}`}
                             <button
-                                onClick={() => removeMutation.mutate(js.id)}
+                                onClick={() => removeMutation.mutate(String(js.seal.id))}
                                 disabled={removeMutation.isPending}
                                 className="ml-1 rounded-full p-0.5 hover:bg-primary-500/30"
                             >

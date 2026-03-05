@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowSquareOut, FloppyDisk, MapPin, Warning } from '@phosphor-icons/react';
-import { getJob, updateJob, uploadJobPhoto } from '@lib/api/jobs.ts';
+import { ArrowSquareOut, CheckCircle, FloppyDisk, MapPin, Warning } from '@phosphor-icons/react';
+import { getJob, updateJob, uploadJobPhoto, reopenJob } from '@lib/api/jobs.ts';
 import { isOnline, getPendingPhotos, removePhoto } from '@lib/offline-store';
 import { useOfflineContext } from '@context/offline/context.ts';
+import { useAuthContext } from '@context/auth/context.ts';
 import { INPUT_CLASS, LABEL_CLASS } from '@components/Form/utils/constants';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { useTranslations } from 'use-intl';
@@ -24,10 +25,14 @@ export function JobDetailPage() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     const { online } = useOfflineContext();
+    const { user } = useAuthContext();
     const i18n = useTranslations();
+
+    const isTechnician = user?.role?.name === 'technician';
 
     const [notes, setNotes] = useState('');
     const [meterReading, setMeterReading] = useState('');
+    const [confirmAction, setConfirmAction] = useState<'complete' | 'reopen' | null>(null);
 
     const { data: job, isLoading } = useQuery({
         queryKey: ['job', id],
@@ -77,6 +82,15 @@ export function JobDetailPage() {
         },
     });
 
+    const reopenMutation = useMutation({
+        mutationFn: () => reopenJob(Number(id)),
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ['job', id] });
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            queryClient.invalidateQueries({ queryKey: ['orders', 'map-points'] });
+        },
+    });
+
     const handleSave = () => {
         updateMutation.mutate({
             notes: notes || job?.notes,
@@ -85,14 +99,13 @@ export function JobDetailPage() {
     };
 
     const handleComplete = () => {
-        // Fire uploads in background — fetch requests survive navigation within the SPA
         getPendingPhotos(job?.id).then((pending) =>
             Promise.all(
-                pending.map(async (p) => {
+                pending.map(async (pendingPhoto) => {
                     try {
-                        const file = new File([p.blob], `${p.type}.jpg`, { type: p.blob.type || 'image/jpeg' });
-                        await uploadJobPhoto(file, job!.id, p.type);
-                        await removePhoto(p.id);
+                        const file = new File([pendingPhoto.blob], `${pendingPhoto.type}.jpg`, { type: pendingPhoto.blob.type || 'image/jpeg' });
+                        await uploadJobPhoto(file, job!.id, pendingPhoto.type);
+                        await removePhoto(pendingPhoto.id);
                     } catch (err) {
                         console.error('Failed to upload photo:', err);
                     }
@@ -106,6 +119,21 @@ export function JobDetailPage() {
             jobStatus: 'completed',
         });
         navigate('/jobs');
+    };
+
+    const handleReopen = () => {
+        reopenMutation.mutate();
+        setConfirmAction(null);
+    };
+
+    const handleConfirm = () => {
+        if (confirmAction === 'complete') {
+            handleComplete();
+        } else if (confirmAction === 'reopen') {
+            handleReopen();
+        }
+
+        setConfirmAction(null);
     };
 
     if (isLoading) {
@@ -130,20 +158,61 @@ export function JobDetailPage() {
                 <div className="space-y-6">
                     {/* Action buttons */}
                     <div className="flex flex-col gap-2 s425:flex-row s425:justify-end">
-                        <Button
-                            variant="outline"
-                            icon={FloppyDisk}
-                            disabled={updateMutation.isPending}
-                            onClick={handleSave}
-                        >
-                            {i18n('pages.jobDetail.save')}
-                        </Button>
-                        {job.jobStatus !== 'completed' && (
-                            <Button variant="solid" disabled={updateMutation.isPending} onClick={handleComplete}>
-                                {i18n('pages.jobDetail.complete')}
+                        {job.jobStatus === 'completed' ? (
+                            <div className="flex items-center gap-2 rounded-lg bg-success-500/10 px-4 py-2 text-success-500">
+                                <CheckCircle width={18} height={18} weight="fill" />
+                                <span className="text-sm font-medium">{i18n('pages.jobDetail.completedBadge')}</span>
+                            </div>
+                        ) : (
+                            <>
+                                {!isTechnician && (
+                                    <Button
+                                        variant="outline"
+                                        icon={FloppyDisk}
+                                        disabled={updateMutation.isPending}
+                                        onClick={handleSave}
+                                    >
+                                        {i18n('pages.jobDetail.save')}
+                                    </Button>
+                                )}
+                                <Button
+                                    variant="solid"
+                                    disabled={updateMutation.isPending}
+                                    onClick={() => setConfirmAction('complete')}
+                                >
+                                    {i18n('pages.jobDetail.complete')}
+                                </Button>
+                            </>
+                        )}
+                        {job.jobStatus === 'completed' && !isTechnician && (
+                            <Button
+                                variant="outline"
+                                disabled={reopenMutation.isPending}
+                                onClick={() => setConfirmAction('reopen')}
+                            >
+                                {i18n('pages.jobDetail.reopen')}
                             </Button>
                         )}
                     </div>
+
+                    {/* Confirmation dialog */}
+                    {confirmAction && (
+                        <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-4">
+                            <p className="text-sm text-neutral-900 mb-4">
+                                {confirmAction === 'complete'
+                                    ? i18n('pages.jobDetail.confirmComplete')
+                                    : i18n('pages.jobDetail.confirmReopen')}
+                            </p>
+                            <div className="flex gap-2 justify-end">
+                                <Button variant="outline" onClick={() => setConfirmAction(null)}>
+                                    {i18n('literal.cancel')}
+                                </Button>
+                                <Button variant="solid" onClick={handleConfirm}>
+                                    {i18n('pages.jobDetail.confirmAction')}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Offline warning */}
                     {!online && (

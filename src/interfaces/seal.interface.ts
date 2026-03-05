@@ -4,8 +4,7 @@ export interface Seal {
 }
 
 export interface JobSeal {
-    id: string;
+    id: number;
     jobId: number;
-    sealId: number;
-    seal?: Seal;
+    seal: Seal;
 }

@@ -26,7 +26,12 @@ const LoginPage = () => {
         try {
             const user = await login(email, password);
             const role = user?.role?.name;
-            const destination = role === 'admin' ? '/tenants' : role === 'technician' ? '/jobs' : '/dashboard';
+            let destination = '/dashboard';
+            if (role === 'admin') {
+                destination = '/tenants';
+            } else if (role === 'technician') {
+                destination = '/jobs';
+            }
             navigate(destination, { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : i18n('errors.common'));

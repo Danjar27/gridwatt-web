@@ -66,7 +66,8 @@
         "users": "Usuarios",
         "jobs": "Trabajos",
         "tenants": "Contratos",
-        "profile": "Perfil"
+        "profile": "Perfil",
+        "map": "Mapa"
     },
     "sidebar": {
         "menu": "Menú",
@@ -434,6 +435,11 @@
             "notFound": "Trabajo no encontrado",
             "save": "Guardar",
             "complete": "Completar trabajo",
+            "reopen": "Reabrir trabajo",
+            "completedBadge": "Trabajo completado",
+            "confirmComplete": "¿Deseas marcar este trabajo como completado? Ya no podrás editar este trabajo.",
+            "confirmReopen": "¿Deseas reabrir este trabajo? La orden volverá a estado pendiente.",
+            "confirmAction": "Confirmar",
             "offline": "Estás sin conexión",
             "offlineCamera": "La cámara no está disponible sin conexión. Por favor selecciona imágenes de tu galería.",
             "orderDetails": "Detalles de la orden",
@@ -508,6 +514,20 @@
             "verifiedTariff": "Tarifa verificada",
             "transformerNumber": "Número de transformador",
             "transformerProperty": "Propiedad del transformador"
+        },
+        "technicianMap": {
+            "title": "Mapa de órdenes",
+            "subtitle": "Visualiza tus órdenes asignadas en el mapa",
+            "order": {
+                "title": "Orden #{id}",
+                "customer": "Cliente",
+                "type": "Tipo",
+                "address": "Dirección",
+                "meter": "Medidor",
+                "account": "Cuenta",
+                "review": "Revisar",
+                "noJob": "Sin trabajo asociado"
+            }
         },
         "ordersImport": {
             "title": "Importar órdenes",

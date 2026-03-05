@@ -28,6 +28,8 @@ export const updateJob = async (id: number, data: Partial<Job>) =>
 
 export const markJobSynced = async (id: number) => request<Job>(`/jobs/${id}/sync`, { method: 'PUT' });
 
+export const reopenJob = async (id: number) => request<Job>(`/jobs/${id}/reopen`, { method: 'PUT' });
+
 export const addJobMaterial = async (jobId: number, materialId: string, quantity: number) =>
     mutationRequest(
         `/jobs/${jobId}/materials`,
@@ -56,25 +58,25 @@ export const addJobPhoto = async (jobId: number, path: string, type: string, not
         { type: 'job', action: 'create', optimisticData: { jobId, path, type, notes } }
     );
 
-export const removeJobActivity = async (jobActivityId: string) =>
+export const removeJobActivity = async (jobId: number, activityId: string) =>
     mutationRequest(
-        `/jobs/activities/${jobActivityId}`,
+        `/jobs/${jobId}/activities/${activityId}`,
         { method: 'DELETE' },
-        { type: 'job', action: 'delete', optimisticData: { id: jobActivityId } }
+        { type: 'job', action: 'delete', optimisticData: { jobId, activityId } }
     );
 
-export const removeJobSeal = async (jobSealId: string) =>
+export const removeJobSeal = async (jobId: number, sealId: string) =>
     mutationRequest(
-        `/jobs/seals/${jobSealId}`,
+        `/jobs/${jobId}/seals/${sealId}`,
         { method: 'DELETE' },
-        { type: 'job', action: 'delete', optimisticData: { id: jobSealId } }
+        { type: 'job', action: 'delete', optimisticData: { jobId, sealId } }
     );
 
-export const removeJobMaterial = async (workMaterialId: string) =>
+export const removeJobMaterial = async (jobId: number, materialId: string) =>
     mutationRequest(
-        `/jobs/materials/${workMaterialId}`,
+        `/jobs/${jobId}/materials/${materialId}`,
         { method: 'DELETE' },
-        { type: 'job', action: 'delete', optimisticData: { id: workMaterialId } }
+        { type: 'job', action: 'delete', optimisticData: { jobId, materialId } }
     );
 
 export const removeJobPhoto = async (photoId: string) =>

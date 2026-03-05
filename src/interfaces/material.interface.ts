@@ -11,9 +11,8 @@ export interface Material {
     totalStock?: number;
 }
 export interface WorkMaterial {
-    id: string;
+    id: number;
     jobId: number;
-    materialId: string;
     quantity: number;
     material?: Material;
 }

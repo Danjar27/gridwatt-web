@@ -73,7 +73,8 @@ const Inventory = () => {
             updateArea(id, { coordinates: coords }),
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['areas'] });
-            queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
+            queryClient.invalidateQueries({ queryKey: ['orders', 'map-points'] });
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
         },
     });
 
@@ -174,6 +175,7 @@ const Inventory = () => {
                 }}
                 pendingCoords={pendingCoords}
                 editingArea={editingArea}
+                orders={allOrders}
             />
         </>
     );

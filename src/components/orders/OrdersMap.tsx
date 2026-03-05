@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import { utmToLatLng } from '@utils/coordinates.ts';
+import { isPointInPolygon } from '@utils/map.ts';
 import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
@@ -15,26 +16,6 @@ import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
 import Form from '@components/Form/Form';
 import Actions from '@components/Form/blocks/Actions';
-
-function isOrderInArea(lat: number, lng: number, coords: Array<AreaCoordinate>): boolean {
-    if (coords.length < 3) {
-        return false;
-    }
-    let inside = false;
-    const n = coords.length;
-    for (let i = 0, j = n - 1; i < n; j = i++) {
-        const xi = coords[i].lng;
-        const yi = coords[i].lat;
-        const xj = coords[j].lng;
-        const yj = coords[j].lat;
-        const intersect = yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
-        if (intersect) {
-            inside = !inside;
-        }
-    }
-
-    return inside;
-}
 
 const LEAFLET_DARK_CSS = `
 .leaflet-popup-content-wrapper {
@@ -118,14 +99,15 @@ function buildOrderPopupHtml(order: OrderMapPoint): string {
         ['Dirección', order.address ?? ''],
         ['Cuenta', order.clientAccount ?? ''],
         ['Medidor', order.meterId ?? ''],
-        ...(order.coordinateX != null ? [['Coord X', String(order.coordinateX)] as [string, string]] : []),
-        ...(order.coordinateY != null ? [['Coord Y', String(order.coordinateY)] as [string, string]] : []),
+        ...(order.coordinateX !== null ? [['Coord X', String(order.coordinateX)] as [string, string]] : []),
+        ...(order.coordinateY !== null ? [['Coord Y', String(order.coordinateY)] as [string, string]] : []),
         ['Orden', order.id ?? ''],
     ];
     const rowsHtml = rows
         .filter(([, v]) => v)
         .map(([l, v]) => `<tr><td class="ow-lbl">${l}</td><td class="ow-val">${v}</td></tr>`)
         .join('');
+
     return `<div class="ow-order-popup"><div class="ow-popup-header"><span class="ow-popup-name">${order.clientName ?? ''} ${order.clientLastName ?? ''}</span></div><table class="ow-popup-table">${rowsHtml}</table></div>`;
 }
 
@@ -208,9 +190,12 @@ export function OrdersMap({
         const orderAreaColor = new Map<string, string>();
         areas.forEach((area) => {
             orders.forEach((order) => {
-                if (order.coordinateX == null || order.coordinateY == null) return;
+                if (order.coordinateX === null || order.coordinateX === undefined || order.coordinateY === null || order.coordinateY === undefined) {
+                    return;
+                }
+
                 const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
-                if (wgs && isOrderInArea(wgs[0], wgs[1], area.coordinates)) {
+                if (wgs && isPointInPolygon(wgs[0], wgs[1], area.coordinates)) {
                     orderAreaColor.set(order.id, area.color);
                 }
             });
@@ -218,9 +203,15 @@ export function OrdersMap({
 
         return orders
             .map((order) => {
-                if (order.coordinateX == null || order.coordinateY == null) return null;
+                if (order.coordinateX === null || order.coordinateX === undefined || order.coordinateY === null || order.coordinateY === undefined) {
+                    return null;
+                }
+
                 const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
-                if (!wgs) return null;
+                if (!wgs) {
+                    return null;
+                }
+
                 return {
                     id: order.id,
                     position: wgs,
@@ -241,36 +232,45 @@ export function OrdersMap({
         const counts = new Map<number, number>();
         let unassigned = 0;
         orders.forEach((order) => {
-            if (order.coordinateX == null || order.coordinateY == null) {
+            if (order.coordinateX === null || order.coordinateX === undefined || order.coordinateY === null || order.coordinateY === undefined) {
                 unassigned++;
+
                 return;
             }
+
             const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
             if (!wgs) {
                 unassigned++;
+
                 return;
             }
+
             let matched = false;
             areas.forEach((area) => {
-                if (isOrderInArea(wgs[0], wgs[1], area.coordinates)) {
+                if (isPointInPolygon(wgs[0], wgs[1], area.coordinates)) {
                     counts.set(area.id, (counts.get(area.id) ?? 0) + 1);
                     matched = true;
                 }
             });
-            if (!matched) unassigned++;
+            if (!matched) {
+                unassigned++;
+            }
         });
+
         return { counts, unassigned };
     }, [orders, areas]);
 
-    const createIcon = useCallback((color: string) => {
-        return L.divIcon({
-            className: '',
-            html: `<div style="width:16px;height:16px;border-radius:50%;background-color:${color};border:2.5px solid rgba(255,255,255,0.9);box-sizing:border-box;"></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
-            popupAnchor: [0, -10],
-        });
-    }, []);
+    const createIcon = useCallback(
+        (color: string) =>
+            L.divIcon({
+                className: '',
+                html: `<div style="width:14px;height:14px;border-radius:50%;background-color:${color};box-shadow:0 2px 6px rgba(0,0,0,0.45),inset 0 1px 2px rgba(255,255,255,0.25);"></div>`,
+                iconSize: [14, 14],
+                iconAnchor: [7, 7],
+                popupAnchor: [0, -8],
+            }),
+        []
+    );
 
     // ─── Map initialisation (runs once) ───────────────────────────────────────
     useEffect(() => {
@@ -325,7 +325,9 @@ export function OrdersMap({
 
         const updatePreviewPolyline = (cursorLatLng?: L.LatLng) => {
             const verts = drawingVerticesRef.current;
-            if (verts.length === 0) return;
+            if (verts.length === 0) {
+                return;
+            }
             const pts = cursorLatLng ? [...verts, cursorLatLng] : verts;
 
             // Dashed edge line
@@ -355,7 +357,9 @@ export function OrdersMap({
                 const poly = pts.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                 let count = 0;
                 markersDataRef.current.forEach((md) => {
-                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                        count++;
+                    }
                 });
                 setLiveDrawCount(count);
             } else if (drawingPreviewPolygonRef.current) {
@@ -456,6 +460,7 @@ export function OrdersMap({
                     clearDrawingPreview();
                     map.dragging.enable();
                     finishDrawingRef.current(final);
+
                     return;
                 }
             }
@@ -476,7 +481,9 @@ export function OrdersMap({
                 const poly = verts.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                 let count = 0;
                 markersDataRef.current.forEach((md) => {
-                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                        count++;
+                    }
                 });
                 setLiveDrawCount(count);
             }
@@ -627,11 +634,16 @@ export function OrdersMap({
                             // Live count while dragging vertices
                             polygon.on('pm:change', () => {
                                 const lls = (polygon.getLatLngs() as Array<Array<L.LatLng>>)[0];
-                                if (!lls || lls.length < 3) return;
+                                if (!lls || lls.length < 3) {
+                                    return;
+                                }
+
                                 const poly = lls.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                                 let count = 0;
                                 markersDataRef.current.forEach((md) => {
-                                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                                        count++;
+                                    }
                                 });
                                 setLiveDrawCount(count);
                             });
@@ -642,7 +654,9 @@ export function OrdersMap({
                                 const poly = initLls.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                                 let count = 0;
                                 markersDataRef.current.forEach((md) => {
-                                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                                        count++;
+                                    }
                                 });
                                 setLiveDrawCount(count);
                             }
@@ -662,7 +676,10 @@ export function OrdersMap({
     // ─── Cursor for draw mode ─────────────────────────────────────────────────
     useEffect(() => {
         const container = mapRef.current;
-        if (!container) return;
+        if (!container) {
+            return;
+        }
+
         container.classList.toggle('ow-drawing', drawMode);
         if (!drawMode) {
             setLiveDrawCount(null);
@@ -746,7 +763,7 @@ export function OrdersMap({
                     <>
                         <button
                             onClick={handleToggleDrawMode}
-                            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${drawMode ? 'bg-indigo-500 text-white' : 'border border-neutral-800 hover:bg-neutral-600'}`}
+                            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${drawMode ? 'bg-primary-500 text-white' : 'border border-neutral-800 hover:bg-neutral-600'}`}
                         >
                             {drawMode ? i18n('pages.orders.map.cancelDraw') : i18n('pages.orders.map.drawArea')}
                         </button>
@@ -780,7 +797,7 @@ export function OrdersMap({
                             <span className="flex-1 text-xs text-neutral-900 truncate">
                                 {i18n('pages.orders.map.unassigned')}
                             </span>
-                            <span className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-neutral-700 text-neutral-900">
+                            <span className="shrink-0 min-w-5 text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-neutral-700 text-neutral-900">
                                 {areaStats.unassigned}
                             </span>
                         </div>
@@ -790,6 +807,7 @@ export function OrdersMap({
                             const tech = area.technician
                                 ? `${area.technician.name} ${area.technician.lastName}`
                                 : 'Sin asignar';
+
                             return (
                                 <div
                                     key={area.id}
@@ -803,7 +821,7 @@ export function OrdersMap({
                                         {tech}
                                     </span>
                                     <span
-                                        className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                                        className="shrink-0 min-w-5 text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
                                         style={{ backgroundColor: area.color }}
                                     >
                                         {count}

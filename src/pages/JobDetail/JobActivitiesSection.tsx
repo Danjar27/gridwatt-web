@@ -38,10 +38,9 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             const previous = queryClient.getQueryData<Job>(jobKey);
             const activity = activitiesData?.data.find((a) => a.id === activityId);
             const tempJobActivity: JobActivity = {
-                id: `temp-${Date.now()}`,
+                id: -Date.now(),
                 jobId,
-                activityId,
-                activity: activity ?? undefined,
+                activity: activity ?? { id: activityId, name: '' },
             };
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
@@ -74,8 +73,8 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
     });
 
     const removeMutation = useMutation({
-        mutationFn: (jobActivityId: string) => removeJobActivity(jobActivityId),
-        onMutate: async (jobActivityId) => {
+        mutationFn: (activityId: string) => removeJobActivity(jobId, activityId),
+        onMutate: async (activityId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
             const pendingSync = !isOnline();
@@ -83,7 +82,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 old
                     ? {
                           ...old,
-                          jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId),
+                          jobActivities: old.jobActivities?.filter((ja) => ja.activity.id !== activityId),
                           ...(pendingSync ? { _pendingSync: true } : {}),
                       }
                     : old
@@ -106,7 +105,7 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
         },
     });
 
-    const addedIds = new Set(jobActivities.map((ja) => ja.activityId));
+    const addedIds = new Set(jobActivities.map((ja) => ja.activity.id));
     const availableActivities = activitiesData?.data.filter((a) => !addedIds.has(a.id)) ?? [];
 
     return (
@@ -125,9 +124,9 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                             key={ja.id}
                             className="flex items-center gap-1 rounded-full bg-primary-500/20 px-3 py-1 text-sm text-primary-500"
                         >
-                            {ja.activity?.name}
+                            {ja.activity.name}
                             <button
-                                onClick={() => removeMutation.mutate(ja.id)}
+                                onClick={() => removeMutation.mutate(ja.activity.id)}
                                 disabled={removeMutation.isPending}
                                 className="ml-1 rounded-full p-0.5 hover:bg-primary-500/30"
                             >
