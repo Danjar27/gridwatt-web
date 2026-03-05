@@ -14,7 +14,7 @@ import DatePicker from '@components/DatePicker/DatePicker';
 import Summary from '@components/Summary/Summary';
 import Papa from 'papaparse';
 import Page from '@layouts/Page';
-import type {Order} from "@interfaces/order.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
 import type { Job } from '@interfaces/job.interface.ts';
 
 const DashboardPage = () => {
@@ -224,7 +224,9 @@ const DashboardPage = () => {
                                 subtitle={i18n('pages.dashboard.recentJobs.subtitle')}
                             >
                                 {pendingJobs.length === 0 ? (
-                                    <p className="text-sm text-neutral-900 py-2">{i18n('pages.dashboard.empty.jobs')}</p>
+                                    <p className="text-sm text-neutral-900 py-2">
+                                        {i18n('pages.dashboard.empty.jobs')}
+                                    </p>
                                 ) : (
                                     <div className="flex flex-col gap-2">
                                         {pendingJobs.slice(0, 5).map((job: Job) => (
@@ -253,7 +255,9 @@ const DashboardPage = () => {
                                 subtitle={i18n('pages.dashboard.pendingOrders.subtitle')}
                             >
                                 {pendingOrders.length === 0 ? (
-                                    <p className="text-sm text-neutral-900 py-2">{i18n('pages.dashboard.empty.orders')}</p>
+                                    <p className="text-sm text-neutral-900 py-2">
+                                        {i18n('pages.dashboard.empty.orders')}
+                                    </p>
                                 ) : (
                                     <div className="flex flex-col gap-2">
                                         {pendingOrders.slice(0, 5).map((order: Order) => (
@@ -336,7 +340,9 @@ const DashboardPage = () => {
                                     className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
                                 >
                                     <Download className="h-4 w-4" />
-                                    {isExporting ? i18n('pages.dashboard.export.exporting') : i18n('pages.dashboard.export.download')}
+                                    {isExporting
+                                        ? i18n('pages.dashboard.export.exporting')
+                                        : i18n('pages.dashboard.export.download')}
                                 </button>
                             </div>
                         </div>

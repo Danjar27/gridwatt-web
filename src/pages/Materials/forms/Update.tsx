@@ -53,7 +53,11 @@ const Update: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         <Modal id="update-material" isOpen={isUpdateOpen} onOpen={openUpdate} onClose={handleCancel}>
             <Window title={i18n('pages.materials.form.update')} className="w-full max-w-150 px-4" icon={PackageIcon}>
                 <FormError message={error} />
-                <Form key={selected.id} onSubmit={handleSubmit} defaultValues={{ name: selected.name, unit: selected.unit }}>
+                <Form
+                    key={selected.id}
+                    onSubmit={handleSubmit}
+                    defaultValues={{ name: selected.name, unit: selected.unit }}
+                >
                     <Field name="name" label={i18n('pages.materials.form.name')} required>
                         <TextInput name="name" rules={{ required: i18n('errors.required') }} />
                     </Field>

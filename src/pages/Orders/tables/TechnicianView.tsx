@@ -1,7 +1,7 @@
 import { EyeIcon } from '@phosphor-icons/react';
 import { useTranslations } from 'use-intl';
 import { Link } from 'react-router-dom';
-import type {Order} from "@interfaces/order.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
 
 const getStatusColor = (status: string) => {
     switch (status) {

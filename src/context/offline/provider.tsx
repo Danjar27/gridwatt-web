@@ -63,27 +63,33 @@ const OfflineProvider: FC<PropsWithChildren> = ({ children }) => {
         }
     }, [online, isSyncing, refreshCounts]);
 
-    const retryMutation = useCallback(async (id: string) => {
-        await resetMutationForRetry(id);
-        await refreshCounts();
-        // Trigger sync after resetting
-        setIsSyncing(true);
-        try {
-            const result = await performFullSync();
-            setLastSyncResult({
-                synced: result.mutations.synced + result.photos.synced,
-                failed: result.mutations.failed + result.photos.failed,
-            });
+    const retryMutation = useCallback(
+        async (id: string) => {
+            await resetMutationForRetry(id);
             await refreshCounts();
-        } finally {
-            setIsSyncing(false);
-        }
-    }, [refreshCounts]);
+            // Trigger sync after resetting
+            setIsSyncing(true);
+            try {
+                const result = await performFullSync();
+                setLastSyncResult({
+                    synced: result.mutations.synced + result.photos.synced,
+                    failed: result.mutations.failed + result.photos.failed,
+                });
+                await refreshCounts();
+            } finally {
+                setIsSyncing(false);
+            }
+        },
+        [refreshCounts]
+    );
 
-    const dismissMutation = useCallback(async (id: string) => {
-        await removeMutation(id);
-        await refreshCounts();
-    }, [refreshCounts]);
+    const dismissMutation = useCallback(
+        async (id: string) => {
+            await removeMutation(id);
+            await refreshCounts();
+        },
+        [refreshCounts]
+    );
 
     const context = useMemo<Context>(
         () => ({

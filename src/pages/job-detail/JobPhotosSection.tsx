@@ -6,7 +6,7 @@ import { useOfflineContext } from '@context/offline/context.ts';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { Camera, X } from 'lucide-react';
 import { useTranslations } from 'use-intl';
-import type {Photo} from "@interfaces/photo.interface.ts";
+import type { Photo } from '@interfaces/photo.interface.ts';
 
 interface Props {
     jobId: number;
@@ -27,7 +27,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
     useEffect(() => {
         let cancelled = false;
         getPendingPhotos(jobId).then((pending: Array<PendingPhoto>) => {
-            if (cancelled) { return; }
+            if (cancelled) {
+                return;
+            }
             const map: Record<string, Blob> = {};
             for (const p of pending) {
                 map[p.type] = p.blob;
@@ -35,7 +37,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
             setPendingPhotos(map);
         });
 
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+        };
     }, [jobId]);
 
     useEffect(() => {
@@ -61,9 +65,13 @@ export function JobPhotosSection({ jobId, photos }: Props) {
         try {
             await removeJobPhoto(photoId);
         } catch {
-            if (previous) {queryClient.setQueryData(['job', String(jobId)], previous);}
+            if (previous) {
+                queryClient.setQueryData(['job', String(jobId)], previous);
+            }
         } finally {
-            if (isOnline()) {queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });}
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+            }
         }
     };
 
@@ -75,7 +83,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
     const handleRemovePending = async (type: SlotType) => {
         const pending = await getPendingPhotos(jobId);
         const entry = pending.find((p) => p.type === type);
-        if (entry) {await removePhoto(entry.id);}
+        if (entry) {
+            await removePhoto(entry.id);
+        }
         setPendingPhotos((prev) => {
             const next = { ...prev };
             delete next[type];
@@ -131,7 +141,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
                         >
                             <Camera className="h-4 w-4" />
-                            {online ? i18n('pages.jobDetail.photos.capture') : i18n('pages.jobDetail.photos.selectLibrary')}
+                            {online
+                                ? i18n('pages.jobDetail.photos.capture')
+                                : i18n('pages.jobDetail.photos.selectLibrary')}
                         </button>
                         <input
                             ref={fileInputRef}
@@ -140,7 +152,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) { handleCapture(file, type); }
+                                if (file) {
+                                    handleCapture(file, type);
+                                }
                                 e.target.value = '';
                             }}
                         />

@@ -70,7 +70,7 @@ export function LocationPickerMap({ lat, lng, onChange }: LocationPickerMapProps
             leafletMapRef.current = null;
             markerRef.current = null;
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Keep marker in sync when lat/lng changes from text input
@@ -90,7 +90,7 @@ export function LocationPickerMap({ lat, lng, onChange }: LocationPickerMapProps
         if (!map.getBounds().contains(latlng)) {
             map.setView(latlng, Math.max(map.getZoom(), 15));
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lat, lng]);
 
     return (

@@ -8,11 +8,9 @@ import { request, mutationRequest, uploadFile } from '../http-client';
 export const getJobs = async (params?: PaginatedQuery & { technicianId?: number }) =>
     request<PaginatedResponse<Job>>(`/jobs${buildQueryParameters(params)}`);
 
-export const getMyJobs = async () =>
-    request<Array<Job>>('/jobs/my');
+export const getMyJobs = async () => request<Array<Job>>('/jobs/my');
 
-export const getJob = async (id: number) =>
-    request<Job>(`/jobs/${id}`);
+export const getJob = async (id: number) => request<Job>(`/jobs/${id}`);
 
 export const createJob = async (data: Partial<Job>) =>
     mutationRequest<Job>(
@@ -28,8 +26,7 @@ export const updateJob = async (id: number, data: Partial<Job>) =>
         { type: 'job', action: 'update', optimisticData: { id, ...data } }
     );
 
-export const markJobSynced = async (id: number) =>
-    request<Job>(`/jobs/${id}/sync`, { method: 'PUT' });
+export const markJobSynced = async (id: number) => request<Job>(`/jobs/${id}/sync`, { method: 'PUT' });
 
 export const addJobMaterial = async (jobId: number, materialId: string, quantity: number) =>
     mutationRequest(

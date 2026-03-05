@@ -38,14 +38,15 @@ export const toggleMaterialActive = async (id: string) =>
 export const importMaterials = async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return uploadFile<{ created: number; updated: number; errors: Array<{ row: number; reason: string }>; total: number }>(
-        '/materials/import',
-        formData
-    );
+    return uploadFile<{
+        created: number;
+        updated: number;
+        errors: Array<{ row: number; reason: string }>;
+        total: number;
+    }>('/materials/import', formData);
 };
 
-export const getMaterialStock = async (materialId: string) =>
-    request<Array<Stock>>(`/materials/${materialId}/stock`);
+export const getMaterialStock = async (materialId: string) => request<Array<Stock>>(`/materials/${materialId}/stock`);
 
 export const assignMaterialStock = async (
     materialId: string,
@@ -72,7 +73,9 @@ export const previewMaterialsImport = async (file: File): Promise<ImportPreviewR
     return uploadFile<ImportPreviewRow[]>('/materials/import/preview', formData);
 };
 
-export const commitMaterialsImport = async (rows: Array<{ id: string; name: string; unit: string }>): Promise<ImportCommitResult> =>
+export const commitMaterialsImport = async (
+    rows: Array<{ id: string; name: string; unit: string }>
+): Promise<ImportCommitResult> =>
     request<ImportCommitResult>('/materials/import/commit', { method: 'POST', body: JSON.stringify({ rows }) });
 
 export const createMaterialStock = async (materialId: string, data: { id: string; minimumStock?: number }) =>
@@ -82,4 +85,5 @@ export const ingressMaterialStock = async (
     materialId: string,
     stockId: string,
     data: { quantity: number; notes?: string }
-) => request<Stock>(`/materials/${materialId}/stock/${stockId}/ingress`, { method: 'POST', body: JSON.stringify(data) });
+) =>
+    request<Stock>(`/materials/${materialId}/stock/${stockId}/ingress`, { method: 'POST', body: JSON.stringify(data) });

@@ -165,22 +165,20 @@ const FullImportModal: FC<FullImportModalProps> = ({
                         <div key={s} className="flex items-center gap-2">
                             <div
                                 className={[
-                                        'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
-                                        s === step ? 'bg-primary-600 text-white' : '',
-                                        steps.indexOf(step) > idx && s !== step ? 'bg-green-600 text-white' : '',
-                                        s !== step && steps.indexOf(step) <= idx ? 'bg-neutral-700 text-neutral-400' : '',
-                                    ].filter(Boolean).join(' ')}
+                                    'flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-colors',
+                                    s === step ? 'bg-primary-600 text-white' : '',
+                                    steps.indexOf(step) > idx && s !== step ? 'bg-green-600 text-white' : '',
+                                    s !== step && steps.indexOf(step) <= idx ? 'bg-neutral-700 text-neutral-400' : '',
+                                ]
+                                    .filter(Boolean)
+                                    .join(' ')}
                             >
                                 {idx + 1}
                             </div>
-                            <span
-                                className={`text-sm ${s === step ? 'font-medium text-white' : 'text-neutral-400'}`}
-                            >
+                            <span className={`text-sm ${s === step ? 'font-medium text-white' : 'text-neutral-400'}`}>
                                 {stepLabels[s]}
                             </span>
-                            {idx < steps.length - 1 && (
-                                <div className="mx-1 h-px w-8 bg-neutral-700" />
-                            )}
+                            {idx < steps.length - 1 && <div className="mx-1 h-px w-8 bg-neutral-700" />}
                         </div>
                     ))}
                 </div>
@@ -240,10 +238,16 @@ const FullImportModal: FC<FullImportModalProps> = ({
                     <div className="space-y-4">
                         {/* Stats bar */}
                         <div className="flex flex-wrap items-center gap-4 text-sm">
-                            <span className="text-neutral-300">{i18n('import.rowsFound', { count: previewRows.length })}</span>
-                            <span className="text-green-400">{i18n('import.rowsValid', { count: validRows.length })}</span>
+                            <span className="text-neutral-300">
+                                {i18n('import.rowsFound', { count: previewRows.length })}
+                            </span>
+                            <span className="text-green-400">
+                                {i18n('import.rowsValid', { count: validRows.length })}
+                            </span>
                             {errorRows.length > 0 && (
-                                <span className="text-red-400">{i18n('import.rowsWithErrors', { count: errorRows.length })}</span>
+                                <span className="text-red-400">
+                                    {i18n('import.rowsWithErrors', { count: errorRows.length })}
+                                </span>
                             )}
                             <button
                                 type="button"
@@ -269,7 +273,10 @@ const FullImportModal: FC<FullImportModalProps> = ({
                                         </th>
                                         <th className="px-3 py-2 text-left font-medium text-neutral-400">#</th>
                                         {columns.map((col) => (
-                                            <th key={col.key} className="px-3 py-2 text-left font-medium text-neutral-400">
+                                            <th
+                                                key={col.key}
+                                                className="px-3 py-2 text-left font-medium text-neutral-400"
+                                            >
                                                 {col.label}
                                             </th>
                                         ))}
@@ -295,7 +302,9 @@ const FullImportModal: FC<FullImportModalProps> = ({
                                                         />
                                                     )}
                                                 </td>
-                                                <td className="px-3 py-2 font-mono text-xs text-neutral-400">{row.row}</td>
+                                                <td className="px-3 py-2 font-mono text-xs text-neutral-400">
+                                                    {row.row}
+                                                </td>
                                                 {columns.map((col) => (
                                                     <td key={col.key} className="px-3 py-2 text-neutral-200">
                                                         {String(row.data[col.key] ?? '')}
@@ -305,12 +314,18 @@ const FullImportModal: FC<FullImportModalProps> = ({
                                                     {hasError ? (
                                                         <span
                                                             className="cursor-help text-red-400"
-                                                            title={row.errors.map((e) => `${e.field}: ${e.reason}`).join(', ')}
+                                                            title={row.errors
+                                                                .map((e) => `${e.field}: ${e.reason}`)
+                                                                .join(', ')}
                                                         >
                                                             <WarningIcon size={16} weight="duotone" />
                                                         </span>
                                                     ) : (
-                                                        <CheckCircleIcon size={16} weight="duotone" className="text-green-500" />
+                                                        <CheckCircleIcon
+                                                            size={16}
+                                                            weight="duotone"
+                                                            className="text-green-500"
+                                                        />
                                                     )}
                                                 </td>
                                             </tr>

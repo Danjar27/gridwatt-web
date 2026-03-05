@@ -4,7 +4,17 @@ import type { FC } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { INPUT_CLASS } from '../utils/constants';
 
-const NumberInput: FC<NumberInputProps> = ({ name, placeholder, disabled, className, autoFocus, step, min, max, rules }) => {
+const NumberInput: FC<NumberInputProps> = ({
+    name,
+    placeholder,
+    disabled,
+    className,
+    autoFocus,
+    step,
+    min,
+    max,
+    rules,
+}) => {
     const { register } = useFormContext();
 
     return (

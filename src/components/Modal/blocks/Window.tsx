@@ -4,14 +4,26 @@ import type { FC, PropsWithChildren } from 'react';
 import { classnames } from '@utils/classnames.ts';
 import Visible from '@components/atoms/Visible';
 
-const Window: FC<PropsWithChildren<WindowProps>> = ({ children, className, icon: Icon, title, hideTitle = false, scrollable = false }) => (
+const Window: FC<PropsWithChildren<WindowProps>> = ({
+    children,
+    className,
+    icon: Icon,
+    title,
+    hideTitle = false,
+    scrollable = false,
+}) => (
     <div
         className={classnames(
             'relative max-w-full max-h-full flex items-center s1600:items-start text-black dark:text-white',
             className
         )}
     >
-        <div className={classnames('w-full rounded-lg border border-neutral-800 bg-neutral-500', scrollable ? 'flex flex-col overflow-hidden' : 'overflow-hidden')}>
+        <div
+            className={classnames(
+                'w-full rounded-lg border border-neutral-800 bg-neutral-500',
+                scrollable ? 'flex flex-col overflow-hidden' : 'overflow-hidden'
+            )}
+        >
             <Visible when={!hideTitle}>
                 <div className="flex items-center justify-between border-b border-neutral-800 bg-neutral-600/60 px-4 py-3 shrink-0">
                     <div className="flex items-center gap-3">

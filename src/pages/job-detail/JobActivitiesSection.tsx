@@ -9,7 +9,7 @@ import Window from '@components/Modal/blocks/Window';
 import Dropdown from '@components/Dropdown/Dropdown';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 import type { JobActivity } from '@interfaces/activity.interface.ts';
 
 interface Props {
@@ -44,7 +44,13 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             };
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobActivities: [...(old.jobActivities ?? []), tempJobActivity], ...(pendingSync ? { _pendingSync: true } : {}) } : old
+                old
+                    ? {
+                          ...old,
+                          jobActivities: [...(old.jobActivities ?? []), tempJobActivity],
+                          ...(pendingSync ? { _pendingSync: true } : {}),
+                      }
+                    : old
             );
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
@@ -73,7 +79,13 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             const previous = queryClient.getQueryData<Job>(jobKey);
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId), ...(pendingSync ? { _pendingSync: true } : {}) } : old
+                old
+                    ? {
+                          ...old,
+                          jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId),
+                          ...(pendingSync ? { _pendingSync: true } : {}),
+                      }
+                    : old
             );
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
@@ -131,25 +143,30 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 <p className="text-center text-neutral-900">{i18n('pages.jobDetail.activities.empty')}</p>
             )}
 
-            <Modal id="job-activities-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+            <Modal
+                id="job-activities-modal"
+                isOpen={modalOpen}
+                onOpen={() => setModalOpen(true)}
+                onClose={() => setModalOpen(false)}
+            >
                 <Window title={i18n('pages.jobDetail.activities.modal')} className="w-full max-w-sm px-4">
-                <div className="space-y-4">
-                    <Dropdown
-                        value={selectedActivityId}
-                        onChange={(v) => setSelectedActivityId(v as string)}
-                        options={[
-                            { label: i18n('pages.jobDetail.activities.select'), value: '' },
-                            ...availableActivities.map((a) => ({ label: a.name, value: a.id })),
-                        ]}
-                    />
-                    <button
-                        onClick={() => selectedActivityId && addMutation.mutate(selectedActivityId)}
-                        disabled={!selectedActivityId || addMutation.isPending}
-                        className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
-                    >
-                        {i18n('literal.add')}
-                    </button>
-                </div>
+                    <div className="space-y-4">
+                        <Dropdown
+                            value={selectedActivityId}
+                            onChange={(v) => setSelectedActivityId(v as string)}
+                            options={[
+                                { label: i18n('pages.jobDetail.activities.select'), value: '' },
+                                ...availableActivities.map((a) => ({ label: a.name, value: a.id })),
+                            ]}
+                        />
+                        <button
+                            onClick={() => selectedActivityId && addMutation.mutate(selectedActivityId)}
+                            disabled={!selectedActivityId || addMutation.isPending}
+                            className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
+                        >
+                            {i18n('literal.add')}
+                        </button>
+                    </div>
                 </Window>
             </Modal>
         </div>

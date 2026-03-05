@@ -51,7 +51,12 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                 <FormError message={error} />
                 <Form key="new" onSubmit={handleSubmit}>
                     <Field name="id" label={i18n('pages.seals.form.id')} required>
-                        <NumberInput name="id" step="1" min={1} rules={{ required: i18n('errors.required'), min: { value: 1, message: '≥ 1' } }} />
+                        <NumberInput
+                            name="id"
+                            step="1"
+                            min={1}
+                            rules={{ required: i18n('errors.required'), min: { value: 1, message: '≥ 1' } }}
+                        />
                     </Field>
                     <Field name="type" label={i18n('pages.seals.form.type')} required>
                         <TextInput name="type" rules={{ required: i18n('errors.required') }} />
@@ -68,4 +73,3 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 };
 
 export default Create;
-

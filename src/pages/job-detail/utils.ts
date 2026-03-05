@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query';
 
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 
 /**
  * Mark a job as _pendingSync in all jobs list caches.
@@ -10,11 +10,11 @@ import type { Job } from "@interfaces/job.interface.ts";
 export function markJobPendingInLists(queryClient: QueryClient, jobId: number) {
     const jobsCaches = queryClient.getQueriesData<Array<Job>>({ queryKey: ['jobs'] });
     for (const [queryKey, cachedJobs] of jobsCaches) {
-        if (!Array.isArray(cachedJobs)) {continue;}
+        if (!Array.isArray(cachedJobs)) {
+            continue;
+        }
         queryClient.setQueryData<Array<Job>>(queryKey, (jobs) =>
-            jobs?.map((j) =>
-                j.id === jobId ? { ...j, _pendingSync: true } : j
-            )
+            jobs?.map((j) => (j.id === jobId ? { ...j, _pendingSync: true } : j))
         );
     }
 }

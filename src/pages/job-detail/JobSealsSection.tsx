@@ -9,7 +9,7 @@ import Window from '@components/Modal/blocks/Window';
 import Dropdown from '@components/Dropdown/Dropdown';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 import type { JobSeal } from '@interfaces/seal.interface.ts';
 
 interface Props {
@@ -44,7 +44,13 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
             };
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobSeals: [...(old.jobSeals ?? []), tempJobSeal], ...(pendingSync ? { _pendingSync: true } : {}) } : old
+                old
+                    ? {
+                          ...old,
+                          jobSeals: [...(old.jobSeals ?? []), tempJobSeal],
+                          ...(pendingSync ? { _pendingSync: true } : {}),
+                      }
+                    : old
             );
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
@@ -73,7 +79,13 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
             const previous = queryClient.getQueryData<Job>(jobKey);
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, jobSeals: old.jobSeals?.filter((js) => js.id !== jobSealId), ...(pendingSync ? { _pendingSync: true } : {}) } : old
+                old
+                    ? {
+                          ...old,
+                          jobSeals: old.jobSeals?.filter((js) => js.id !== jobSealId),
+                          ...(pendingSync ? { _pendingSync: true } : {}),
+                      }
+                    : old
             );
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
@@ -131,25 +143,30 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                 <p className="text-center text-neutral-900">{i18n('pages.jobDetail.seals.empty')}</p>
             )}
 
-            <Modal id="job-seals-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+            <Modal
+                id="job-seals-modal"
+                isOpen={modalOpen}
+                onOpen={() => setModalOpen(true)}
+                onClose={() => setModalOpen(false)}
+            >
                 <Window title={i18n('pages.jobDetail.seals.modal')} className="w-full max-w-sm px-4">
-                <div className="space-y-4">
-                    <Dropdown
-                        value={selectedSealId}
-                        onChange={(v) => setSelectedSealId(v === '' ? '' : v as number)}
-                        options={[
-                            { label: i18n('pages.jobDetail.seals.select'), value: '' },
-                            ...availableSeals.map((s) => ({ label: `#${s.id} — ${s.type}`, value: s.id })),
-                        ]}
-                    />
-                    <button
-                        onClick={() => selectedSealId !== '' && addMutation.mutate(Number(selectedSealId))}
-                        disabled={selectedSealId === '' || addMutation.isPending}
-                        className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
-                    >
-                        {i18n('literal.add')}
-                    </button>
-                </div>
+                    <div className="space-y-4">
+                        <Dropdown
+                            value={selectedSealId}
+                            onChange={(v) => setSelectedSealId(v === '' ? '' : (v as number))}
+                            options={[
+                                { label: i18n('pages.jobDetail.seals.select'), value: '' },
+                                ...availableSeals.map((s) => ({ label: `#${s.id} — ${s.type}`, value: s.id })),
+                            ]}
+                        />
+                        <button
+                            onClick={() => selectedSealId !== '' && addMutation.mutate(Number(selectedSealId))}
+                            disabled={selectedSealId === '' || addMutation.isPending}
+                            className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
+                        >
+                            {i18n('literal.add')}
+                        </button>
+                    </div>
                 </Window>
             </Modal>
         </div>

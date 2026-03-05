@@ -7,7 +7,7 @@ import { getActivities } from '@lib/api/activities.ts';
 import { useTranslations } from 'use-intl';
 
 import Table from '@components/Table/Table';
-import type {Activity} from "@interfaces/activity.interface.ts";
+import type { Activity } from '@interfaces/activity.interface.ts';
 
 const ViewTable = () => {
     const i18n = useTranslations();

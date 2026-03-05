@@ -17,7 +17,9 @@ import Form from '@components/Form/Form';
 import Actions from '@components/Form/blocks/Actions';
 
 function isOrderInArea(lat: number, lng: number, coords: Array<AreaCoordinate>): boolean {
-    if (coords.length < 3) { return false; }
+    if (coords.length < 3) {
+        return false;
+    }
     let inside = false;
     const n = coords.length;
     for (let i = 0, j = n - 1; i < n; j = i++) {
@@ -25,8 +27,10 @@ function isOrderInArea(lat: number, lng: number, coords: Array<AreaCoordinate>):
         const yi = coords[i].lat;
         const xj = coords[j].lng;
         const yj = coords[j].lat;
-        const intersect = (yi > lat) !== (yj > lat) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
-        if (intersect) { inside = !inside; }
+        const intersect = yi > lat !== yj > lat && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
+        if (intersect) {
+            inside = !inside;
+        }
     }
 
     return inside;
@@ -106,9 +110,7 @@ const LEAFLET_DARK_CSS = `
 `;
 
 function buildOrderPopupHtml(order: OrderMapPoint): string {
-    const techName = order.technician
-        ? `${order.technician.name} ${order.technician.lastName}`
-        : null;
+    const techName = order.technician ? `${order.technician.name} ${order.technician.lastName}` : null;
     const rows: Array<[string, string]> = [
         ['Técnico', techName ?? 'Sin asignar'],
         ['Cédula', order.clientId ?? ''],
@@ -230,16 +232,24 @@ export function OrdersMap({
     }, [orders, areas]);
 
     const markersDataRef = useRef<typeof markersData>([]);
-    useEffect(() => { markersDataRef.current = markersData; }, [markersData]);
+    useEffect(() => {
+        markersDataRef.current = markersData;
+    }, [markersData]);
 
     // Count orders per area (and unassigned)
     const areaStats = useMemo(() => {
         const counts = new Map<number, number>();
         let unassigned = 0;
         orders.forEach((order) => {
-            if (order.coordinateX == null || order.coordinateY == null) { unassigned++; return; }
+            if (order.coordinateX == null || order.coordinateY == null) {
+                unassigned++;
+                return;
+            }
             const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
-            if (!wgs) { unassigned++; return; }
+            if (!wgs) {
+                unassigned++;
+                return;
+            }
             let matched = false;
             areas.forEach((area) => {
                 if (isOrderInArea(wgs[0], wgs[1], area.coordinates)) {
@@ -322,7 +332,9 @@ export function OrdersMap({
             if (drawingPolylineRef.current) {
                 drawingPolylineRef.current.setLatLngs(pts);
             } else {
-                drawingPolylineRef.current = L.polyline(pts, { color: '#6366f1', weight: 2, dashArray: '6 3' }).addTo(map);
+                drawingPolylineRef.current = L.polyline(pts, { color: '#6366f1', weight: 2, dashArray: '6 3' }).addTo(
+                    map
+                );
             }
 
             // Live shaded polygon — shown once ≥3 points are on screen
@@ -647,7 +659,6 @@ export function OrdersMap({
         });
     }, [areas]);
 
-
     // ─── Cursor for draw mode ─────────────────────────────────────────────────
     useEffect(() => {
         const container = mapRef.current;
@@ -758,13 +769,17 @@ export function OrdersMap({
                 {/* Stats sidebar */}
                 <div className="w-44 shrink-0 flex flex-col border-l border-neutral-800 bg-neutral-600/40 overflow-hidden">
                     <div className="px-3 py-2 border-b border-neutral-800">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-900">{i18n('pages.orders.map.areas')}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-900">
+                            {i18n('pages.orders.map.areas')}
+                        </p>
                     </div>
                     <div className="flex-1 overflow-y-auto">
                         {/* Unassigned row */}
                         <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60">
                             <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-amber-500 border border-white/40" />
-                            <span className="flex-1 text-xs text-neutral-900 truncate">{i18n('pages.orders.map.unassigned')}</span>
+                            <span className="flex-1 text-xs text-neutral-900 truncate">
+                                {i18n('pages.orders.map.unassigned')}
+                            </span>
                             <span className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-neutral-700 text-neutral-900">
                                 {areaStats.unassigned}
                             </span>
@@ -776,12 +791,17 @@ export function OrdersMap({
                                 ? `${area.technician.name} ${area.technician.lastName}`
                                 : 'Sin asignar';
                             return (
-                                <div key={area.id} className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60 last:border-b-0">
+                                <div
+                                    key={area.id}
+                                    className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60 last:border-b-0"
+                                >
                                     <span
                                         className="shrink-0 w-2.5 h-2.5 rounded border border-white/30"
                                         style={{ backgroundColor: area.color }}
                                     />
-                                    <span className="flex-1 text-xs truncate" title={tech}>{tech}</span>
+                                    <span className="flex-1 text-xs truncate" title={tech}>
+                                        {tech}
+                                    </span>
                                     <span
                                         className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
                                         style={{ backgroundColor: area.color }}

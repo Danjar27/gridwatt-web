@@ -39,8 +39,7 @@ const CreateRange: FC<CreateRangeProps> = ({ isOpen, onClose }) => {
     const [result, setResult] = useState<RangeResult | null>(null);
 
     const rangeMutation = useMutation({
-        mutationFn: (data: RangeFormData) =>
-            createSealRange({ ...data, from: Number(data.from), to: Number(data.to) }),
+        mutationFn: (data: RangeFormData) => createSealRange({ ...data, from: Number(data.from), to: Number(data.to) }),
         onSuccess: async (data) => {
             await queryClient.invalidateQueries({ queryKey: ['seals'] });
             setResult(data);

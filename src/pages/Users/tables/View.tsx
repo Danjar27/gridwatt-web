@@ -7,7 +7,7 @@ import { useAuthContext } from '@context/auth/context.ts';
 import { getUsers } from '@lib/api/users.ts';
 import Table from '@components/Table/Table';
 import { useTranslations } from 'use-intl';
-import type {User} from "@interfaces/user.interface.ts";
+import type { User } from '@interfaces/user.interface.ts';
 
 const ViewTable = () => {
     const i18n = useTranslations();

@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
 
 import Table from '@components/Table/Table';
-import type {User} from "@interfaces/user.interface.ts";
+import type { User } from '@interfaces/user.interface.ts';
 import type { Order } from '@interfaces/order.interface.ts';
 
 const getStatusColor = (status: string) => {

@@ -17,7 +17,7 @@ import { JobMaterialsSection } from './JobMaterialsSection';
 import { JobPhotosSection } from './JobPhotosSection';
 import Button from '@components/Button/Button';
 import Page from '@layouts/Page';
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 
 export function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -45,13 +45,13 @@ export function JobDetailPage() {
             const pendingSync = !isOnline();
             const patchedData = { ...data, ...(pendingSync ? { _pendingSync: true } : {}) };
 
-            queryClient.setQueryData<Job>(['job', id], (old) =>
-                old ? { ...old, ...patchedData } : old
-            );
+            queryClient.setQueryData<Job>(['job', id], (old) => (old ? { ...old, ...patchedData } : old));
 
             const previousJobsCache = queryClient.getQueriesData<Array<Job>>({ queryKey: ['jobs'] });
             for (const [queryKey, cachedJobs] of previousJobsCache) {
-                if (!Array.isArray(cachedJobs)) {continue;}
+                if (!Array.isArray(cachedJobs)) {
+                    continue;
+                }
                 queryClient.setQueryData<Array<Job>>(queryKey, (jobs) =>
                     jobs?.map((j) => (j.id === Number(id) ? { ...j, ...patchedData } : j))
                 );
@@ -60,7 +60,9 @@ export function JobDetailPage() {
             return { previousJob, previousJobsCache };
         },
         onError: (_err, _data, context) => {
-            if (context?.previousJob) {queryClient.setQueryData(['job', id], context.previousJob);}
+            if (context?.previousJob) {
+                queryClient.setQueryData(['job', id], context.previousJob);
+            }
             if (context?.previousJobsCache) {
                 for (const [queryKey, cachedJobs] of context.previousJobsCache) {
                     queryClient.setQueryData(queryKey, cachedJobs);
@@ -94,8 +96,8 @@ export function JobDetailPage() {
                     } catch (err) {
                         console.error('Failed to upload photo:', err);
                     }
-                }),
-            ),
+                })
+            )
         );
 
         updateMutation.mutate({
@@ -123,12 +125,7 @@ export function JobDetailPage() {
     }
 
     return (
-        <Page
-            id="job-detail"
-            title={`Job #${job.id}`}
-            subtitle={job.jobType}
-            backRoute="/jobs"
-        >
+        <Page id="job-detail" title={`Job #${job.id}`} subtitle={job.jobType} backRoute="/jobs">
             <PendingSyncWrapper pending={!!job._pendingSync}>
                 <div className="space-y-6">
                     {/* Action buttons */}
@@ -142,11 +139,7 @@ export function JobDetailPage() {
                             {i18n('pages.jobDetail.save')}
                         </Button>
                         {job.jobStatus !== 'completed' && (
-                            <Button
-                                variant="solid"
-                                disabled={updateMutation.isPending}
-                                onClick={handleComplete}
-                            >
+                            <Button variant="solid" disabled={updateMutation.isPending} onClick={handleComplete}>
                                 {i18n('pages.jobDetail.complete')}
                             </Button>
                         )}
@@ -263,7 +256,9 @@ function JobLocationMap({ lat, lng }: { lat: number; lng: number }) {
     const mapInstanceRef = useRef<leaflet.Map | null>(null);
 
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) {return;}
+        if (!mapRef.current || mapInstanceRef.current) {
+            return;
+        }
         const map = leaflet.map(mapRef.current).setView([lat, lng], 15);
         leaflet
             .tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {

@@ -14,14 +14,17 @@ import DateRangePicker from '@components/DateRangePicker/DateRangePicker';
 import Summary from '@components/Summary/Summary';
 import Button from '@components/Button/Button';
 import Papa from 'papaparse';
-import type {User} from "@interfaces/user.interface.ts";
+import type { User } from '@interfaces/user.interface.ts';
 import type { Order } from '@interfaces/order.interface.ts';
 import type { Job } from '@interfaces/job.interface.ts';
 
 const exportTargets = ['orders', 'jobs', 'materials', 'activities', 'seals'] as const;
 type ExportTarget = (typeof exportTargets)[number];
 
-const exportTargetRouteKeys: Record<ExportTarget, 'routes.orders' | 'routes.jobs' | 'routes.materials' | 'routes.activities' | 'routes.seals'> = {
+const exportTargetRouteKeys: Record<
+    ExportTarget,
+    'routes.orders' | 'routes.jobs' | 'routes.materials' | 'routes.activities' | 'routes.seals'
+> = {
     orders: 'routes.orders',
     jobs: 'routes.jobs',
     materials: 'routes.materials',
@@ -29,8 +32,29 @@ const exportTargetRouteKeys: Record<ExportTarget, 'routes.orders' | 'routes.jobs
     seals: 'routes.seals',
 };
 
-const orderFields = ['id', 'clientName', 'clientLastName', 'clientEmail', 'type', 'status', 'issueDate', 'meterId', 'clientAccount'];
-const jobFields = ['id', 'orderId', 'jobType', 'jobStatus', 'startDateTime', 'endDateTime', 'technicianId', 'gpsLocation', 'meterReading', 'notes'];
+const orderFields = [
+    'id',
+    'clientName',
+    'clientLastName',
+    'clientEmail',
+    'type',
+    'status',
+    'issueDate',
+    'meterId',
+    'clientAccount',
+];
+const jobFields = [
+    'id',
+    'orderId',
+    'jobType',
+    'jobStatus',
+    'startDateTime',
+    'endDateTime',
+    'technicianId',
+    'gpsLocation',
+    'meterReading',
+    'notes',
+];
 const materialFields = ['id', 'name', 'unit'];
 const activityFields = ['id', 'name', 'contractPrice', 'technicianPrice'];
 const sealFields = ['id', 'name', 'type'];
@@ -108,11 +132,15 @@ function DonutChart({ completed, total, completedLabel, pendingLabel }: DonutCha
             <div className="flex flex-col gap-2 text-sm">
                 <div className="flex items-center gap-2">
                     <span className="h-3 w-3 rounded-full bg-primary-500" />
-                    <span>{completedLabel}: <strong>{completed}</strong></span>
+                    <span>
+                        {completedLabel}: <strong>{completed}</strong>
+                    </span>
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="h-3 w-3 rounded-full bg-neutral-600" />
-                    <span>{pendingLabel}: <strong>{total - completed}</strong></span>
+                    <span>
+                        {pendingLabel}: <strong>{total - completed}</strong>
+                    </span>
                 </div>
             </div>
         </div>
@@ -154,7 +182,9 @@ function HorizontalBarChart({ items, maxValue, jobsLabel, emptyLabel }: BarChart
 
 // Normalize response: some endpoints return Array directly, others return { data: Array }
 function toArray<T>(res: unknown): Array<T> {
-    if (Array.isArray(res)) {return res;}
+    if (Array.isArray(res)) {
+        return res;
+    }
     if (res && typeof res === 'object' && Array.isArray((res as { data?: unknown }).data)) {
         return (res as { data: Array<T> }).data;
     }
@@ -174,7 +204,9 @@ function Inventory() {
     const { data: rawJobs } = useQuery({
         queryKey: ['jobs', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
-            if (isTechnician) {return await getMyJobs();}
+            if (isTechnician) {
+                return await getMyJobs();
+            }
 
             return await getJobs();
         },
@@ -184,7 +216,9 @@ function Inventory() {
     const { data: rawOrders } = useQuery({
         queryKey: ['orders', isTechnician ? 'my' : 'all'],
         queryFn: async () => {
-            if (isTechnician) {return await getMyOrders();}
+            if (isTechnician) {
+                return await getMyOrders();
+            }
 
             return await getOrders();
         },
@@ -431,7 +465,7 @@ function Inventory() {
                                     value={selectedTargets}
                                     onChange={(e) => {
                                         const values = Array.from(e.target.selectedOptions).map(
-                                            (o) => o.value as ExportTarget,
+                                            (o) => o.value as ExportTarget
                                         );
                                         setSelectedTargets(values);
                                     }}

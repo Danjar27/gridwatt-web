@@ -53,7 +53,11 @@ const ViewTable: FC<ViewTableProps> = ({ onAssign }) => {
             header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    <button onClick={() => handleAssign(row.original)} className="cursor-pointer" title={i18n('pages.seals.form.assign')}>
+                    <button
+                        onClick={() => handleAssign(row.original)}
+                        className="cursor-pointer"
+                        title={i18n('pages.seals.form.assign')}
+                    >
                         <UserPlusIcon weight="duotone" className="text-primary-500" width={20} height={20} />
                     </button>
                     <button onClick={() => handleEdit(row.original)} className="cursor-pointer">

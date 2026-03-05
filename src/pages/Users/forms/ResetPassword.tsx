@@ -25,8 +25,7 @@ const ResetPassword: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const [error, setError] = useState<string | null>(null);
 
     const resetMutation = useMutation({
-        mutationFn: ({ id, password }: { id: number; password: string }) =>
-            updateUser(id, { password }),
+        mutationFn: ({ id, password }: { id: number; password: string }) => updateUser(id, { password }),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['users'] });
             closePasswordReset();
@@ -52,7 +51,11 @@ const ResetPassword: FC<MutationForm> = ({ onSubmit, onCancel }) => {
 
     return (
         <Modal id="reset-password-user" isOpen={isPasswordResetOpen} onOpen={openPasswordReset} onClose={handleCancel}>
-            <Window title={i18n('pages.users.form.passwordReset.title')} className="w-full max-w-120 px-4" icon={KeyIcon}>
+            <Window
+                title={i18n('pages.users.form.passwordReset.title')}
+                className="w-full max-w-120 px-4"
+                icon={KeyIcon}
+            >
                 <FormError message={error} />
                 <p className="mb-2 text-sm text-muted-foreground">
                     {selected.name} {selected.lastName}
@@ -62,10 +65,17 @@ const ResetPassword: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                         <PasswordInput
                             name="password"
                             autoFocus
-                            rules={{ required: i18n('errors.required'), minLength: { value: 6, message: i18n('errors.minLength', { min: 6 }) } }}
+                            rules={{
+                                required: i18n('errors.required'),
+                                minLength: { value: 6, message: i18n('errors.minLength', { min: 6 }) },
+                            }}
                         />
                     </Field>
-                    <Actions submitLabel={i18n('pages.users.form.passwordReset.title')} onCancel={handleCancel} isLoading={resetMutation.isPending} />
+                    <Actions
+                        submitLabel={i18n('pages.users.form.passwordReset.title')}
+                        onCancel={handleCancel}
+                        isLoading={resetMutation.isPending}
+                    />
                 </Form>
             </Window>
         </Modal>

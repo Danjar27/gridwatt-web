@@ -10,7 +10,7 @@ import { INPUT_CLASS } from '@components/Form/utils/constants';
 import Dropdown from '@components/Dropdown/Dropdown';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 import type { WorkMaterial } from '@interfaces/material.interface.ts';
 
 interface Props {
@@ -48,7 +48,13 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             };
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial], ...(pendingSync ? { _pendingSync: true } : {}) } : old
+                old
+                    ? {
+                          ...old,
+                          workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial],
+                          ...(pendingSync ? { _pendingSync: true } : {}),
+                      }
+                    : old
             );
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
@@ -78,7 +84,13 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
             const previous = queryClient.getQueryData<Job>(jobKey);
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
-                old ? { ...old, workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId), ...(pendingSync ? { _pendingSync: true } : {}) } : old
+                old
+                    ? {
+                          ...old,
+                          workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId),
+                          ...(pendingSync ? { _pendingSync: true } : {}),
+                      }
+                    : old
             );
             if (pendingSync) {
                 markJobPendingInLists(queryClient, jobId);
@@ -158,33 +170,40 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 <p className="text-center text-neutral-900">{i18n('pages.jobDetail.materials.empty')}</p>
             )}
 
-            <Modal id="job-materials-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+            <Modal
+                id="job-materials-modal"
+                isOpen={modalOpen}
+                onOpen={() => setModalOpen(true)}
+                onClose={() => setModalOpen(false)}
+            >
                 <Window title={i18n('pages.jobDetail.materials.modal')} className="w-full max-w-sm px-4">
-                <div className="space-y-4">
-                    <Dropdown
-                        value={selectedMaterialId}
-                        onChange={(v) => handleMaterialChange(v as string)}
-                        options={[
-                            { label: i18n('pages.jobDetail.materials.select'), value: '' },
-                            ...availableMaterials.map((m) => ({ label: m.name, value: m.id })),
-                        ]}
-                    />
-                    <input
-                        type="number"
-                        value={quantity}
-                        onChange={(e) => setQuantity(e.target.value)}
-                        min="0"
-                        placeholder={i18n('pages.jobDetail.materials.quantity')}
-                        className={INPUT_CLASS}
-                    />
-                    <button
-                        onClick={handleAdd}
-                        disabled={!selectedMaterialId || !quantity || Number(quantity) <= 0 || addMutation.isPending}
-                        className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
-                    >
-                        {i18n('literal.add')}
-                    </button>
-                </div>
+                    <div className="space-y-4">
+                        <Dropdown
+                            value={selectedMaterialId}
+                            onChange={(v) => handleMaterialChange(v as string)}
+                            options={[
+                                { label: i18n('pages.jobDetail.materials.select'), value: '' },
+                                ...availableMaterials.map((m) => ({ label: m.name, value: m.id })),
+                            ]}
+                        />
+                        <input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            min="0"
+                            placeholder={i18n('pages.jobDetail.materials.quantity')}
+                            className={INPUT_CLASS}
+                        />
+                        <button
+                            onClick={handleAdd}
+                            disabled={
+                                !selectedMaterialId || !quantity || Number(quantity) <= 0 || addMutation.isPending
+                            }
+                            className="w-full rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
+                        >
+                            {i18n('literal.add')}
+                        </button>
+                    </div>
                 </Window>
             </Modal>
         </div>

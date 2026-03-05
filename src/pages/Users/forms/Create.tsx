@@ -46,7 +46,8 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     });
 
     const roleOptions = useMemo(
-        () => roles.filter((r) => isCurrentUserAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: r.id })),
+        () =>
+            roles.filter((r) => isCurrentUserAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: r.id })),
         [roles, isCurrentUserAdmin]
     );
 
@@ -79,7 +80,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         <Modal id="new-user" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
             <Window title={i18n('pages.users.form.create')} className="w-full max-w-150 px-4" icon={UsersIcon}>
                 <FormError message={error} />
-                <Form key="new" onSubmit={handleSubmit} defaultValues={{ roleId: 2, tenantId: !isCurrentUserAdmin ? currentUser?.tenantId : undefined }}>
+                <Form
+                    key="new"
+                    onSubmit={handleSubmit}
+                    defaultValues={{ roleId: 2, tenantId: !isCurrentUserAdmin ? currentUser?.tenantId : undefined }}
+                >
                     {({ watch }) => {
                         const roleId = watch('roleId');
                         const selectedRole = roles.find((r) => String(r.id) === String(roleId));

@@ -18,7 +18,7 @@ import { queryClient } from '@lib/query-client';
 import { createActivity } from '@lib/api/activities.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Activity} from "@interfaces/activity.interface.ts";
+import type { Activity } from '@interfaces/activity.interface.ts';
 
 const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();
@@ -61,10 +61,20 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                     </Field>
                     <div className="grid grid-cols-2 gap-4">
                         <Field name="contractPrice" label={i18n('pages.activities.form.contractPrice')} required>
-                            <NumberInput name="contractPrice" step="any" min={0} rules={{ required: i18n('errors.required') }} />
+                            <NumberInput
+                                name="contractPrice"
+                                step="any"
+                                min={0}
+                                rules={{ required: i18n('errors.required') }}
+                            />
                         </Field>
                         <Field name="technicianPrice" label={i18n('pages.activities.form.technicianPrice')} required>
-                            <NumberInput name="technicianPrice" step="any" min={0} rules={{ required: i18n('errors.required') }} />
+                            <NumberInput
+                                name="technicianPrice"
+                                step="any"
+                                min={0}
+                                rules={{ required: i18n('errors.required') }}
+                            />
                         </Field>
                     </div>
                     <Actions

@@ -7,48 +7,47 @@
     --sidebar-mobile-width: 16rem;
     --sidebar-collapsed-width: 4rem;
 
-    --neutral-500: #FFFFFF;
-    --neutral-600: #F0F3FA;
-    --neutral-700: #E0E5F0;
-    --neutral-800: #C4CCDE;
-    --neutral-900: #8890A8;
+    --neutral-500: #ffffff;
+    --neutral-600: #f0f3fa;
+    --neutral-700: #e0e5f0;
+    --neutral-800: #c4ccde;
+    --neutral-900: #8890a8;
 
-    --primary-500: #3D3D3D;
+    --primary-500: #3d3d3d;
     --primary-600: #292929;
-    --primary-700: #1F1F1F;
+    --primary-700: #1f1f1f;
 
-    --secondary-500: #FF6F43;
-    --secondary-600: #9D391B;
+    --secondary-500: #ff6f43;
+    --secondary-600: #9d391b;
 
-    --sucesss-400: #74FFAE;
-    --success-500: #41B06F;
+    --sucesss-400: #74ffae;
+    --success-500: #41b06f;
     --success-600: #166c3b;
 
-    --error-400: #FF93B5;
-    --error-500: #EB5E8B;
+    --error-400: #ff93b5;
+    --error-500: #eb5e8b;
 }
 
-
 .dark {
-    --neutral-500: #29282A;
+    --neutral-500: #29282a;
     --neutral-600: #333234;
     --neutral-700: #474649;
     --neutral-800: #656468;
-    --neutral-900: #8E8D91;
+    --neutral-900: #8e8d91;
 
-    --primary-500: #F3752B;
-    --primary-600: #F4813E;
-    --primary-700: #F69A65;
+    --primary-500: #f3752b;
+    --primary-600: #f4813e;
+    --primary-700: #f69a65;
 
-    --secondary-500: #FF8560;
-    --secondary-600: #C4553A;
+    --secondary-500: #ff8560;
+    --secondary-600: #c4553a;
 
-    --sucesss-400: #5EEEA0;
-    --success-500: #38C76E;
-    --success-600: #248C4A;
+    --sucesss-400: #5eeea0;
+    --success-500: #38c76e;
+    --success-600: #248c4a;
 
-    --error-400: #FF8AAE;
-    --error-500: #E04F7A;
+    --error-400: #ff8aae;
+    --error-500: #e04f7a;
 }
 
 @theme inline {
@@ -116,16 +115,19 @@
     }
 }
 
-html, body, #root {
+html,
+body,
+#root {
     height: 100dvh;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
     padding-top: env(safe-area-inset-top);
-    background-color: #E4E9F4;
+    background-color: #e4e9f4;
 }
 
-body.dark, body.dark #root {
-    background-color: #29282A;
+body.dark,
+body.dark #root {
+    background-color: #29282a;
 }
 
 .scrollbar-hide {

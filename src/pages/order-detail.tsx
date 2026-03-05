@@ -67,7 +67,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
             </div>
             <div className="min-w-0">
                 <p className="text-xs text-neutral-900">{label}</p>
-                <p className="break-words text-sm font-medium">{value || '—'}</p>
+                <p className="wrap-break-word text-sm font-medium">{value || '—'}</p>
             </div>
         </div>
     );
@@ -161,7 +161,7 @@ export function OrderDetailPage() {
 
     const { data: order, isLoading } = useQuery({
         queryKey: ['order', id],
-        queryFn: () => getOrder(id!),  
+        queryFn: () => getOrder(id!),
         enabled: !!id,
     });
 
@@ -262,8 +262,16 @@ export function OrderDetailPage() {
                             </div>
                         </div>
                         <div className="space-y-2.5 pt-1">
-                            <InfoRow icon={EnvelopeIcon} label={i18n('pages.orderDetail.email')} value={order.clientEmail} />
-                            <InfoRow icon={PhoneIcon} label={i18n('pages.orderDetail.phone')} value={order.clientPhone} />
+                            <InfoRow
+                                icon={EnvelopeIcon}
+                                label={i18n('pages.orderDetail.email')}
+                                value={order.clientEmail}
+                            />
+                            <InfoRow
+                                icon={PhoneIcon}
+                                label={i18n('pages.orderDetail.phone')}
+                                value={order.clientPhone}
+                            />
                             <InfoRow
                                 icon={IdentificationCardIcon}
                                 label={i18n('pages.orderDetail.idNumber')}
@@ -290,11 +298,11 @@ export function OrderDetailPage() {
                                 {order.addressReference && (
                                     <p className="text-xs text-neutral-900">{order.addressReference}</p>
                                 )}
-                                {[order.neighborhood, order.building, order.urbanization]
-                                    .filter(Boolean)
-                                    .map((v) => (
-                                        <p key={v} className="text-xs text-neutral-900">{v}</p>
-                                    ))}
+                                {[order.neighborhood, order.building, order.urbanization].filter(Boolean).map((v) => (
+                                    <p key={v} className="text-xs text-neutral-900">
+                                        {v}
+                                    </p>
+                                ))}
                                 {[order.zone, order.sector, order.parish, order.canton, order.province]
                                     .filter(Boolean)
                                     .join(' · ') && (
@@ -323,11 +331,7 @@ export function OrderDetailPage() {
                 {/* Order Details */}
                 <SectionCard title={i18n('pages.orderDetail.orderDetails')} accentColor="border-l-secondary-500">
                     <div className="space-y-2.5">
-                        <InfoRow
-                            icon={WrenchIcon}
-                            label={i18n('pages.orderDetail.serviceType')}
-                            value={order.type}
-                        />
+                        <InfoRow icon={WrenchIcon} label={i18n('pages.orderDetail.serviceType')} value={order.type} />
                         <InfoRow icon={PlugIcon} label={i18n('pages.orderDetail.meterNumber')} value={order.meterId} />
                         {order.meterType && (
                             <InfoRow
@@ -374,7 +378,7 @@ export function OrderDetailPage() {
                             <div className="flex-1">
                                 <Dropdown
                                     value={selectedTechnician ?? ''}
-                                    onChange={(v) => setSelectedTechnician(v === '' ? null : v as number)}
+                                    onChange={(v) => setSelectedTechnician(v === '' ? null : (v as number))}
                                     options={[
                                         { label: i18n('pages.orderDetail.selectTechnician'), value: '' },
                                         ...technicians.map((tech: UserType) => ({
