@@ -44,8 +44,8 @@ const CreateOrderPage = () => {
         >
             <Form onSubmit={handleSubmit}>
                 {({ setValue, watch }) => {
-                    const lat = watch('latitude') as number | undefined;
-                    const lng = watch('longitude') as number | undefined;
+                    const lat = watch('coordinateX') as number | undefined;
+                    const lng = watch('coordinateY') as number | undefined;
 
                     return (
                         <>
@@ -178,17 +178,17 @@ const CreateOrderPage = () => {
                                                 lat={lat}
                                                 lng={lng}
                                                 onChange={(newLat, newLng) => {
-                                                    setValue('latitude', newLat, { shouldValidate: true });
-                                                    setValue('longitude', newLng, { shouldValidate: true });
+                                                    setValue('coordinateX', newLat, { shouldValidate: true });
+                                                    setValue('coordinateY', newLng, { shouldValidate: true });
                                                 }}
                                             />
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <Field name="latitude" label={i18n('pages.orders.form.fields.latitude')}>
-                                                    <NumberInput name="latitude" step="any" placeholder="0.000000" />
+                                                <Field name="coordinateX" label={i18n('pages.orders.form.fields.coordinateX')}>
+                                                    <NumberInput name="coordinateX" step="any" placeholder="0.000000" />
                                                 </Field>
-                                                <Field name="longitude" label={i18n('pages.orders.form.fields.longitude')}>
-                                                    <NumberInput name="longitude" step="any" placeholder="0.000000" />
+                                                <Field name="coordinateY" label={i18n('pages.orders.form.fields.coordinateY')}>
+                                                    <NumberInput name="coordinateY" step="any" placeholder="0.000000" />
                                                 </Field>
                                             </div>
 

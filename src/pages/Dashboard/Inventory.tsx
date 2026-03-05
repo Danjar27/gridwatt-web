@@ -29,7 +29,7 @@ const exportTargetRouteKeys: Record<ExportTarget, 'routes.orders' | 'routes.jobs
     seals: 'routes.seals',
 };
 
-const orderFields = ['id', 'firstName', 'lastName', 'email', 'serviceType', 'orderStatus', 'issueDate', 'issueTime', 'meterNumber', 'accountNumber'];
+const orderFields = ['id', 'clientName', 'clientLastName', 'clientEmail', 'type', 'status', 'issueDate', 'meterId', 'clientAccount'];
 const jobFields = ['id', 'orderId', 'jobType', 'jobStatus', 'startDateTime', 'endDateTime', 'technicianId', 'gpsLocation', 'meterReading', 'notes'];
 const materialFields = ['id', 'name', 'unit'];
 const activityFields = ['id', 'name', 'contractPrice', 'technicianPrice'];
@@ -359,7 +359,7 @@ function Inventory() {
                                         <div>
                                             <p className="text-sm font-medium">#{job.id}</p>
                                             <p className="text-xs text-neutral-900">
-                                                {job.order?.serviceType} — {job.order?.meterNumber}
+                                                {job.order?.type} — {job.order?.meterId}
                                             </p>
                                         </div>
                                         <span className="shrink-0 rounded-full border border-secondary-500 px-2 py-0.5 text-xs font-medium text-secondary-500">
@@ -384,10 +384,10 @@ function Inventory() {
                                     <div key={order.id} className="flex items-center justify-between gap-3 py-3">
                                         <div>
                                             <p className="text-sm font-medium">
-                                                {order.firstName} {order.lastName}
+                                                {order.clientName} {order.clientLastName}
                                             </p>
                                             <p className="text-xs text-neutral-900">
-                                                {order.serviceType} — {order.meterNumber}
+                                                {order.type} — {order.meterId}
                                             </p>
                                         </div>
                                         <span className="shrink-0 rounded-full border border-primary-500 px-2 py-0.5 text-xs font-medium text-primary-500">

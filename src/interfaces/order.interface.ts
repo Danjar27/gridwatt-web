@@ -1,71 +1,88 @@
-import type { User } from '@interfaces/user.interface.ts';
-
 import type { Job } from '@interfaces/job.interface.ts';
 
 export interface Order {
     id: string;
     technicianId?: number;
-    serviceType: string;
-    meterNumber: string;
+    type: string;
     status: string;
     issueDate: string;
-    issueTime: string;
-    accountNumber: string;
-    lastName: string;
-    firstName: string;
-    idNumber: string;
-    email: string;
-    phone: string;
-    orderLocation: string;
-    latitude?: number;
-    longitude?: number;
-    observations?: string;
-    panelTowerBlock?: string;
+    clientAccount: string;
+    clientName: string;
+    clientLastName?: string;
+    clientId: string;
+    clientPhone?: string;
+    clientEmail?: string;
+    address: string;
+    addressReference?: string;
+    zone?: string;
+    sector?: string;
+    parish?: string;
+    neighborhood?: string;
+    building?: string;
+    urbanization?: string;
+    canton?: string;
+    province?: string;
     coordinateX?: number;
     coordinateY?: number;
     appliedTariff?: string;
+    verifiedTariff?: string;
     transformerNumber?: string;
-    distributionNetwork?: string;
-    transformerOwnership?: string;
-    sharedSubstation?: string;
-    normalLoad?: string;
-    fluctuatingLoad?: string;
-    plannerGroup?: string;
-    workPosition?: string;
-    lockerSequence?: string;
-    technician?: User;
-    jobs?: Array<Job>;
+    transformerProperty?: string;
+    meterId?: string;
+    meterType?: string;
+    observations?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    technician?: { id: number; name: string; lastName: string };
+    job?: Job;
 }
+
+/** Lightweight projection used by the map — avoids fetching the full order payload */
+export interface OrderMapPoint {
+    id: string;
+    coordinateX?: number | null;
+    coordinateY?: number | null;
+    technicianId?: number | null;
+    technician?: { id: number; name: string; lastName: string } | null;
+    clientName: string;
+    clientLastName?: string | null;
+    clientId: string;
+    type: string;
+    address: string;
+    clientAccount: string;
+    meterId?: string | null;
+}
+
 export interface OrderImportData {
-    serviceType: string;
-    meterNumber: string;
+    id: string;
+    type: string;
     orderStatus: string;
     issueDate: string;
-    issueTime: string;
-    accountNumber: string;
-    lastName: string;
-    firstName: string;
-    idNumber: string;
-    email: string;
-    phone: string;
-    orderLocation: string;
-    panelTowerBlock?: string;
+    clientAccount: string;
+    clientName: string;
+    clientLastName?: string;
+    clientId: string;
+    clientPhone?: string;
+    clientEmail?: string;
+    address: string;
+    addressReference?: string;
+    zone?: string;
+    sector?: string;
+    parish?: string;
+    neighborhood?: string;
+    building?: string;
+    urbanization?: string;
+    canton?: string;
+    province?: string;
     coordinateX?: number;
     coordinateY?: number;
-    latitude?: number;
-    longitude?: number;
     appliedTariff?: string;
+    verifiedTariff?: string;
     transformerNumber?: string;
-    distributionNetwork?: string;
-    transformerOwnership?: string;
-    sharedSubstation?: string;
-    normalLoad?: string;
-    fluctuatingLoad?: string;
-    plannerGroup?: string;
-    workPosition?: string;
-    lockerSequence?: string;
+    transformerProperty?: string;
+    meterId?: string;
+    meterType?: string;
     observations?: string;
-    technicianId?: number;
 }
 
 export interface OrderImportPreviewItem {
@@ -83,4 +100,5 @@ export interface OrdersImportPreviewResponse {
 
 export interface OrdersImportCommitResponse {
     createdCount: number;
+    skippedCount: number;
 }

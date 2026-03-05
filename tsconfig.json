@@ -29,6 +29,7 @@
             "@interfaces/*": ["src/interfaces/*"],
             "@layouts/*": ["src/layouts/*"],
             "@pages/*": ["src/pages/*"],
+            "@schemas/*": ["src/schemas/*"],
             "@/*": ["src/*"]
         }
     },

@@ -97,19 +97,12 @@ function TechnicalDetailsSection({ order }: { order: Order }) {
     const i18n = useTranslations();
 
     const fields: Array<{ label: string; value: string | number | undefined }> = [
-        { label: i18n('pages.orders.form.fields.panelTowerBlock'), value: order.panelTowerBlock },
-        { label: i18n('pages.orders.form.fields.coordinateX'), value: order.coordinateX },
-        { label: i18n('pages.orders.form.fields.coordinateY'), value: order.coordinateY },
-        { label: i18n('pages.orders.form.fields.appliedTariff'), value: order.appliedTariff },
-        { label: i18n('pages.orders.form.fields.transformerNumber'), value: order.transformerNumber },
-        { label: i18n('pages.orders.form.fields.distributionNetwork'), value: order.distributionNetwork },
-        { label: i18n('pages.orders.form.fields.transformerOwnership'), value: order.transformerOwnership },
-        { label: i18n('pages.orders.form.fields.sharedSubstation'), value: order.sharedSubstation },
-        { label: i18n('pages.orders.form.fields.normalLoad'), value: order.normalLoad },
-        { label: i18n('pages.orders.form.fields.fluctuatingLoad'), value: order.fluctuatingLoad },
-        { label: i18n('pages.orders.form.fields.plannerGroup'), value: order.plannerGroup },
-        { label: i18n('pages.orders.form.fields.workPosition'), value: order.workPosition },
-        { label: i18n('pages.orders.form.fields.lockerSequence'), value: order.lockerSequence },
+        { label: i18n('pages.orderDetail.coordinateX'), value: order.coordinateX },
+        { label: i18n('pages.orderDetail.coordinateY'), value: order.coordinateY },
+        { label: i18n('pages.orderDetail.appliedTariff'), value: order.appliedTariff },
+        { label: i18n('pages.orderDetail.verifiedTariff'), value: order.verifiedTariff },
+        { label: i18n('pages.orderDetail.transformerNumber'), value: order.transformerNumber },
+        { label: i18n('pages.orderDetail.transformerProperty'), value: order.transformerProperty },
     ];
 
     const available = fields.filter((f) => f.value !== undefined && f.value !== '');
@@ -235,7 +228,7 @@ export function OrderDetailPage() {
                             <h1 className="text-lg font-bold s768:text-xl">
                                 {i18n('pages.orderDetail.orderTitle', { id: order.id })}
                             </h1>
-                            <p className="text-xs text-neutral-900">{order.serviceType}</p>
+                            <p className="text-xs text-neutral-900">{order.type}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -259,27 +252,27 @@ export function OrderDetailPage() {
                     <div className="space-y-3">
                         <div className="flex items-center gap-3">
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-500/20 text-sm font-semibold text-primary-500">
-                                {getInitials(order.firstName, order.lastName)}
+                                {getInitials(order.clientName, order.clientLastName)}
                             </div>
                             <div>
                                 <p className="font-semibold">
-                                    {order.firstName} {order.lastName}
+                                    {order.clientName} {order.clientLastName}
                                 </p>
                                 <p className="text-xs text-neutral-900">{i18n('pages.orderDetail.customerInfo')}</p>
                             </div>
                         </div>
                         <div className="space-y-2.5 pt-1">
-                            <InfoRow icon={EnvelopeIcon} label={i18n('pages.orderDetail.email')} value={order.email} />
-                            <InfoRow icon={PhoneIcon} label={i18n('pages.orderDetail.phone')} value={order.phone} />
+                            <InfoRow icon={EnvelopeIcon} label={i18n('pages.orderDetail.email')} value={order.clientEmail} />
+                            <InfoRow icon={PhoneIcon} label={i18n('pages.orderDetail.phone')} value={order.clientPhone} />
                             <InfoRow
                                 icon={IdentificationCardIcon}
                                 label={i18n('pages.orderDetail.idNumber')}
-                                value={order.idNumber}
+                                value={order.clientId}
                             />
                             <InfoRow
                                 icon={HashIcon}
                                 label={i18n('pages.orderDetail.account')}
-                                value={order.accountNumber}
+                                value={order.clientAccount}
                             />
                         </div>
                     </div>
@@ -292,11 +285,30 @@ export function OrderDetailPage() {
                             <div className="mt-0.5 shrink-0 rounded-md bg-neutral-700/50 p-1.5">
                                 <MapPinIcon size={14} weight="duotone" className="text-neutral-900" />
                             </div>
-                            <p className="text-sm">{order.orderLocation || '—'}</p>
+                            <div className="space-y-0.5">
+                                <p className="text-sm font-medium">{order.address || '—'}</p>
+                                {order.addressReference && (
+                                    <p className="text-xs text-neutral-900">{order.addressReference}</p>
+                                )}
+                                {[order.neighborhood, order.building, order.urbanization]
+                                    .filter(Boolean)
+                                    .map((v) => (
+                                        <p key={v} className="text-xs text-neutral-900">{v}</p>
+                                    ))}
+                                {[order.zone, order.sector, order.parish, order.canton, order.province]
+                                    .filter(Boolean)
+                                    .join(' · ') && (
+                                    <p className="text-xs text-neutral-900">
+                                        {[order.zone, order.sector, order.parish, order.canton, order.province]
+                                            .filter(Boolean)
+                                            .join(' · ')}
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                        {order.latitude && order.longitude && (
+                        {order.coordinateX && order.coordinateY && (
                             <a
-                                href={`https://maps.google.com/?q=${order.latitude},${order.longitude}`}
+                                href={`https://maps.google.com/?q=${order.coordinateY},${order.coordinateX}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 rounded-lg border border-neutral-800 px-3 py-1.5 text-xs font-medium text-primary-500 transition hover:border-primary-500 hover:bg-primary-500/10"
@@ -314,13 +326,20 @@ export function OrderDetailPage() {
                         <InfoRow
                             icon={WrenchIcon}
                             label={i18n('pages.orderDetail.serviceType')}
-                            value={order.serviceType}
+                            value={order.type}
                         />
-                        <InfoRow icon={PlugIcon} label={i18n('pages.orderDetail.meterNumber')} value={order.meterNumber} />
+                        <InfoRow icon={PlugIcon} label={i18n('pages.orderDetail.meterNumber')} value={order.meterId} />
+                        {order.meterType && (
+                            <InfoRow
+                                icon={PlugIcon}
+                                label={i18n('pages.orderDetail.meterType')}
+                                value={order.meterType}
+                            />
+                        )}
                         <InfoRow
                             icon={CalendarIcon}
                             label={i18n('pages.orderDetail.issueDate')}
-                            value={`${formattedDate}${order.issueTime ? ` · ${order.issueTime}` : ''}`}
+                            value={formattedDate}
                         />
                         {order.observations && (
                             <div className="rounded-lg bg-neutral-700/30 px-3 py-2.5 text-sm italic text-neutral-900">
@@ -341,7 +360,6 @@ export function OrderDetailPage() {
                                 <p className="font-medium">
                                     {order.technician.name} {order.technician.lastName}
                                 </p>
-                                <p className="text-xs text-neutral-900">{order.technician.email}</p>
                             </div>
                         </div>
                     ) : (
@@ -377,64 +395,55 @@ export function OrderDetailPage() {
             {/* Technical Details (collapsible) */}
             <TechnicalDetailsSection order={order} />
 
-            {/* Jobs timeline */}
-            {order.jobs && order.jobs.length > 0 && (
+            {/* Job */}
+            {order.job && (
                 <div className="overflow-hidden rounded-lg border border-neutral-800">
                     <div className="border-b border-neutral-800 bg-neutral-600 px-5 py-3">
                         <h2 className="text-base font-semibold">{i18n('pages.orderDetail.jobs')}</h2>
                     </div>
                     <div className="bg-neutral-600/30 px-5 py-4">
-                        <div className="relative space-y-0">
-                            {/* Vertical timeline line */}
-                            <div className="absolute left-[5px] top-3 bottom-3 w-0.5 bg-neutral-800" />
-
-                            {order.jobs.map((job) => (
-                                <Link
-                                    key={job.id}
-                                    to={`/jobs/${job.id}`}
-                                    className="group relative flex items-center justify-between gap-4 py-3 pl-7 pr-2 transition hover:pl-8"
+                        <Link
+                            to={`/jobs/${order.job.id}`}
+                            className="group flex items-center justify-between gap-4 rounded-lg px-3 py-2.5 transition hover:bg-neutral-700/30"
+                        >
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className={classnames(
+                                        'h-3 w-3 shrink-0 rounded-full',
+                                        getJobDotColor(order.job.jobStatus)
+                                    )}
+                                />
+                                <div className="min-w-0">
+                                    <p className="font-medium">
+                                        {i18n('pages.orderDetail.jobItem', { id: order.job.id })}
+                                    </p>
+                                    <p className="text-xs text-neutral-900">
+                                        {i18n('pages.orderDetail.started')}:{' '}
+                                        {new Date(order.job.startDateTime).toLocaleString()}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="flex shrink-0 items-center gap-2">
+                                {order.job.jobStatus === 'completed' && (
+                                    <CheckCircleIcon size={14} weight="fill" className="text-success-500" />
+                                )}
+                                <span
+                                    className={classnames(
+                                        'rounded-full px-2 py-0.5 text-xs font-medium',
+                                        order.job.jobStatus === 'completed'
+                                            ? 'bg-success-500/20 text-success-500'
+                                            : 'bg-primary-500/20 text-primary-500'
+                                    )}
                                 >
-                                    {/* Timeline dot */}
-                                    <div
-                                        className={classnames(
-                                            'absolute left-0 h-3 w-3 rounded-full border-2 border-neutral-600 transition-transform group-hover:scale-125',
-                                            getJobDotColor(job.jobStatus)
-                                        )}
-                                    />
-
-                                    <div className="min-w-0">
-                                        <p className="font-medium">
-                                            {i18n('pages.orderDetail.jobItem', { id: job.id })}
-                                        </p>
-                                        <p className="text-xs text-neutral-900">
-                                            {i18n('pages.orderDetail.started')}:{' '}
-                                            {new Date(job.startDateTime).toLocaleString()}
-                                        </p>
-                                    </div>
-
-                                    <div className="flex shrink-0 items-center gap-2">
-                                        {job.jobStatus === 'completed' && (
-                                            <CheckCircleIcon size={14} weight="fill" className="text-success-500" />
-                                        )}
-                                        <span
-                                            className={classnames(
-                                                'rounded-full px-2 py-0.5 text-xs font-medium',
-                                                job.jobStatus === 'completed'
-                                                    ? 'bg-success-500/20 text-success-500'
-                                                    : 'bg-primary-500/20 text-primary-500'
-                                            )}
-                                        >
-                                            {job.jobStatus ?? 'in_progress'}
-                                        </span>
-                                        <ArrowRightIcon
-                                            size={14}
-                                            weight="bold"
-                                            className="text-neutral-900 transition group-hover:text-primary-500"
-                                        />
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
+                                    {order.job.jobStatus ?? 'in_progress'}
+                                </span>
+                                <ArrowRightIcon
+                                    size={14}
+                                    weight="bold"
+                                    className="text-neutral-900 transition group-hover:text-primary-500"
+                                />
+                            </div>
+                        </Link>
                     </div>
                 </div>
             )}

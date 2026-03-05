@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
+import { utmToLatLng } from '@utils/coordinates.ts';
 import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
@@ -7,7 +8,7 @@ import { useTranslations } from 'use-intl';
 
 import { SealWarningIcon, PolygonIcon } from '@phosphor-icons/react';
 import type { User } from '@interfaces/user.interface.ts';
-import type { Order } from '@interfaces/order.interface.ts';
+import type { OrderMapPoint } from '@interfaces/order.interface.ts';
 import type { MapArea, AreaCoordinate } from '@interfaces/area.interface.ts';
 
 import Modal from '@components/Modal/Modal';
@@ -70,6 +71,9 @@ const LEAFLET_DARK_CSS = `
     padding: 4px 10px !important;
 }
 .ow-area-tip::before { display: none !important; }
+.leaflet-interactive:focus { outline: none !important; }
+.leaflet-container.ow-drawing,
+.leaflet-container.ow-drawing * { cursor: crosshair !important; }
 .ow-area-popup { min-width: 180px; font-family: inherit; }
 .ow-area-popup-header {
     padding: 10px 14px 8px;
@@ -101,38 +105,30 @@ const LEAFLET_DARK_CSS = `
 .ow-area-btn.danger:hover { background: var(--secondary-500); color: white; }
 `;
 
-function buildOrderPopupHtml(order: Order): string {
+function buildOrderPopupHtml(order: OrderMapPoint): string {
     const techName = order.technician
         ? `${order.technician.name} ${order.technician.lastName}`
         : null;
     const rows: Array<[string, string]> = [
         ['Técnico', techName ?? 'Sin asignar'],
-        ['Cédula', order.idNumber ?? ''],
-        ['Tipo', order.serviceType ?? ''],
-        ['Dirección', order.orderLocation ?? ''],
-        ['Cuenta', order.accountNumber ?? ''],
-        ['Medidor', order.meterNumber ?? ''],
+        ['Cédula', order.clientId ?? ''],
+        ['Tipo', order.type ?? ''],
+        ['Dirección', order.address ?? ''],
+        ['Cuenta', order.clientAccount ?? ''],
+        ['Medidor', order.meterId ?? ''],
         ...(order.coordinateX != null ? [['Coord X', String(order.coordinateX)] as [string, string]] : []),
         ...(order.coordinateY != null ? [['Coord Y', String(order.coordinateY)] as [string, string]] : []),
-        ...(order.latitude != null
-            ? [
-                  [
-                      'Lat / Lng',
-                      `${Number(order.latitude).toFixed(6)}, ${Number(order.longitude ?? 0).toFixed(6)}`,
-                  ] as [string, string],
-              ]
-            : []),
         ['Orden', order.id ?? ''],
     ];
     const rowsHtml = rows
         .filter(([, v]) => v)
         .map(([l, v]) => `<tr><td class="ow-lbl">${l}</td><td class="ow-val">${v}</td></tr>`)
         .join('');
-    return `<div class="ow-order-popup"><div class="ow-popup-header"><span class="ow-popup-name">${order.firstName ?? ''} ${order.lastName ?? ''}</span></div><table class="ow-popup-table">${rowsHtml}</table></div>`;
+    return `<div class="ow-order-popup"><div class="ow-popup-header"><span class="ow-popup-name">${order.clientName ?? ''} ${order.clientLastName ?? ''}</span></div><table class="ow-popup-table">${rowsHtml}</table></div>`;
 }
 
 interface OrdersMapProps {
-    orders: Array<Order>;
+    orders: Array<OrderMapPoint>;
     technicians: Array<User>;
     areas?: Array<MapArea>;
     onDrawComplete?: (coords: Array<AreaCoordinate>) => void;
@@ -162,6 +158,7 @@ export function OrdersMap({
     // ─── Area layers and shape-editing state ──────────────────────────────────
     const areasLayerRef = useRef<Map<number, L.Polygon>>(new Map());
     const [drawMode, setDrawMode] = useState(false);
+    const [liveDrawCount, setLiveDrawCount] = useState<number | null>(null);
     const [isEditingShape, setIsEditingShape] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
     const editingShapeAreaIdRef = useRef<number | null>(null);
@@ -197,6 +194,7 @@ export function OrdersMap({
     // ─── Drawing working refs ─────────────────────────────────────────────────
     const drawingVerticesRef = useRef<Array<L.LatLng>>([]);
     const drawingPolylineRef = useRef<L.Polyline | null>(null);
+    const drawingPreviewPolygonRef = useRef<L.Polygon | null>(null);
     const drawingVertexMarkersRef = useRef<Array<L.CircleMarker>>([]);
     const mouseDownPointRef = useRef<L.Point | null>(null);
     const freehandActiveRef = useRef(false);
@@ -204,39 +202,63 @@ export function OrdersMap({
 
     // ─── Memos ────────────────────────────────────────────────────────────────
     const markersData = useMemo(() => {
-        // Build order → area color map using point-in-polygon
+        // Build order → area color map using point-in-polygon (coordinates must be WGS84)
         const orderAreaColor = new Map<string, string>();
         areas.forEach((area) => {
             orders.forEach((order) => {
-                if (
-                    order.latitude !== null &&
-                    order.latitude !== undefined &&
-                    order.longitude !== null &&
-                    order.longitude !== undefined &&
-                    isOrderInArea(order.latitude, order.longitude, area.coordinates)
-                ) {
+                if (order.coordinateX == null || order.coordinateY == null) return;
+                const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
+                if (wgs && isOrderInArea(wgs[0], wgs[1], area.coordinates)) {
                     orderAreaColor.set(order.id, area.color);
                 }
             });
         });
 
         return orders
-            .filter((order) => order.latitude && order.longitude)
-            .map((order) => ({
-                id: order.id,
-                position: [order.latitude, order.longitude] as [number, number],
-                color: orderAreaColor.get(order.id),
-                order,
-            }));
+            .map((order) => {
+                if (order.coordinateX == null || order.coordinateY == null) return null;
+                const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
+                if (!wgs) return null;
+                return {
+                    id: order.id,
+                    position: wgs,
+                    color: orderAreaColor.get(order.id),
+                    order,
+                };
+            })
+            .filter((m): m is NonNullable<typeof m> => m !== null);
+    }, [orders, areas]);
+
+    const markersDataRef = useRef<typeof markersData>([]);
+    useEffect(() => { markersDataRef.current = markersData; }, [markersData]);
+
+    // Count orders per area (and unassigned)
+    const areaStats = useMemo(() => {
+        const counts = new Map<number, number>();
+        let unassigned = 0;
+        orders.forEach((order) => {
+            if (order.coordinateX == null || order.coordinateY == null) { unassigned++; return; }
+            const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
+            if (!wgs) { unassigned++; return; }
+            let matched = false;
+            areas.forEach((area) => {
+                if (isOrderInArea(wgs[0], wgs[1], area.coordinates)) {
+                    counts.set(area.id, (counts.get(area.id) ?? 0) + 1);
+                    matched = true;
+                }
+            });
+            if (!matched) unassigned++;
+        });
+        return { counts, unassigned };
     }, [orders, areas]);
 
     const createIcon = useCallback((color: string) => {
         return L.divIcon({
             className: '',
-            html: `<div style="background-color:${color};width:24px;height:24px;border-radius:50%;border:3px solid rgba(255,255,255,0.9);box-shadow:0 2px 6px rgba(0,0,0,0.45)"></div>`,
-            iconSize: [24, 24],
-            iconAnchor: [12, 12],
-            popupAnchor: [0, -14],
+            html: `<div style="width:16px;height:16px;border-radius:50%;background-color:${color};border:2.5px solid rgba(255,255,255,0.9);box-sizing:border-box;"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8],
+            popupAnchor: [0, -10],
         });
     }, []);
 
@@ -272,6 +294,10 @@ export function OrdersMap({
                 map.removeLayer(drawingPolylineRef.current);
                 drawingPolylineRef.current = null;
             }
+            if (drawingPreviewPolygonRef.current) {
+                map.removeLayer(drawingPreviewPolygonRef.current);
+                drawingPreviewPolygonRef.current = null;
+            }
             drawingVertexMarkersRef.current.forEach((m) => map.removeLayer(m));
             drawingVertexMarkersRef.current = [];
         };
@@ -289,22 +315,48 @@ export function OrdersMap({
 
         const updatePreviewPolyline = (cursorLatLng?: L.LatLng) => {
             const verts = drawingVerticesRef.current;
-            if (verts.length === 0) {
-                return;
-            }
+            if (verts.length === 0) return;
             const pts = cursorLatLng ? [...verts, cursorLatLng] : verts;
+
+            // Dashed edge line
             if (drawingPolylineRef.current) {
                 drawingPolylineRef.current.setLatLngs(pts);
             } else {
-                drawingPolylineRef.current = L.polyline(pts, { color: '#6366f1', weight: 2, dashArray: '6 3' }).addTo(
-                    map
-                );
+                drawingPolylineRef.current = L.polyline(pts, { color: '#6366f1', weight: 2, dashArray: '6 3' }).addTo(map);
+            }
+
+            // Live shaded polygon — shown once ≥3 points are on screen
+            if (pts.length >= 3) {
+                if (drawingPreviewPolygonRef.current) {
+                    drawingPreviewPolygonRef.current.setLatLngs(pts);
+                } else {
+                    drawingPreviewPolygonRef.current = L.polygon(pts, {
+                        color: '#6366f1',
+                        fillColor: '#6366f1',
+                        fillOpacity: 0.18,
+                        weight: 0,
+                        interactive: false,
+                    }).addTo(map);
+                }
+
+                // Update live count with the cursor-extended polygon
+                const poly = pts.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
+                let count = 0;
+                markersDataRef.current.forEach((md) => {
+                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                });
+                setLiveDrawCount(count);
+            } else if (drawingPreviewPolygonRef.current) {
+                map.removeLayer(drawingPreviewPolygonRef.current);
+                drawingPreviewPolygonRef.current = null;
+                setLiveDrawCount(null);
             }
         };
 
         finishDrawingRef.current = (coords: Array<L.LatLng>) => {
             clearDrawingPreview();
             setDrawMode(false);
+            setLiveDrawCount(null);
             if (onDrawCompleteRef.current && coords.length >= 3) {
                 onDrawCompleteRef.current(coords.map((ll) => ({ lat: ll.lat, lng: ll.lng })));
             }
@@ -374,14 +426,48 @@ export function OrdersMap({
             }
         });
 
-        // Click → add polygon vertex
+        // Click → add vertex, or snap-to-close if near first vertex
         map.on('click', (e: L.LeafletMouseEvent) => {
             if (isEditingShapeRef.current || !drawModeRef.current || freehandActiveRef.current) {
                 return;
             }
-            drawingVerticesRef.current.push(e.latlng);
+            const verts = drawingVerticesRef.current;
+
+            // Snap-to-close: click within 20px of first vertex with ≥3 verts placed
+            if (verts.length >= 3) {
+                const firstPx = map.latLngToContainerPoint(verts[0]);
+                const dx = e.containerPoint.x - firstPx.x;
+                const dy = e.containerPoint.y - firstPx.y;
+                if (Math.sqrt(dx * dx + dy * dy) < 20) {
+                    const final = [...verts];
+                    drawingVerticesRef.current = [];
+                    clearDrawingPreview();
+                    map.dragging.enable();
+                    finishDrawingRef.current(final);
+                    return;
+                }
+            }
+
+            verts.push(e.latlng);
             addVertexMarker(e.latlng);
+
+            // Highlight first vertex green once polygon can be closed
+            if (verts.length === 3 && drawingVertexMarkersRef.current[0]) {
+                drawingVertexMarkersRef.current[0].setStyle({ color: '#22c55e', fillColor: '#22c55e', radius: 7 });
+            }
+
             updatePreviewPolyline();
+
+            // Live count is now updated inside updatePreviewPolyline via cursor extension;
+            // for click-only path (no cursor arg), force-update count from placed verts.
+            if (verts.length >= 3) {
+                const poly = verts.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
+                let count = 0;
+                markersDataRef.current.forEach((md) => {
+                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                });
+                setLiveDrawCount(count);
+            }
         });
 
         // Double-click → close polygon (strip 2 spurious pre-dblclick vertices)
@@ -487,7 +573,7 @@ export function OrdersMap({
                     weight: 2,
                 }).addTo(map);
 
-                // Tooltip: shows technician name
+                // Permanent tooltip: technician name + order count
                 const techTooltip = area.technician
                     ? `${area.technician.name} ${area.technician.lastName}`
                     : 'Sin asignar';
@@ -525,6 +611,29 @@ export function OrdersMap({
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             (polygon as any).pm.enable({ snappable: false });
                             setIsEditingShape(true);
+
+                            // Live count while dragging vertices
+                            polygon.on('pm:change', () => {
+                                const lls = (polygon.getLatLngs() as Array<Array<L.LatLng>>)[0];
+                                if (!lls || lls.length < 3) return;
+                                const poly = lls.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
+                                let count = 0;
+                                markersDataRef.current.forEach((md) => {
+                                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                                });
+                                setLiveDrawCount(count);
+                            });
+
+                            // Show initial count
+                            const initLls = (polygon.getLatLngs() as Array<Array<L.LatLng>>)[0];
+                            if (initLls && initLls.length >= 3) {
+                                const poly = initLls.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
+                                let count = 0;
+                                markersDataRef.current.forEach((md) => {
+                                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                                });
+                                setLiveDrawCount(count);
+                            }
                         });
                         document.getElementById(`area-delete-${area.id}`)?.addEventListener('click', () => {
                             polygon.closePopup();
@@ -538,19 +647,15 @@ export function OrdersMap({
         });
     }, [areas]);
 
+
     // ─── Cursor for draw mode ─────────────────────────────────────────────────
     useEffect(() => {
         const container = mapRef.current;
-        if (!container) {
-            return;
-        }
-        container.style.cursor = drawMode ? 'crosshair' : '';
-        const map = leafletMapRef.current;
-        if (!map) {
-            return;
-        }
+        if (!container) return;
+        container.classList.toggle('ow-drawing', drawMode);
         if (!drawMode) {
-            map.dragging.enable();
+            setLiveDrawCount(null);
+            leafletMapRef.current?.dragging.enable();
         }
     }, [drawMode]);
 
@@ -566,9 +671,11 @@ export function OrdersMap({
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (polygon as any).pm.disable();
+        polygon.off('pm:change');
         const rawLatLngs = polygon.getLatLngs() as Array<Array<L.LatLng>>;
         const coords = rawLatLngs[0].map((ll) => ({ lat: ll.lat, lng: ll.lng }));
         setIsEditingShape(false);
+        setLiveDrawCount(null);
         editingShapeAreaIdRef.current = null;
         editingAreaOriginalCoordsRef.current = null;
         onAreaShapeUpdateRef.current?.(id, coords);
@@ -585,10 +692,12 @@ export function OrdersMap({
         }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (polygon as any).pm.disable();
+        polygon.off('pm:change');
         if (editingAreaOriginalCoordsRef.current) {
             polygon.setLatLngs(editingAreaOriginalCoordsRef.current);
         }
         setIsEditingShape(false);
+        setLiveDrawCount(null);
         editingShapeAreaIdRef.current = null;
         editingAreaOriginalCoordsRef.current = null;
     }, []);
@@ -631,35 +740,66 @@ export function OrdersMap({
                             {drawMode ? i18n('pages.orders.map.cancelDraw') : i18n('pages.orders.map.drawArea')}
                         </button>
                         {drawMode && (
-                            <span className="text-xs text-neutral-400">{i18n('pages.orders.map.drawHint')}</span>
+                            <span className="text-xs text-neutral-900">{i18n('pages.orders.map.drawHint')}</span>
+                        )}
+                        {drawMode && liveDrawCount !== null && (
+                            <span className="ml-1 rounded-full bg-primary-500/20 px-2 py-0.5 text-xs font-semibold text-primary-500">
+                                {liveDrawCount} {liveDrawCount === 1 ? 'orden' : 'órdenes'}
+                            </span>
                         )}
                     </>
                 )}
             </div>
 
-            {/* Map */}
-            <div ref={mapRef} className="flex-1 min-h-0" />
+            {/* Map + Sidebar */}
+            <div className="flex-1 min-h-0 flex">
+                <div ref={mapRef} className="flex-1 min-h-0" />
 
-            {/* Legend */}
-            <div className="shrink-0 px-3 py-2 border-t border-neutral-800 bg-neutral-600/40">
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <div className="flex items-center gap-1.5">
-                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 border border-white shadow-sm" />
-                        <span className="text-xs text-neutral-400">{i18n('pages.orders.map.unassigned')}</span>
+                {/* Stats sidebar */}
+                <div className="w-44 shrink-0 flex flex-col border-l border-neutral-800 bg-neutral-600/40 overflow-hidden">
+                    <div className="px-3 py-2 border-b border-neutral-800">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-900">{i18n('pages.orders.map.areas')}</p>
                     </div>
-                    {areas
-                        .filter((a) => a.technician)
-                        .map((area) => (
-                            <div key={`area-${area.id}`} className="flex items-center gap-1.5">
-                                <span
-                                    className="inline-block w-2.5 h-2.5 rounded border border-white/30 shadow-sm"
-                                    style={{ backgroundColor: area.color }}
-                                />
-                                <span className="text-xs text-neutral-400 truncate max-w-24">
-                                    {area.technician!.name} {area.technician!.lastName}
-                                </span>
-                            </div>
-                        ))}
+                    <div className="flex-1 overflow-y-auto">
+                        {/* Unassigned row */}
+                        <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60">
+                            <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-amber-500 border border-white/40" />
+                            <span className="flex-1 text-xs text-neutral-900 truncate">{i18n('pages.orders.map.unassigned')}</span>
+                            <span className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-neutral-700 text-neutral-900">
+                                {areaStats.unassigned}
+                            </span>
+                        </div>
+                        {/* One row per area */}
+                        {areas.map((area) => {
+                            const count = areaStats.counts.get(area.id) ?? 0;
+                            const tech = area.technician
+                                ? `${area.technician.name} ${area.technician.lastName}`
+                                : 'Sin asignar';
+                            return (
+                                <div key={area.id} className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60 last:border-b-0">
+                                    <span
+                                        className="shrink-0 w-2.5 h-2.5 rounded border border-white/30"
+                                        style={{ backgroundColor: area.color }}
+                                    />
+                                    <span className="flex-1 text-xs truncate" title={tech}>{tech}</span>
+                                    <span
+                                        className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                                        style={{ backgroundColor: area.color }}
+                                    >
+                                        {count}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                        {areas.length === 0 && (
+                            <p className="text-xs text-neutral-900 px-3 py-3">{i18n('pages.orders.map.noAreas')}</p>
+                        )}
+                    </div>
+                    {/* Total */}
+                    <div className="px-3 py-2 border-t border-neutral-800 flex items-center justify-between">
+                        <span className="text-xs text-neutral-900">Total</span>
+                        <span className="text-xs font-semibold">{orders.length}</span>
+                    </div>
                 </div>
             </div>
 

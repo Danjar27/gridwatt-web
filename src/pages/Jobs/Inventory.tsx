@@ -123,15 +123,15 @@ const Inventory = () => {
                                                 <span className="text-neutral-900">
                                                     {i18n('pages.jobs.card.customer')}:
                                                 </span>{' '}
-                                                {job.order.firstName} {job.order.lastName}
+                                                {job.order.clientName} {job.order.clientLastName}
                                             </p>
                                             <p>
                                                 <span className="text-neutral-900">
                                                     {i18n('pages.jobs.card.meter')}:
                                                 </span>{' '}
-                                                {job.order.meterNumber}
+                                                {job.order.meterId}
                                             </p>
-                                            {job.order.latitude && job.order.longitude && (
+                                            {job.order.coordinateX && job.order.coordinateY && (
                                                 <p className="flex items-center gap-1">
                                                     <MapPinIcon
                                                         weight="duotone"

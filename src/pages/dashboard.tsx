@@ -68,15 +68,14 @@ const DashboardPage = () => {
 
     const orderFields = [
         'id',
-        'firstName',
-        'lastName',
-        'email',
-        'serviceType',
-        'orderStatus',
+        'clientName',
+        'clientLastName',
+        'clientEmail',
+        'type',
+        'status',
         'issueDate',
-        'issueTime',
-        'meterNumber',
-        'accountNumber',
+        'meterId',
+        'clientAccount',
     ];
 
     const jobFields = [
@@ -236,7 +235,7 @@ const DashboardPage = () => {
                                                 <div>
                                                     <p className="text-sm font-medium">Job #{job.id}</p>
                                                     <p className="text-xs text-neutral-900">
-                                                        {job.order?.serviceType} - {job.order?.meterNumber}
+                                                        {job.order?.type} - {job.order?.meterId}
                                                     </p>
                                                 </div>
                                                 <span className="rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
@@ -264,10 +263,10 @@ const DashboardPage = () => {
                                             >
                                                 <div>
                                                     <p className="text-sm font-medium">
-                                                        {order.firstName} {order.lastName}
+                                                        {order.clientName} {order.clientLastName}
                                                     </p>
                                                     <p className="text-xs text-neutral-900">
-                                                        {order.serviceType} - {order.meterNumber}
+                                                        {order.type} - {order.meterId}
                                                     </p>
                                                 </div>
                                                 <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">

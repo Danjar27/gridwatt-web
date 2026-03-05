@@ -1,4 +1,4 @@
-import type { Order, OrderImportData, OrdersImportCommitResponse, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
+import type { Order, OrderMapPoint, OrderImportData, OrdersImportCommitResponse, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
 import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
 
 import { buildQueryParameters } from '@utils/common/parameters.ts';
@@ -6,6 +6,9 @@ import { request, mutationRequest, uploadFile } from '../http-client';
 
 export const getOrders = async (params?: PaginatedQuery & { technicianId?: number }) =>
     request<PaginatedResponse<Order>>(`/orders${buildQueryParameters(params)}`);
+
+export const getOrderMapPoints = async () =>
+    request<Array<OrderMapPoint>>('/orders/map-points');
 
 export const getMyOrders = async () =>
     request<Array<Order>>('/orders/my');

@@ -13,6 +13,8 @@ export interface User {
         id: number;
         name: Role;
     };
-    tenantId: number;
+    roleId: number;
+    password?: string;
+    tenantId?: number;
     tenant: Tenant;
 }

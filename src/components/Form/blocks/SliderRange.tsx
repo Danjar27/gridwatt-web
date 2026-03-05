@@ -154,7 +154,7 @@ const SliderRange: FC<SliderRangeProps> = ({
                 <div className="rounded border border-neutral-600 bg-neutral-700 px-3 py-1 font-mono text-neutral-200">
                     {fromValue}
                 </div>
-                <span className="text-neutral-500">—</span>
+                <span className="text-neutral-800">—</span>
                 <div className="rounded border border-neutral-600 bg-neutral-700 px-3 py-1 font-mono text-neutral-200">
                     {toValue}
                 </div>

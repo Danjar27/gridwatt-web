@@ -297,7 +297,9 @@
                 "editShapeHint": "Arrastra los vértices para editar la forma",
                 "saveShape": "Guardar forma",
                 "cancelEdit": "Cancelar",
-                "unassigned": "Sin asignar"
+                "unassigned": "Sin asignar",
+                "areas": "Áreas",
+                "noAreas": "Sin áreas definidas"
             },
             "areas": {
                 "title": "Configurar área",
@@ -498,7 +500,14 @@
             "selectTechnician": "Seleccionar técnico...",
             "assign": "Asignar",
             "jobs": "Trabajos",
-            "started": "Inicio"
+            "started": "Inicio",
+            "meterType": "Tipo de medidor",
+            "coordinateX": "Coordenada X",
+            "coordinateY": "Coordenada Y",
+            "appliedTariff": "Tarifa aplicada",
+            "verifiedTariff": "Tarifa verificada",
+            "transformerNumber": "Número de transformador",
+            "transformerProperty": "Propiedad del transformador"
         },
         "ordersImport": {
             "title": "Importar órdenes",
@@ -514,9 +523,17 @@
             "filesSelected": "{count} archivos seleccionados",
             "parseFiles": "Procesar archivos",
             "parsing": "Procesando...",
+            "willBatch": "{count} archivos se procesarán en {batches} lotes.",
+            "batchingTitle": "Procesando {total} lotes",
+            "batchingProgress": "{done} de {total} completados",
+            "batchN": "Lote {n}",
+            "batchFiles": "{count} archivos",
+            "batchOrders": "{count} órdenes",
             "importValid": "Importar órdenes válidas",
             "importing": "Importando...",
+            "commitBatching": "Importando lote {done} de {total}...",
             "importedSuccess": "{count} órdenes importadas exitosamente.",
+            "importedSkipped": "{count} órdenes omitidas por estar duplicadas.",
             "validReadyToImport": "{count} órdenes válidas listas para importar",
             "doneSubtitle": "Las órdenes han sido guardadas y están listas para ser asignadas.",
             "importMoreFiles": "Importar más archivos",
@@ -532,40 +549,66 @@
                 "review": "Revisar",
                 "done": "Listo"
             },
-            "table": {
-                "source": "Fuente",
-                "customer": "Cliente",
-                "accountMeter": "Cuenta / Medidor",
-                "service": "Servicio",
-                "issueDate": "Fecha de emisión",
-                "issues": "Problemas"
-            },
-            "placeholders": {
-                "firstName": "Nombre",
-                "lastName": "Apellido",
-                "email": "Correo",
-                "phone": "Teléfono",
-                "accountNumber": "Número de cuenta",
-                "meterNumber": "Número de medidor",
-                "serviceType": "Tipo de servicio",
-                "orderStatus": "Estado de la orden",
-                "issueDate": "Fecha de emisión",
-                "issueTime": "Hora de emisión"
-            },
             "selected": "{count} órdenes seleccionadas",
             "importSelected": "Importar seleccionadas ({count})",
             "removeFromBatch": "Eliminar del lote",
             "filterErrors": "Con errores",
             "showAll": "Mostrar todos",
             "cancel": "Cancelar",
-            "editRow": "Editar fila",
-            "saveRow": "Guardar cambios",
-            "cancelEdit": "Cancelar edición",
             "errors": {
                 "noFiles": "Selecciona al menos un archivo para procesar.",
                 "parseFiles": "Error al procesar los archivos.",
                 "noValidOrders": "No hay órdenes válidas para importar.",
                 "importFailed": "Error al importar las órdenes."
+            },
+            "editOrderTitle": "Editar orden",
+            "saveOrder": "Guardar orden",
+            "table": {
+                "source": "Fuente",
+                "order": "Orden",
+                "client": "Cliente",
+                "issues": "Problemas"
+            },
+            "filter": {
+                "ok": "Sin problemas",
+                "error": "Con errores",
+                "warning": "Con advertencias"
+            },
+            "tabs": {
+                "customer": "Cliente",
+                "service": "Servicio",
+                "location": "Ubicación",
+                "optional": "Opcional"
+            },
+            "form": {
+                "clientName": "Nombre",
+                "clientLastName": "Apellido",
+                "clientId": "Número de identificación",
+                "clientEmail": "Correo electrónico",
+                "clientPhone": "Teléfono",
+                "clientAccount": "Número de cuenta",
+                "type": "Tipo de orden",
+                "orderStatus": "Estado de la orden",
+                "meterId": "Número de medidor",
+                "meterType": "Tipo de medidor",
+                "issueDate": "Fecha de emisión",
+                "address": "Dirección",
+                "addressReference": "Referencia",
+                "zone": "Zona",
+                "sector": "Sector",
+                "parish": "Parroquia",
+                "neighborhood": "Barrio",
+                "building": "Edificio",
+                "urbanization": "Urbanización",
+                "canton": "Cantón",
+                "province": "Provincia",
+                "coordinateX": "Coordenada X",
+                "coordinateY": "Coordenada Y",
+                "appliedTariff": "Tarifa aplicada",
+                "verifiedTariff": "Tarifa verificada",
+                "transformerNumber": "Número de transformador",
+                "transformerProperty": "Propiedad del transformador",
+                "observations": "Observaciones"
             }
         }
     },

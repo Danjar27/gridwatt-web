@@ -1,4 +1,5 @@
 import type { MutationForm } from '@interfaces/form.interface';
+import type { User } from '@interfaces/user.interface';
 import type { FC } from 'react';
 
 import TextInput from '@components/Form/blocks/TextInput';
@@ -31,7 +32,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const { user: currentUser } = useAuthContext();
     const [error, setError] = useState<string | null>(null);
 
-    const isAdmin = currentUser?.role?.name === 'admin';
+    const isCurrentUserAdmin = currentUser?.role?.name === 'admin';
 
     const { data: roles = [] } = useQuery({
         queryKey: ['roles'],
@@ -41,12 +42,12 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const { data: tenantsData } = useQuery({
         queryKey: ['tenants'],
         queryFn: () => getTenants({ limit: 100, offset: 0 }),
-        enabled: isAdmin,
+        enabled: isCurrentUserAdmin,
     });
 
     const roleOptions = useMemo(
-        () => roles.filter((r) => isAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: r.id })),
-        [roles, isAdmin]
+        () => roles.filter((r) => isCurrentUserAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: r.id })),
+        [roles, isCurrentUserAdmin]
     );
 
     const tenantOptions = useMemo(
@@ -55,7 +56,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     );
 
     const createMutation = useMutation({
-        mutationFn: (data: any) => createUser(data),
+        mutationFn: (data: User) => createUser(data),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['users'] });
             await queryClient.invalidateQueries({ queryKey: ['tenants'] });
@@ -65,12 +66,8 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
-    const handleSubmit = (data: any) => {
-        const payload: any = { ...data, roleId: Number(data.roleId) };
-        if (isAdmin && data.tenantId) {
-            payload.tenantId = Number(data.tenantId);
-        }
-        createMutation.mutate(payload);
+    const handleSubmit = (data: User) => {
+        createMutation.mutate(data);
     };
 
     const handleCancel = () => {
@@ -82,44 +79,61 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         <Modal id="new-user" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
             <Window title={i18n('pages.users.form.create')} className="w-full max-w-150 px-4" icon={UsersIcon}>
                 <FormError message={error} />
-                <Form key="new" onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-2 gap-4">
-                        <Field name="name" label={i18n('pages.users.form.name')} required>
-                            <TextInput name="name" rules={{ required: i18n('errors.required') }} />
-                        </Field>
-                        <Field name="lastName" label={i18n('pages.users.form.lastName')} required>
-                            <TextInput name="lastName" rules={{ required: i18n('errors.required') }} />
-                        </Field>
-                    </div>
-                    <Field name="email" label={i18n('pages.users.form.email')} required>
-                        <EmailInput name="email" rules={{ required: i18n('errors.required') }} />
-                    </Field>
-                    <Field name="password" label={i18n('pages.users.form.password')} required>
-                        <PasswordInput
-                            name="password"
-                            rules={{ required: i18n('errors.required'), minLength: { value: 6, message: i18n('errors.minLength', { min: 6 }) } }}
-                        />
-                    </Field>
-                    <Field name="phone" label={i18n('pages.users.form.phone')}>
-                        <PhoneInput name="phone" />
-                    </Field>
-                    <Field name="roleId" label={i18n('pages.users.form.role')} required>
-                        <Select
-                            name="roleId"
-                            rules={{ required: i18n('errors.required') }}
-                            options={[{ label: i18n('pages.users.form.selectRole'), value: '' }, ...roleOptions]}
-                        />
-                    </Field>
-                    {isAdmin && (
-                        <Field name="tenantId" label={i18n('pages.users.form.tenant')} required>
-                            <Select
-                                name="tenantId"
-                                rules={{ required: i18n('errors.required') }}
-                                options={[{ label: i18n('pages.users.form.selectTenant'), value: '' }, ...tenantOptions]}
-                            />
-                        </Field>
-                    )}
-                    <Actions submitLabel={i18n('literal.create')} onCancel={handleCancel} isLoading={createMutation.isPending} />
+                <Form key="new" onSubmit={handleSubmit} defaultValues={{ roleId: 2, tenantId: !isCurrentUserAdmin ? currentUser?.tenantId : undefined }}>
+                    {({ watch }) => {
+                        const roleId = watch('roleId');
+                        const selectedRole = roles.find((r) => String(r.id) === String(roleId));
+                        const isNewUserAdmin = selectedRole?.name === 'admin';
+
+                        return (
+                            <>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Field name="name" label={i18n('pages.users.form.name')} required>
+                                        <TextInput name="name" rules={{ required: i18n('errors.required') }} />
+                                    </Field>
+                                    <Field name="lastName" label={i18n('pages.users.form.lastName')} required>
+                                        <TextInput name="lastName" rules={{ required: i18n('errors.required') }} />
+                                    </Field>
+                                </div>
+                                <Field name="email" label={i18n('pages.users.form.email')} required>
+                                    <EmailInput name="email" rules={{ required: i18n('errors.required') }} />
+                                </Field>
+                                <Field name="password" label={i18n('pages.users.form.password')} required>
+                                    <PasswordInput
+                                        name="password"
+                                        rules={{
+                                            required: i18n('errors.required'),
+                                            minLength: { value: 6, message: i18n('errors.minLength', { min: 6 }) },
+                                        }}
+                                    />
+                                </Field>
+                                <Field name="phone" label={i18n('pages.users.form.phone')}>
+                                    <PhoneInput name="phone" />
+                                </Field>
+                                <Field name="roleId" label={i18n('pages.users.form.role')} required>
+                                    <Select
+                                        name="roleId"
+                                        rules={{ required: i18n('errors.required') }}
+                                        options={roleOptions}
+                                    />
+                                </Field>
+                                {!isNewUserAdmin && isCurrentUserAdmin && (
+                                    <Field name="tenantId" label={i18n('pages.users.form.tenant')} required>
+                                        <Select
+                                            name="tenantId"
+                                            rules={{ required: i18n('errors.required') }}
+                                            options={tenantOptions}
+                                        />
+                                    </Field>
+                                )}
+                                <Actions
+                                    submitLabel={i18n('literal.create')}
+                                    onCancel={handleCancel}
+                                    isLoading={createMutation.isPending}
+                                />
+                            </>
+                        );
+                    }}
                 </Form>
             </Window>
         </Modal>

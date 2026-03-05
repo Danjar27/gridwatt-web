@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     UploadSimpleIcon,
     CheckCircleIcon,
@@ -12,11 +12,14 @@ import {
     ArrowRightIcon,
     ListBulletsIcon,
     CheckSquareIcon,
-    FunnelIcon,
     PencilSimpleIcon,
+    ArrowsClockwiseIcon,
+    ClockIcon,
+    XCircleIcon,
 } from '@phosphor-icons/react';
+import OrderEditModal from './OrdersImport/OrderEditModal';
 import { useQueryClient } from '@tanstack/react-query';
-import { useReactTable, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table';
+import { useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import type { ColumnDef, RowSelectionState, PaginationState } from '@tanstack/react-table';
 import { commitOrdersImport, previewOrdersImport } from '@lib/api/orders.ts';
 import { classnames } from '@utils/classnames.ts';
@@ -28,11 +31,8 @@ import Table from '@components/Table/Table';
 import Checkbox from '@components/atoms/Checkbox';
 import Stepper from '@components/Stepper/Stepper.tsx';
 import { useStepper } from '@hooks/useStepper.ts';
-import type {
-    OrderImportData,
-    OrderImportPreviewItem,
-    OrdersImportPreviewResponse,
-} from '@interfaces/order.interface.ts';
+import type { FilterConfig } from '@components/Table/Table.interface.ts';
+import type { OrderImportPreviewItem, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -40,8 +40,22 @@ type WizardStep = 'upload' | 'review' | 'done';
 
 const WIZARD_STEP_IDS = ['upload', 'review', 'done'] as const satisfies ReadonlyArray<WizardStep>;
 
-const CELL_INPUT =
-    'w-full rounded-lg border border-neutral-800 bg-neutral-500/60 px-2 py-1.5 text-sm outline-none transition focus:border-primary-500';
+/** Files per request sent to /orders/import/preview. Must be ≤ server FilesInterceptor limit (100). */
+const BATCH_SIZE = 20;
+/** Orders per request sent to /orders/import/commit. Keeps JSON body well under NestJS's 1 MB limit. */
+const COMMIT_BATCH_SIZE = 200;
+
+type BatchStatus = 'pending' | 'processing' | 'done' | 'error';
+
+interface BatchState {
+    id: string;
+    index: number;
+    fileCount: number;
+    status: BatchStatus;
+    parsedCount?: number;
+    fileErrorCount?: number;
+    error?: string;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -77,6 +91,7 @@ export function OrdersImportPage() {
 
     const { current: step, currentIndex, goTo, reset: resetStep } = useStepper(WIZARD_STEP_IDS);
     const [files, setFiles] = useState<Array<File>>([]);
+    const [batches, setBatches] = useState<Array<BatchState>>([]);
     const [isDragging, setIsDragging] = useState(false);
     const [preview, setPreview] = useState<OrdersImportPreviewResponse | null>(null);
     const [localOrders, setLocalOrders] = useState<Array<OrderImportPreviewItem>>([]);
@@ -85,13 +100,20 @@ export function OrdersImportPage() {
     const [error, setError] = useState<string | null>(null);
     const [isParsing, setIsParsing] = useState(false);
     const [isCommitting, setIsCommitting] = useState(false);
-    const [commitResult, setCommitResult] = useState<number | null>(null);
-    const [filterErrors, setFilterErrors] = useState(false);
-    const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+    const [commitProgress, setCommitProgress] = useState<{ done: number; total: number } | null>(null);
+    const [commitResult, setCommitResult] = useState<{ created: number; skipped: number } | null>(null);
+    const [editingOrder, setEditingOrder] = useState<OrderImportPreviewItem | null>(null);
 
     useEffect(() => {
         if (preview) {
-            setLocalOrders(preview.orders);
+            setLocalOrders(
+                preview.orders.map((order) => ({
+                    ...order,
+                    data: { ...order.data, id: order.data.id || crypto.randomUUID() },
+                    errors: order.errors ?? [],
+                    warnings: order.warnings ?? [],
+                }))
+            );
             setRowSelection({});
             setPagination((p) => ({ ...p, pageIndex: 0 }));
         }
@@ -130,34 +152,96 @@ export function OrdersImportPage() {
         setError(null);
         setIsParsing(true);
         setCommitResult(null);
-        try {
-            const result = await previewOrdersImport(files);
-            setPreview(result);
-            goTo('review');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : i18n('pages.ordersImport.errors.parseFiles'));
-        } finally {
-            setIsParsing(false);
+
+        // ── Single batch (≤ BATCH_SIZE files) ─────────────────────────────────
+        if (files.length <= BATCH_SIZE) {
+            try {
+                const result = await previewOrdersImport(files);
+                setPreview(result);
+                goTo('review');
+            } catch (err) {
+                setError(err instanceof Error ? err.message : i18n('pages.ordersImport.errors.parseFiles'));
+            } finally {
+                setIsParsing(false);
+            }
+
+            return;
         }
+
+        // ── Multi-batch mode ───────────────────────────────────────────────────
+        const groups: Array<Array<File>> = [];
+        for (let i = 0; i < files.length; i += BATCH_SIZE) {
+            groups.push(files.slice(i, i + BATCH_SIZE));
+        }
+
+        const initialBatches: Array<BatchState> = groups.map((group, i) => ({
+            id: crypto.randomUUID(),
+            index: i + 1,
+            fileCount: group.length,
+            status: 'pending',
+        }));
+        setBatches(initialBatches);
+
+        const allOrders: Array<OrderImportPreviewItem> = [];
+        const allFileErrors: Array<{ fileName: string; message: string }> = [];
+
+        for (let i = 0; i < groups.length; i++) {
+            const batchId = initialBatches[i]!.id;
+
+            setBatches((prev) => prev.map((b) => (b.id === batchId ? { ...b, status: 'processing' } : b)));
+
+            try {
+                const result = await previewOrdersImport(groups[i]!);
+                allOrders.push(...result.orders);
+                allFileErrors.push(...result.fileErrors);
+                setBatches((prev) =>
+                    prev.map((b) =>
+                        b.id === batchId
+                            ? {
+                                  ...b,
+                                  status: 'done',
+                                  parsedCount: result.orders.length,
+                                  fileErrorCount: result.fileErrors.length,
+                              }
+                            : b
+                    )
+                );
+            } catch (err) {
+                setBatches((prev) =>
+                    prev.map((b) =>
+                        b.id === batchId
+                            ? {
+                                  ...b,
+                                  status: 'error',
+                                  error:
+                                      err instanceof Error ? err.message : i18n('pages.ordersImport.errors.parseFiles'),
+                              }
+                            : b
+                    )
+                );
+            }
+        }
+
+        setIsParsing(false);
+        setPreview({ orders: allOrders, fileErrors: allFileErrors });
+        goTo('review');
     };
 
     const resetWizard = () => {
         resetStep();
         setFiles([]);
+        setBatches([]);
         setPreview(null);
         setLocalOrders([]);
         setRowSelection({});
         setCommitResult(null);
         setError(null);
+        setEditingOrder(null);
     };
 
-    const handleEdit = useCallback((rowIndex: number, field: keyof OrderImportData, value: string) => {
-        setLocalOrders((prev) =>
-            prev.map((order, i) => (i === rowIndex ? { ...order, data: { ...order.data, [field]: value } } : order))
-        );
-    }, []);
-
-    // ── Order editing ──────────────────────────────────────────────────────────
+    const handleSaveOrder = (updated: OrderImportPreviewItem) => {
+        setLocalOrders((prev) => prev.map((o) => (o.data.id === updated.data.id ? updated : o)));
+    };
 
     const commitOrders = async (selectedOnly = false) => {
         if (localOrders.length === 0) {
@@ -183,11 +267,27 @@ export function OrdersImportPage() {
             return;
         }
 
+        // Split into batches to stay under the server's body-size limit
+        const allOrderData = validOrders.map((o) => o.data);
+        const commitBatches: Array<typeof allOrderData> = [];
+        for (let i = 0; i < allOrderData.length; i += COMMIT_BATCH_SIZE) {
+            commitBatches.push(allOrderData.slice(i, i + COMMIT_BATCH_SIZE));
+        }
+
         setError(null);
         setIsCommitting(true);
+        setCommitProgress({ done: 0, total: commitBatches.length });
         try {
-            const response = await commitOrdersImport(validOrders.map((o) => o.data));
-            setCommitResult(response.createdCount);
+            let totalCreated = 0;
+            let totalSkipped = 0;
+            for (let i = 0; i < commitBatches.length; i++) {
+                const response = await commitOrdersImport(commitBatches[i]!);
+                totalCreated += response.createdCount;
+                totalSkipped += response.skippedCount;
+                setCommitProgress({ done: i + 1, total: commitBatches.length });
+            }
+
+            setCommitResult({ created: totalCreated, skipped: totalSkipped });
             queryClient.invalidateQueries({ queryKey: ['orders'] });
 
             if (selectedOnly && selectedIndices) {
@@ -208,6 +308,7 @@ export function OrdersImportPage() {
             setError(err instanceof Error ? err.message : i18n('pages.ordersImport.errors.importFailed'));
         } finally {
             setIsCommitting(false);
+            setCommitProgress(null);
         }
     };
 
@@ -234,9 +335,17 @@ export function OrdersImportPage() {
         return { total: localOrders.length, valid: localOrders.length - invalid, invalid };
     }, [localOrders]);
 
-    const tableData = useMemo(
-        () => (filterErrors ? localOrders.filter((o) => o.errors && o.errors.length > 0) : localOrders),
-        [localOrders, filterErrors]
+    const filterConfig = useMemo<FilterConfig>(
+        () => ({
+            issues: {
+                options: [
+                    { label: i18n('pages.ordersImport.filter.ok'), value: 'ok' },
+                    { label: i18n('pages.ordersImport.filter.error'), value: 'error' },
+                    { label: i18n('pages.ordersImport.filter.warning'), value: 'warning' },
+                ],
+            },
+        }),
+        [i18n]
     );
 
     const columns = useMemo<Array<ColumnDef<OrderImportPreviewItem>>>(
@@ -255,16 +364,23 @@ export function OrdersImportPage() {
                 cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onChange={row.getToggleSelectedHandler()} />,
             },
             {
+                id: 'counter',
+                size: 52,
+                meta: { fixed: true },
+                header: () => <span className="text-neutral-900">#</span>,
+                cell: ({ row }) => <span className="text-xs tabular-nums text-neutral-900">{row.index + 1}</span>,
+            },
+            {
                 id: 'source',
-                size: 170,
+                size: 200,
                 header: i18n('pages.ordersImport.table.source'),
                 cell: ({ row }) => {
                     const hasErrors = !!row.original.errors?.length;
                     const hasWarnings = !!row.original.warnings?.length;
 
                     return (
-                        <div className="flex w-full min-w-0 items-start gap-2">
-                            <div className="mt-0.5 shrink-0">
+                        <div className="flex w-full min-w-0 items-center gap-2">
+                            <div className="shrink-0">
                                 {hasErrors ? (
                                     <WarningCircleIcon size={15} weight="fill" className="text-error-500" />
                                 ) : hasWarnings ? (
@@ -273,166 +389,47 @@ export function OrdersImportPage() {
                                     <CheckCircleIcon size={15} weight="fill" className="text-success-500" />
                                 )}
                             </div>
-                            <div className="min-w-0 overflow-hidden">
-                                <div className="flex items-center gap-1 overflow-hidden">
-                                    <FileTypeIcon filename={row.original.fileName} />
-                                    <span className="truncate text-xs font-medium" title={row.original.fileName}>
-                                        {row.original.fileName}
-                                    </span>
-                                </div>
-                                <div className="text-xs text-neutral-900">
-                                    {i18n('pages.ordersImport.row')} {row.original.rowNumber ?? '—'}
-                                </div>
+                            <div className="flex min-w-0 items-center gap-1.5 overflow-hidden">
+                                <FileTypeIcon filename={row.original.fileName} />
+                                <span className="truncate text-xs font-medium" title={row.original.fileName}>
+                                    {row.original.fileName}
+                                </span>
                             </div>
                         </div>
                     );
                 },
             },
             {
-                id: 'customer',
-                header: i18n('pages.ordersImport.table.customer'),
+                id: 'order',
+                header: i18n('pages.ordersImport.table.order'),
                 cell: ({ row }) => {
-                    const idx = row.index;
-                    const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">
-                                    {[d.firstName, d.lastName].filter(Boolean).join(' ') || '—'}
+                    const data = row.original.data;
+
+                    return (
+                        <div className="w-full space-y-0.5">
+                            <p className="font-mono text-xs font-semibold text-neutral-800">{data.id || '—'}</p>
+                            <p className="text-xs text-neutral-900">{data.type || '—'}</p>
+                        </div>
+                    );
+                },
+            },
+            {
+                id: 'client',
+                header: i18n('pages.ordersImport.table.client'),
+                cell: ({ row }) => {
+                    const data = row.original.data;
+                    const fullName = [data.clientName, data.clientLastName].filter(Boolean).join(' ') || '—';
+
+                    return (
+                        <div className="w-full space-y-0.5">
+                            <p className="text-xs font-semibold text-neutral-800">{fullName}</p>
+                            <p className="font-mono text-xs text-neutral-900">{data.clientAccount || '—'}</p>
+                            {data.meterId && <p className="font-mono text-xs text-neutral-900">{data.meterId}</p>}
+                            {data.address && (
+                                <p className="truncate text-xs text-neutral-900" title={data.address}>
+                                    {data.address}
                                 </p>
-                                <p className="text-xs text-neutral-900">{d.email || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.phone || '—'}</p>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <div className="space-y-1.5">
-                            <div className="flex gap-1.5">
-                                <input
-                                    className={CELL_INPUT}
-                                    value={d.firstName ?? ''}
-                                    onChange={(e) => handleEdit(idx, 'firstName', e.target.value)}
-                                    placeholder={i18n('pages.ordersImport.placeholders.firstName')}
-                                />
-                                <input
-                                    className={CELL_INPUT}
-                                    value={d.lastName ?? ''}
-                                    onChange={(e) => handleEdit(idx, 'lastName', e.target.value)}
-                                    placeholder={i18n('pages.ordersImport.placeholders.lastName')}
-                                />
-                            </div>
-                            <input
-                                className={CELL_INPUT}
-                                value={d.email ?? ''}
-                                onChange={(e) => handleEdit(idx, 'email', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.email')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.phone ?? ''}
-                                onChange={(e) => handleEdit(idx, 'phone', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.phone')}
-                            />
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'accountMeter',
-                header: i18n('pages.ordersImport.table.accountMeter'),
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">{d.accountNumber || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.meterNumber || '—'}</p>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <div className="space-y-1.5">
-                            <input
-                                className={CELL_INPUT}
-                                value={d.accountNumber ?? ''}
-                                onChange={(e) => handleEdit(idx, 'accountNumber', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.accountNumber')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.meterNumber ?? ''}
-                                onChange={(e) => handleEdit(idx, 'meterNumber', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.meterNumber')}
-                            />
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'service',
-                header: i18n('pages.ordersImport.table.service'),
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">{d.serviceType || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.orderStatus || '—'}</p>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <div className="space-y-1.5">
-                            <input
-                                className={CELL_INPUT}
-                                value={d.serviceType ?? ''}
-                                onChange={(e) => handleEdit(idx, 'serviceType', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.serviceType')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.orderStatus ?? ''}
-                                onChange={(e) => handleEdit(idx, 'orderStatus', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.orderStatus')}
-                            />
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'issueDate',
-                header: i18n('pages.ordersImport.table.issueDate'),
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">{d.issueDate || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.issueTime || '—'}</p>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <div className="space-y-1.5">
-                            <input
-                                className={CELL_INPUT}
-                                value={d.issueDate ?? ''}
-                                onChange={(e) => handleEdit(idx, 'issueDate', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.issueDate')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.issueTime ?? ''}
-                                onChange={(e) => handleEdit(idx, 'issueTime', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.issueTime')}
-                            />
+                            )}
                         </div>
                     );
                 },
@@ -440,13 +437,22 @@ export function OrdersImportPage() {
             {
                 id: 'issues',
                 header: i18n('pages.ordersImport.table.issues'),
+                filterFn: (row, _columnId, filterValue: string | undefined) => {
+                    if (!filterValue) return true;
+                    const hasErrors = !!row.original.errors?.length;
+                    const hasWarnings = !!row.original.warnings?.length;
+                    if (filterValue === 'error') return hasErrors;
+                    if (filterValue === 'warning') return !hasErrors && hasWarnings;
+                    if (filterValue === 'ok') return !hasErrors && !hasWarnings;
+                    return true;
+                },
                 cell: ({ row }) => {
                     const errors = row.original.errors;
                     const warnings = row.original.warnings;
 
                     if (errors && errors.length > 0) {
                         return (
-                            <div className="space-y-1">
+                            <div className="w-full space-y-1">
                                 {errors.map((msg, i) => (
                                     <span
                                         key={i}
@@ -460,7 +466,7 @@ export function OrdersImportPage() {
                     }
                     if (warnings && warnings.length > 0) {
                         return (
-                            <div className="space-y-1">
+                            <div className="w-full space-y-1">
                                 {warnings.map((msg, i) => (
                                     <span
                                         key={i}
@@ -486,57 +492,32 @@ export function OrdersImportPage() {
                 size: 64,
                 meta: { fixed: true },
                 header: () => null,
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    if (editingRowIndex === idx) {
-                        return (
-                            <div className="flex items-center gap-1">
-                                <button
-                                    type="button"
-                                    onClick={() => setEditingRowIndex(null)}
-                                    className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-success-500 transition hover:bg-success-500/10"
-                                    aria-label={i18n('pages.ordersImport.saveRow')}
-                                >
-                                    <CheckCircleIcon size={16} weight="fill" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setEditingRowIndex(null)}
-                                    className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-error-500"
-                                    aria-label={i18n('pages.ordersImport.cancelEdit')}
-                                >
-                                    <XIcon size={16} />
-                                </button>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <button
-                            type="button"
-                            onClick={() => setEditingRowIndex(idx)}
-                            className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-primary-500"
-                            aria-label={i18n('pages.ordersImport.editRow')}
-                        >
-                            <PencilSimpleIcon size={16} weight="duotone" />
-                        </button>
-                    );
-                },
+                cell: ({ row }) => (
+                    <button
+                        type="button"
+                        onClick={() => setEditingOrder(row.original)}
+                        className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-primary-500"
+                        aria-label={i18n('pages.ordersImport.editOrderTitle')}
+                    >
+                        <PencilSimpleIcon size={16} weight="duotone" />
+                    </button>
+                ),
             },
         ],
-        [i18n, handleEdit, editingRowIndex, setEditingRowIndex]
+        [i18n, setEditingOrder]
     );
 
     // ── Table setup ──────────────────────────────────────────────────────────
 
     const table = useReactTable({
-        data: tableData,
+        data: localOrders,
         columns,
         state: { rowSelection, pagination },
         enableRowSelection: true,
         onRowSelectionChange: setRowSelection,
         onPaginationChange: setPagination,
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
     });
 
@@ -566,36 +547,109 @@ export function OrdersImportPage() {
             {/* ── Step 1: Upload ─────────────────────────────────────────────────────── */}
             {step === 'upload' && (
                 <div className="space-y-3">
-                    {/* Toolbar */}
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="flex-1">
-                            {error && (
-                                <p className="text-xs text-error-500">{error}</p>
-                            )}
+                    {/* Batch progress panel */}
+                    {batches.length > 0 ? (
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm font-semibold">
+                                    {i18n('pages.ordersImport.batchingTitle', { total: batches.length })}
+                                </p>
+                                <span className="text-xs text-neutral-900">
+                                    {i18n('pages.ordersImport.batchingProgress', {
+                                        done: batches.filter((b) => b.status === 'done' || b.status === 'error').length,
+                                        total: batches.length,
+                                    })}
+                                </span>
+                            </div>
+                            <div className="overflow-hidden rounded-lg border border-neutral-800 divide-y divide-neutral-800">
+                                {batches.map((batch) => (
+                                    <div key={batch.id} className="flex items-center gap-3 px-4 py-2.5">
+                                        {/* Status icon */}
+                                        <div className="shrink-0 w-4">
+                                            {batch.status === 'pending' && (
+                                                <ClockIcon size={15} className="text-neutral-900" />
+                                            )}
+                                            {batch.status === 'processing' && (
+                                                <ArrowsClockwiseIcon
+                                                    size={15}
+                                                    className="animate-spin text-primary-500"
+                                                />
+                                            )}
+                                            {batch.status === 'done' && (
+                                                <CheckCircleIcon size={15} weight="fill" className="text-success-500" />
+                                            )}
+                                            {batch.status === 'error' && (
+                                                <XCircleIcon size={15} weight="fill" className="text-error-500" />
+                                            )}
+                                        </div>
+                                        {/* Label */}
+                                        <span className="flex-1 text-sm font-medium">
+                                            {i18n('pages.ordersImport.batchN', { n: batch.index })}
+                                        </span>
+                                        {/* File count */}
+                                        <span className="text-xs text-neutral-900">
+                                            {i18n('pages.ordersImport.batchFiles', { count: batch.fileCount })}
+                                        </span>
+                                        {/* Result */}
+                                        {batch.status === 'done' && (
+                                            <span className="text-xs text-success-500">
+                                                {i18n('pages.ordersImport.batchOrders', {
+                                                    count: batch.parsedCount ?? 0,
+                                                })}
+                                            </span>
+                                        )}
+                                        {batch.status === 'error' && (
+                                            <span className="truncate text-xs text-error-500" title={batch.error}>
+                                                {batch.error}
+                                            </span>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                            {error && <p className="text-xs text-error-500">{error}</p>}
                         </div>
-                        <button
-                            type="button"
-                            onClick={parseFiles}
-                            disabled={isParsing || files.length === 0}
-                            className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary-500 bg-primary-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                            <UploadSimpleIcon size={11} weight="duotone" />
-                            {isParsing ? i18n('pages.ordersImport.parsing') : i18n('pages.ordersImport.parseFiles')}
-                        </button>
-                    </div>
+                    ) : (
+                        <>
+                            {/* Toolbar */}
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="flex-1 space-y-1">
+                                    {error && <p className="text-xs text-error-500">{error}</p>}
+                                    {files.length > BATCH_SIZE && (
+                                        <p className="text-xs text-neutral-900">
+                                            {i18n('pages.ordersImport.willBatch', {
+                                                count: files.length,
+                                                batches: Math.ceil(files.length / BATCH_SIZE),
+                                            })}
+                                        </p>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={parseFiles}
+                                    disabled={isParsing || files.length === 0}
+                                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary-500 bg-primary-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    <UploadSimpleIcon size={11} weight="duotone" />
+                                    {isParsing
+                                        ? i18n('pages.ordersImport.parsing')
+                                        : i18n('pages.ordersImport.parseFiles')}
+                                </button>
+                            </div>
 
-                    <FileUploader
-                        files={files}
-                        isDragging={isDragging}
-                        onAdd={addFiles}
-                        onRemove={removeFile}
-                        onDragOver={(e) => {
-                            e.preventDefault();
-                            setIsDragging(true);
-                        }}
-                        onDragLeave={() => setIsDragging(false)}
-                        onDrop={onDrop}
-                    />
+                            <FileUploader
+                                files={files}
+                                isDragging={isDragging}
+                                onAdd={addFiles}
+                                onRemove={removeFile}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    setIsDragging(true);
+                                }}
+                                onDragLeave={() => setIsDragging(false)}
+                                onDrop={onDrop}
+                            />
+                        </>
+                    )}
                 </div>
             )}
 
@@ -661,23 +715,6 @@ export function OrdersImportPage() {
 
                             {/* Right: filter toggle + actions */}
                             <div className="flex flex-wrap items-center gap-1.5">
-                                <button
-                                    type="button"
-                                    onClick={() => setFilterErrors((v) => !v)}
-                                    className={classnames(
-                                        'flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-medium transition',
-                                        {
-                                            'border-secondary-500 bg-secondary-500/10 text-secondary-500': filterErrors,
-                                            'border-neutral-800 text-neutral-900 hover:border-neutral-700 hover:text-neutral-500':
-                                                !filterErrors,
-                                        }
-                                    )}
-                                >
-                                    <FunnelIcon size={11} weight={filterErrors ? 'fill' : 'duotone'} />
-                                    {filterErrors
-                                        ? i18n('pages.ordersImport.showAll')
-                                        : i18n('pages.ordersImport.filterErrors')}
-                                </button>
                                 {selectedCount > 0 && (
                                     <>
                                         <button
@@ -706,14 +743,19 @@ export function OrdersImportPage() {
                                     className="flex cursor-pointer items-center gap-1.5 rounded-md border border-primary-500 bg-primary-500 px-3 py-1 text-xs font-medium text-white transition hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     <UploadSimpleIcon size={11} weight="duotone" />
-                                    {isCommitting
-                                        ? i18n('pages.ordersImport.importing')
-                                        : i18n('pages.ordersImport.importValid')}
+                                    {isCommitting && commitProgress
+                                        ? i18n('pages.ordersImport.commitBatching', {
+                                              done: commitProgress.done,
+                                              total: commitProgress.total,
+                                          })
+                                        : isCommitting
+                                          ? i18n('pages.ordersImport.importing')
+                                          : i18n('pages.ordersImport.importValid')}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={resetWizard}
-                                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-800 px-3 py-1 text-xs font-medium text-neutral-900 transition hover:border-neutral-700 hover:text-neutral-500"
+                                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-800 px-3 py-1 text-xs font-medium text-neutral-900 transition hover:border-neutral-700 hover:text-neutral-800"
                                 >
                                     <XIcon size={11} />
                                     {i18n('pages.ordersImport.cancel')}
@@ -724,8 +766,15 @@ export function OrdersImportPage() {
 
                     {/* Preview table */}
                     <div className="overflow-hidden rounded-lg border border-neutral-800">
-                        <Table table={table} total={localOrders.length} />
+                        <Table table={table} total={localOrders.length} filterConfig={filterConfig} />
                     </div>
+
+                    <OrderEditModal
+                        order={editingOrder}
+                        isOpen={editingOrder !== null}
+                        onClose={() => setEditingOrder(null)}
+                        onSave={handleSaveOrder}
+                    />
 
                     {error && (
                         <div className="rounded-lg border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-500">
@@ -743,8 +792,13 @@ export function OrdersImportPage() {
                     </div>
                     <div className="text-center">
                         <h2 className="text-xl font-bold">
-                            {i18n('pages.ordersImport.importedSuccess', { count: commitResult ?? 0 })}
+                            {i18n('pages.ordersImport.importedSuccess', { count: commitResult?.created ?? 0 })}
                         </h2>
+                        {commitResult && commitResult.skipped > 0 && (
+                            <p className="mt-1 text-sm text-neutral-900">
+                                {i18n('pages.ordersImport.importedSkipped', { count: commitResult.skipped })}
+                            </p>
+                        )}
                         <p className="mt-1 text-sm text-neutral-900">{i18n('pages.ordersImport.doneSubtitle')}</p>
                     </div>
                     <div className="flex flex-wrap justify-center gap-3">
