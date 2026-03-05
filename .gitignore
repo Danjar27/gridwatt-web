@@ -23,6 +23,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.claude
+docs
 
 # Environment
 .env
