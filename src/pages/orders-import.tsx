@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
     UploadSimpleIcon,
     CheckCircleIcon,
@@ -15,6 +15,7 @@ import {
     FunnelIcon,
     PencilSimpleIcon,
 } from '@phosphor-icons/react';
+import OrderEditModal from './OrdersImport/OrderEditModal';
 import { useQueryClient } from '@tanstack/react-query';
 import { useReactTable, getCoreRowModel, getPaginationRowModel } from '@tanstack/react-table';
 import type { ColumnDef, RowSelectionState, PaginationState } from '@tanstack/react-table';
@@ -28,20 +29,13 @@ import Table from '@components/Table/Table';
 import Checkbox from '@components/atoms/Checkbox';
 import Stepper from '@components/Stepper/Stepper.tsx';
 import { useStepper } from '@hooks/useStepper.ts';
-import type {
-    OrderImportData,
-    OrderImportPreviewItem,
-    OrdersImportPreviewResponse,
-} from '@interfaces/order.interface.ts';
+import type { OrderImportPreviewItem, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type WizardStep = 'upload' | 'review' | 'done';
 
 const WIZARD_STEP_IDS = ['upload', 'review', 'done'] as const satisfies ReadonlyArray<WizardStep>;
-
-const CELL_INPUT =
-    'w-full rounded-lg border border-neutral-800 bg-neutral-500/60 px-2 py-1.5 text-sm outline-none transition focus:border-primary-500';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -87,11 +81,16 @@ export function OrdersImportPage() {
     const [isCommitting, setIsCommitting] = useState(false);
     const [commitResult, setCommitResult] = useState<number | null>(null);
     const [filterErrors, setFilterErrors] = useState(false);
-    const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+    const [editingOrder, setEditingOrder] = useState<OrderImportPreviewItem | null>(null);
 
     useEffect(() => {
         if (preview) {
-            setLocalOrders(preview.orders);
+            setLocalOrders(
+                preview.orders.map((order) => ({
+                    ...order,
+                    data: { ...order.data, id: order.data.id || crypto.randomUUID() },
+                }))
+            );
             setRowSelection({});
             setPagination((p) => ({ ...p, pageIndex: 0 }));
         }
@@ -149,15 +148,12 @@ export function OrdersImportPage() {
         setRowSelection({});
         setCommitResult(null);
         setError(null);
+        setEditingOrder(null);
     };
 
-    const handleEdit = useCallback((rowIndex: number, field: keyof OrderImportData, value: string) => {
-        setLocalOrders((prev) =>
-            prev.map((order, i) => (i === rowIndex ? { ...order, data: { ...order.data, [field]: value } } : order))
-        );
-    }, []);
-
-    // ── Order editing ──────────────────────────────────────────────────────────
+    const handleSaveOrder = (updated: OrderImportPreviewItem) => {
+        setLocalOrders((prev) => prev.map((o) => (o.data.id === updated.data.id ? updated : o)));
+    };
 
     const commitOrders = async (selectedOnly = false) => {
         if (localOrders.length === 0) {
@@ -289,150 +285,15 @@ export function OrdersImportPage() {
                 },
             },
             {
-                id: 'customer',
-                header: i18n('pages.ordersImport.table.customer'),
+                id: 'order',
+                header: i18n('pages.ordersImport.table.order'),
                 cell: ({ row }) => {
-                    const idx = row.index;
                     const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">
-                                    {[d.firstName, d.lastName].filter(Boolean).join(' ') || '—'}
-                                </p>
-                                <p className="text-xs text-neutral-900">{d.email || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.phone || '—'}</p>
-                            </div>
-                        );
-                    }
+                    const shortId = d.id ? d.id.slice(0, 8).toUpperCase() : '—';
 
                     return (
-                        <div className="space-y-1.5">
-                            <div className="flex gap-1.5">
-                                <input
-                                    className={CELL_INPUT}
-                                    value={d.firstName ?? ''}
-                                    onChange={(e) => handleEdit(idx, 'firstName', e.target.value)}
-                                    placeholder={i18n('pages.ordersImport.placeholders.firstName')}
-                                />
-                                <input
-                                    className={CELL_INPUT}
-                                    value={d.lastName ?? ''}
-                                    onChange={(e) => handleEdit(idx, 'lastName', e.target.value)}
-                                    placeholder={i18n('pages.ordersImport.placeholders.lastName')}
-                                />
-                            </div>
-                            <input
-                                className={CELL_INPUT}
-                                value={d.email ?? ''}
-                                onChange={(e) => handleEdit(idx, 'email', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.email')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.phone ?? ''}
-                                onChange={(e) => handleEdit(idx, 'phone', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.phone')}
-                            />
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'accountMeter',
-                header: i18n('pages.ordersImport.table.accountMeter'),
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">{d.accountNumber || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.meterNumber || '—'}</p>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <div className="space-y-1.5">
-                            <input
-                                className={CELL_INPUT}
-                                value={d.accountNumber ?? ''}
-                                onChange={(e) => handleEdit(idx, 'accountNumber', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.accountNumber')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.meterNumber ?? ''}
-                                onChange={(e) => handleEdit(idx, 'meterNumber', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.meterNumber')}
-                            />
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'service',
-                header: i18n('pages.ordersImport.table.service'),
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">{d.serviceType || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.orderStatus || '—'}</p>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <div className="space-y-1.5">
-                            <input
-                                className={CELL_INPUT}
-                                value={d.serviceType ?? ''}
-                                onChange={(e) => handleEdit(idx, 'serviceType', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.serviceType')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.orderStatus ?? ''}
-                                onChange={(e) => handleEdit(idx, 'orderStatus', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.orderStatus')}
-                            />
-                        </div>
-                    );
-                },
-            },
-            {
-                id: 'issueDate',
-                header: i18n('pages.ordersImport.table.issueDate'),
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    const d = row.original.data;
-                    if (editingRowIndex !== idx) {
-                        return (
-                            <div className="space-y-0.5">
-                                <p className="text-sm font-medium">{d.issueDate || '—'}</p>
-                                <p className="text-xs text-neutral-900">{d.issueTime || '—'}</p>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <div className="space-y-1.5">
-                            <input
-                                className={CELL_INPUT}
-                                value={d.issueDate ?? ''}
-                                onChange={(e) => handleEdit(idx, 'issueDate', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.issueDate')}
-                            />
-                            <input
-                                className={CELL_INPUT}
-                                value={d.issueTime ?? ''}
-                                onChange={(e) => handleEdit(idx, 'issueTime', e.target.value)}
-                                placeholder={i18n('pages.ordersImport.placeholders.issueTime')}
-                            />
+                        <div className="space-y-0.5">
+                            <p className="font-mono text-xs font-semibold text-neutral-900">{shortId}</p>
                         </div>
                     );
                 },
@@ -486,45 +347,19 @@ export function OrdersImportPage() {
                 size: 64,
                 meta: { fixed: true },
                 header: () => null,
-                cell: ({ row }) => {
-                    const idx = row.index;
-                    if (editingRowIndex === idx) {
-                        return (
-                            <div className="flex items-center gap-1">
-                                <button
-                                    type="button"
-                                    onClick={() => setEditingRowIndex(null)}
-                                    className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-success-500 transition hover:bg-success-500/10"
-                                    aria-label={i18n('pages.ordersImport.saveRow')}
-                                >
-                                    <CheckCircleIcon size={16} weight="fill" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setEditingRowIndex(null)}
-                                    className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-error-500"
-                                    aria-label={i18n('pages.ordersImport.cancelEdit')}
-                                >
-                                    <XIcon size={16} />
-                                </button>
-                            </div>
-                        );
-                    }
-
-                    return (
-                        <button
-                            type="button"
-                            onClick={() => setEditingRowIndex(idx)}
-                            className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-primary-500"
-                            aria-label={i18n('pages.ordersImport.editRow')}
-                        >
-                            <PencilSimpleIcon size={16} weight="duotone" />
-                        </button>
-                    );
-                },
+                cell: ({ row }) => (
+                    <button
+                        type="button"
+                        onClick={() => setEditingOrder(row.original)}
+                        className="flex cursor-pointer items-center justify-center rounded-lg p-1.5 text-neutral-900 transition hover:bg-neutral-700/60 hover:text-primary-500"
+                        aria-label={i18n('pages.ordersImport.editOrderTitle')}
+                    >
+                        <PencilSimpleIcon size={16} weight="duotone" />
+                    </button>
+                ),
             },
         ],
-        [i18n, handleEdit, editingRowIndex, setEditingRowIndex]
+        [i18n, setEditingOrder]
     );
 
     // ── Table setup ──────────────────────────────────────────────────────────
@@ -568,11 +403,7 @@ export function OrdersImportPage() {
                 <div className="space-y-3">
                     {/* Toolbar */}
                     <div className="flex items-center justify-between gap-3">
-                        <div className="flex-1">
-                            {error && (
-                                <p className="text-xs text-error-500">{error}</p>
-                            )}
-                        </div>
+                        <div className="flex-1">{error && <p className="text-xs text-error-500">{error}</p>}</div>
                         <button
                             type="button"
                             onClick={parseFiles}
@@ -726,6 +557,13 @@ export function OrdersImportPage() {
                     <div className="overflow-hidden rounded-lg border border-neutral-800">
                         <Table table={table} total={localOrders.length} />
                     </div>
+
+                    <OrderEditModal
+                        order={editingOrder}
+                        isOpen={editingOrder !== null}
+                        onClose={() => setEditingOrder(null)}
+                        onSave={handleSaveOrder}
+                    />
 
                     {error && (
                         <div className="rounded-lg border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-500">

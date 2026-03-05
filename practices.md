@@ -1,0 +1,8 @@
+- don't type cast anything. Mandatory. Use right types and never any or unknown
+- components should be isolated into reusable blocks inside the components directory.
+- each component should have an interface file where types and definition are stored
+- Always use arrow functions and default export for components
+- Do now hallucinate styles, but check globals.css (tailwind v4) to actually get a list of collors and breakpoints available
+- Avoid large files and functions. Prefer modularity and encapsulation. Don't repeat yourself
+- Don't overuse colors. Try to keep everything within a small range of colors, up to a maximum of 4. To add depth, use different shades of the same color
+- Don't add unneded comments. Explain yourself through clean code, not annotations

@@ -37,6 +37,7 @@ export interface Order {
     jobs?: Array<Job>;
 }
 export interface OrderImportData {
+    id?: string;
     serviceType: string;
     meterNumber: string;
     orderStatus: string;
