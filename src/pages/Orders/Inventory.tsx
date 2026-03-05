@@ -5,7 +5,7 @@ import { useTranslations } from 'use-intl';
 import { useMemo, useState } from 'react';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getMyOrders, getOrders } from '@lib/api/orders.ts';
+import { getMyOrders, getOrderMapPoints } from '@lib/api/orders.ts';
 import { getTechnicians } from '@lib/api/users.ts';
 import { getAreas, deleteArea, updateArea } from '@lib/api/areas.ts';
 import { OrdersMap } from '@/components/orders/OrdersMap';
@@ -21,6 +21,7 @@ import Summary from '@components/Summary/Summary';
 import AreaForm from '@pages/Orders/forms/AreaForm.tsx';
 import type { User } from '@interfaces/user.interface.ts';
 import type { MapArea, AreaCoordinate } from '@interfaces/area.interface.ts';
+import type { OrderMapPoint } from '@interfaces/order.interface.ts';
 
 const Inventory = () => {
     const i18n = useTranslations();
@@ -49,17 +50,11 @@ const Inventory = () => {
         ? technicianResponse
         : ((technicianResponse as any)?.data ?? []);
 
-    const { data: allOrdersResponse } = useQuery({
-        queryKey: ['orders', 'all-map', filterTechnicianId],
-        queryFn: () =>
-            getOrders({
-                limit: 10000,
-                offset: 0,
-                ...(filterTechnicianId ? { technicianId: filterTechnicianId } : {}),
-            }),
-        enabled: !isTechnician,
+    const { data: allOrders = [] } = useQuery<Array<OrderMapPoint>>({
+        queryKey: ['orders', 'map-points', filterTechnicianId],
+        queryFn: () => getOrderMapPoints(),
+        enabled: !isTechnician && viewMode === 'map',
     });
-    const allOrders = allOrdersResponse?.data || [];
 
     const { data: areas = [] } = useQuery({
         queryKey: ['areas'],

@@ -36,7 +36,7 @@ const AdminView = () => {
                 cell: ({ row }) => (
                     <div>
                         <div className="font-medium">#{row.original.id}</div>
-                        <div className="text-sm text-neutral-900">{row.original.meterNumber}</div>
+                        <div className="text-sm text-neutral-900">{row.original.meterId}</div>
                     </div>
                 ),
             },
@@ -46,19 +46,19 @@ const AdminView = () => {
                 cell: ({ row }) => (
                     <div>
                         <div>
-                            {row.original.firstName} {row.original.lastName}
+                            {row.original.clientName} {row.original.clientLastName}
                         </div>
-                        <div className="text-sm text-neutral-900">{row.original.email}</div>
+                        <div className="text-sm text-neutral-900">{row.original.clientEmail}</div>
                     </div>
                 ),
             },
             {
-                accessorKey: 'serviceType',
+                accessorKey: 'type',
                 header: i18n('pages.orders.table.service'),
                 cell: ({ row }) => (
                     <div>
-                        <div>{row.original.serviceType}</div>
-                        {row.original.latitude && row.original.longitude && (
+                        <div>{row.original.type}</div>
+                        {row.original.coordinateX != null && row.original.coordinateY != null && (
                             <div className="flex items-center gap-1 text-sm text-neutral-900">
                                 <MapPinIcon weight="duotone" width={12} height={12} />
                                 {i18n('pages.orders.table.hasLocation')}

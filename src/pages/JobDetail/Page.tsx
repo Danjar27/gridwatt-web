@@ -171,23 +171,23 @@ export function JobDetailPage() {
                                 <div className="space-y-2 text-sm">
                                     <p>
                                         <span className="text-neutral-900">{i18n('pages.jobDetail.customer')}:</span>{' '}
-                                        {job.order.firstName} {job.order.lastName}
+                                        {job.order.clientName} {job.order.clientLastName}
                                     </p>
                                     <p>
                                         <span className="text-neutral-900">{i18n('pages.jobDetail.serviceType')}:</span>{' '}
-                                        {job.order.serviceType}
+                                        {job.order.type}
                                     </p>
                                     <p>
                                         <span className="text-neutral-900">{i18n('pages.jobDetail.meterNumber')}:</span>{' '}
-                                        {job.order.meterNumber}
+                                        {job.order.meterId}
                                     </p>
                                     <p>
                                         <span className="text-neutral-900">{i18n('pages.jobDetail.location')}:</span>{' '}
-                                        {job.order.orderLocation}
+                                        {job.order.address}
                                     </p>
-                                    {job.order.latitude && job.order.longitude && (
+                                    {job.order.coordinateX && job.order.coordinateY && (
                                         <a
-                                            href={`https://maps.google.com/?q=${job.order.latitude},${job.order.longitude}`}
+                                            href={`https://maps.google.com/?q=${job.order.coordinateY},${job.order.coordinateX}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center gap-1 text-primary-500 hover:underline"
@@ -233,15 +233,15 @@ export function JobDetailPage() {
                     <JobMaterialsSection jobId={job.id} workMaterials={job.workMaterials ?? []} />
 
                     {/* Location map */}
-                    {job.order?.latitude && job.order?.longitude && (
+                    {job.order?.coordinateX && job.order?.coordinateY && (
                         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
                             <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.location')}</h2>
-                            <JobLocationMap lat={job.order.latitude} lng={job.order.longitude} />
+                            <JobLocationMap lat={job.order.coordinateY} lng={job.order.coordinateX} />
                             <a
                                 href={
                                     /iPhone|iPad|iPod/i.test(navigator.userAgent)
-                                        ? `maps://maps.apple.com/?q=${job.order.latitude},${job.order.longitude}`
-                                        : `https://maps.google.com/?q=${job.order.latitude},${job.order.longitude}`
+                                        ? `maps://maps.apple.com/?q=${job.order.coordinateY},${job.order.coordinateX}`
+                                        : `https://maps.google.com/?q=${job.order.coordinateY},${job.order.coordinateX}`
                                 }
                                 target="_blank"
                                 rel="noopener noreferrer"

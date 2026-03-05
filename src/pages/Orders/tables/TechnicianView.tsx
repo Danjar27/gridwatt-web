@@ -54,15 +54,15 @@ const TechnicianView = ({ orders }: TechnicianViewProps) => {
                         <tr key={order.id} className="border-b border-neutral-800">
                             <td className="px-6 py-4 text-sm">
                                 <div className="font-medium">#{order.id}</div>
-                                <div className="text-sm text-neutral-900">{order.meterNumber}</div>
+                                <div className="text-sm text-neutral-900">{order.meterId}</div>
                             </td>
                             <td className="px-6 py-4 text-sm">
                                 <div>
-                                    {order.firstName} {order.lastName}
+                                    {order.clientName} {order.clientLastName}
                                 </div>
-                                <div className="text-sm text-neutral-900">{order.email}</div>
+                                <div className="text-sm text-neutral-900">{order.clientEmail}</div>
                             </td>
-                            <td className="px-6 py-4 text-sm">{order.serviceType}</td>
+                            <td className="px-6 py-4 text-sm">{order.type}</td>
                             <td className="px-6 py-4 text-sm">
                                 <span
                                     className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(order.status)}`}

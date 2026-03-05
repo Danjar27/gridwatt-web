@@ -297,7 +297,9 @@
                 "editShapeHint": "Arrastra los vértices para editar la forma",
                 "saveShape": "Guardar forma",
                 "cancelEdit": "Cancelar",
-                "unassigned": "Sin asignar"
+                "unassigned": "Sin asignar",
+                "areas": "Áreas",
+                "noAreas": "Sin áreas definidas"
             },
             "areas": {
                 "title": "Configurar área",
@@ -498,7 +500,14 @@
             "selectTechnician": "Seleccionar técnico...",
             "assign": "Asignar",
             "jobs": "Trabajos",
-            "started": "Inicio"
+            "started": "Inicio",
+            "meterType": "Tipo de medidor",
+            "coordinateX": "Coordenada X",
+            "coordinateY": "Coordenada Y",
+            "appliedTariff": "Tarifa aplicada",
+            "verifiedTariff": "Tarifa verificada",
+            "transformerNumber": "Número de transformador",
+            "transformerProperty": "Propiedad del transformador"
         },
         "ordersImport": {
             "title": "Importar órdenes",
@@ -514,9 +523,17 @@
             "filesSelected": "{count} archivos seleccionados",
             "parseFiles": "Procesar archivos",
             "parsing": "Procesando...",
+            "willBatch": "{count} archivos se procesarán en {batches} lotes.",
+            "batchingTitle": "Procesando {total} lotes",
+            "batchingProgress": "{done} de {total} completados",
+            "batchN": "Lote {n}",
+            "batchFiles": "{count} archivos",
+            "batchOrders": "{count} órdenes",
             "importValid": "Importar órdenes válidas",
             "importing": "Importando...",
+            "commitBatching": "Importando lote {done} de {total}...",
             "importedSuccess": "{count} órdenes importadas exitosamente.",
+            "importedSkipped": "{count} órdenes omitidas por estar duplicadas.",
             "validReadyToImport": "{count} órdenes válidas listas para importar",
             "doneSubtitle": "Las órdenes han sido guardadas y están listas para ser asignadas.",
             "importMoreFiles": "Importar más archivos",
@@ -549,7 +566,13 @@
             "table": {
                 "source": "Fuente",
                 "order": "Orden",
+                "client": "Cliente",
                 "issues": "Problemas"
+            },
+            "filter": {
+                "ok": "Sin problemas",
+                "error": "Con errores",
+                "warning": "Con advertencias"
             },
             "tabs": {
                 "customer": "Cliente",

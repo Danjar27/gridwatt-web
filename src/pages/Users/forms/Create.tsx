@@ -32,7 +32,7 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const { user: currentUser } = useAuthContext();
     const [error, setError] = useState<string | null>(null);
 
-    const isAdmin = currentUser?.role?.name === 'admin';
+    const isCurrentUserAdmin = currentUser?.role?.name === 'admin';
 
     const { data: roles = [] } = useQuery({
         queryKey: ['roles'],
@@ -42,12 +42,12 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const { data: tenantsData } = useQuery({
         queryKey: ['tenants'],
         queryFn: () => getTenants({ limit: 100, offset: 0 }),
-        enabled: isAdmin,
+        enabled: isCurrentUserAdmin,
     });
 
     const roleOptions = useMemo(
-        () => roles.filter((r) => isAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: r.id })),
-        [roles, isAdmin]
+        () => roles.filter((r) => isCurrentUserAdmin || r.name !== 'admin').map((r) => ({ label: r.name, value: r.id })),
+        [roles, isCurrentUserAdmin]
     );
 
     const tenantOptions = useMemo(
@@ -79,11 +79,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         <Modal id="new-user" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
             <Window title={i18n('pages.users.form.create')} className="w-full max-w-150 px-4" icon={UsersIcon}>
                 <FormError message={error} />
-                <Form key="new" onSubmit={handleSubmit} defaultValues={{ roleId: 2 }}>
+                <Form key="new" onSubmit={handleSubmit} defaultValues={{ roleId: 2, tenantId: !isCurrentUserAdmin ? currentUser?.tenantId : undefined }}>
                     {({ watch }) => {
                         const roleId = watch('roleId');
                         const selectedRole = roles.find((r) => String(r.id) === String(roleId));
-                        const isAdmin = selectedRole?.name === 'admin';
+                        const isNewUserAdmin = selectedRole?.name === 'admin';
 
                         return (
                             <>
@@ -117,11 +117,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                                         options={roleOptions}
                                     />
                                 </Field>
-                                {!isAdmin && (
-                                    <Field name="tenantId" label={i18n('pages.users.form.tenant')} required={!isAdmin}>
+                                {!isNewUserAdmin && isCurrentUserAdmin && (
+                                    <Field name="tenantId" label={i18n('pages.users.form.tenant')} required>
                                         <Select
                                             name="tenantId"
-                                            rules={!isAdmin ? { required: i18n('errors.required') } : undefined}
+                                            rules={{ required: i18n('errors.required') }}
                                             options={tenantOptions}
                                         />
                                     </Field>
