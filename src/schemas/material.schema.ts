@@ -3,7 +3,6 @@ import { z } from 'zod';
 export const stockSchema = z.object({
     id: z.string().min(1),
     availableQuantity: z.number(),
-    minimumStock: z.number(),
 });
 
 export const materialSchema = z.object({
