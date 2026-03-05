@@ -79,11 +79,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
         <Modal id="new-user" isOpen={isCreateOpen} onOpen={openCreate} onClose={handleCancel}>
             <Window title={i18n('pages.users.form.create')} className="w-full max-w-150 px-4" icon={UsersIcon}>
                 <FormError message={error} />
-                <Form key="new" onSubmit={handleSubmit}>
+                <Form key="new" onSubmit={handleSubmit} defaultValues={{ roleId: 2 }}>
                     {({ watch }) => {
-                        const selectedRoleId = watch('roleId');
-                        const selectedRole = roles.find((r) => String(r.id) === String(selectedRoleId));
-                        const isAdminRole = selectedRole?.name === 'admin';
+                        const roleId = watch('roleId');
+                        const selectedRole = roles.find((r) => String(r.id) === String(roleId));
+                        const isAdmin = selectedRole?.name === 'admin';
 
                         return (
                             <>
@@ -117,15 +117,11 @@ const Create: FC<MutationForm> = ({ onSubmit, onCancel }) => {
                                         options={roleOptions}
                                     />
                                 </Field>
-                                {isAdmin && (
-                                    <Field
-                                        name="tenantId"
-                                        label={i18n('pages.users.form.tenant')}
-                                        required={!isAdminRole}
-                                    >
+                                {!isAdmin && (
+                                    <Field name="tenantId" label={i18n('pages.users.form.tenant')} required={!isAdmin}>
                                         <Select
                                             name="tenantId"
-                                            rules={!isAdminRole ? { required: i18n('errors.required') } : undefined}
+                                            rules={!isAdmin ? { required: i18n('errors.required') } : undefined}
                                             options={tenantOptions}
                                         />
                                     </Field>
