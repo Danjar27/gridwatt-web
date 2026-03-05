@@ -1,17 +1,12 @@
 import type { OrderImportData } from '@interfaces/order.interface.ts';
 
 const REQUIRED_FIELDS: ReadonlyArray<keyof OrderImportData> = [
-    'serviceType',
-    'meterNumber',
-    'orderStatus',
+    'type',
     'issueDate',
-    'accountNumber',
-    'lastName',
-    'firstName',
-    'idNumber',
-    'email',
-    'phone',
-    'orderLocation',
+    'clientAccount',
+    'clientName',
+    'clientId',
+    'address',
 ];
 
 export const validateImportData = (data: OrderImportData): Array<string> =>

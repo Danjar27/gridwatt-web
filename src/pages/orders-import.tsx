@@ -89,6 +89,8 @@ export function OrdersImportPage() {
                 preview.orders.map((order) => ({
                     ...order,
                     data: { ...order.data, id: order.data.id || crypto.randomUUID() },
+                    errors: order.errors ?? [],
+                    warnings: order.warnings ?? [],
                 }))
             );
             setRowSelection({});
@@ -288,12 +290,14 @@ export function OrdersImportPage() {
                 id: 'order',
                 header: i18n('pages.ordersImport.table.order'),
                 cell: ({ row }) => {
-                    const d = row.original.data;
-                    const shortId = d.id ? d.id.slice(0, 8).toUpperCase() : '—';
+                    const data = row.original.data;
+                    const fullName = [data.clientName, data.clientLastName].filter(Boolean).join(' ') || '—';
 
                     return (
                         <div className="space-y-0.5">
-                            <p className="font-mono text-xs font-semibold text-neutral-900">{shortId}</p>
+                            <p className="text-xs font-semibold text-neutral-800">{fullName}</p>
+                            <p className="text-xs text-neutral-900">{data.type || '—'}</p>
+                            <p className="font-mono text-xs text-neutral-900">{data.clientAccount || '—'}</p>
                         </div>
                     );
                 },
@@ -499,7 +503,7 @@ export function OrdersImportPage() {
                                         'flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1 text-xs font-medium transition',
                                         {
                                             'border-secondary-500 bg-secondary-500/10 text-secondary-500': filterErrors,
-                                            'border-neutral-800 text-neutral-900 hover:border-neutral-700 hover:text-neutral-500':
+                                            'border-neutral-800 text-neutral-900 hover:border-neutral-700 hover:text-neutral-800':
                                                 !filterErrors,
                                         }
                                     )}
@@ -544,7 +548,7 @@ export function OrdersImportPage() {
                                 <button
                                     type="button"
                                     onClick={resetWizard}
-                                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-800 px-3 py-1 text-xs font-medium text-neutral-900 transition hover:border-neutral-700 hover:text-neutral-500"
+                                    className="flex cursor-pointer items-center gap-1.5 rounded-md border border-neutral-800 px-3 py-1 text-xs font-medium text-neutral-900 transition hover:border-neutral-700 hover:text-neutral-800"
                                 >
                                     <XIcon size={11} />
                                     {i18n('pages.ordersImport.cancel')}

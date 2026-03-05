@@ -24,8 +24,8 @@ interface OrderEditModalProps {
     onSave: (item: OrderImportPreviewItem) => void;
 }
 
-const toOptionalNumber = (v: number | undefined): number | undefined =>
-    v === undefined || isNaN(v) ? undefined : v;
+const toOptionalNumber = (value: number | undefined): number | undefined =>
+    value === undefined || isNaN(value) ? undefined : value;
 
 const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps) => {
     const i18n = useTranslations('pages.ordersImport');
@@ -47,8 +47,8 @@ const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps)
 
         const cleaned: OrderImportData = {
             ...formData,
-            latitude: toOptionalNumber(formData.latitude),
-            longitude: toOptionalNumber(formData.longitude),
+            coordinateX: toOptionalNumber(formData.coordinateX),
+            coordinateY: toOptionalNumber(formData.coordinateY),
         };
 
         onSave({ ...order, data: cleaned, errors: validateImportData(cleaned) });
@@ -80,7 +80,7 @@ const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps)
                                 'px-3 py-2 text-sm font-medium border-b-2 -mb-px transition cursor-pointer',
                                 activeTab === tab.id
                                     ? 'border-primary-500 text-primary-500'
-                                    : 'border-transparent text-neutral-900 hover:text-neutral-500'
+                                    : 'border-transparent text-neutral-900 hover:text-neutral-800'
                             )}
                         >
                             {tab.label}
@@ -92,37 +92,40 @@ const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps)
                     <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
                         {activeTab === 'customer' && (
                             <div className="grid grid-cols-1 gap-4 s768:grid-cols-2">
-                                <Field name="firstName" label={i18n('form.firstName')} required>
-                                    <TextInput name="firstName" rules={{ required: true }} />
+                                <Field name="clientName" label={i18n('form.clientName')} required>
+                                    <TextInput name="clientName" rules={{ required: true }} />
                                 </Field>
-                                <Field name="lastName" label={i18n('form.lastName')} required>
-                                    <TextInput name="lastName" rules={{ required: true }} />
+                                <Field name="clientLastName" label={i18n('form.clientLastName')}>
+                                    <TextInput name="clientLastName" />
                                 </Field>
-                                <Field name="idNumber" label={i18n('form.idNumber')} required>
-                                    <TextInput name="idNumber" rules={{ required: true }} />
+                                <Field name="clientId" label={i18n('form.clientId')} required>
+                                    <TextInput name="clientId" rules={{ required: true }} />
                                 </Field>
-                                <Field name="email" label={i18n('form.email')} required>
-                                    <TextInput name="email" rules={{ required: true }} />
+                                <Field name="clientEmail" label={i18n('form.clientEmail')}>
+                                    <TextInput name="clientEmail" />
                                 </Field>
-                                <Field name="phone" label={i18n('form.phone')} required>
-                                    <TextInput name="phone" rules={{ required: true }} />
+                                <Field name="clientPhone" label={i18n('form.clientPhone')}>
+                                    <TextInput name="clientPhone" />
+                                </Field>
+                                <Field name="clientAccount" label={i18n('form.clientAccount')} required>
+                                    <TextInput name="clientAccount" rules={{ required: true }} />
                                 </Field>
                             </div>
                         )}
 
                         {activeTab === 'service' && (
                             <div className="grid grid-cols-1 gap-4 s768:grid-cols-2">
-                                <Field name="serviceType" label={i18n('form.serviceType')} required>
-                                    <TextInput name="serviceType" rules={{ required: true }} />
+                                <Field name="type" label={i18n('form.type')} required>
+                                    <TextInput name="type" rules={{ required: true }} />
                                 </Field>
                                 <Field name="orderStatus" label={i18n('form.orderStatus')} required>
                                     <TextInput name="orderStatus" rules={{ required: true }} />
                                 </Field>
-                                <Field name="meterNumber" label={i18n('form.meterNumber')} required>
-                                    <TextInput name="meterNumber" rules={{ required: true }} />
+                                <Field name="meterId" label={i18n('form.meterId')}>
+                                    <TextInput name="meterId" />
                                 </Field>
-                                <Field name="accountNumber" label={i18n('form.accountNumber')} required>
-                                    <TextInput name="accountNumber" rules={{ required: true }} />
+                                <Field name="meterType" label={i18n('form.meterType')}>
+                                    <TextInput name="meterType" />
                                 </Field>
                                 <Field name="issueDate" label={i18n('form.issueDate')} required>
                                     <TextInput name="issueDate" rules={{ required: true }} />
@@ -133,18 +136,44 @@ const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps)
                         {activeTab === 'location' && (
                             <div className="grid grid-cols-1 gap-4 s768:grid-cols-2">
                                 <div className="s768:col-span-2">
-                                    <Field name="orderLocation" label={i18n('form.orderLocation')} required>
-                                        <TextInput name="orderLocation" rules={{ required: true }} />
+                                    <Field name="address" label={i18n('form.address')} required>
+                                        <TextInput name="address" rules={{ required: true }} />
                                     </Field>
                                 </div>
-                                <Field name="panelTowerBlock" label={i18n('form.panelTowerBlock')}>
-                                    <TextInput name="panelTowerBlock" />
+                                <div className="s768:col-span-2">
+                                    <Field name="addressReference" label={i18n('form.addressReference')}>
+                                        <TextInput name="addressReference" />
+                                    </Field>
+                                </div>
+                                <Field name="zone" label={i18n('form.zone')}>
+                                    <TextInput name="zone" />
                                 </Field>
-                                <Field name="latitude" label={i18n('form.latitude')}>
-                                    <NumberInput name="latitude" step="any" />
+                                <Field name="sector" label={i18n('form.sector')}>
+                                    <TextInput name="sector" />
                                 </Field>
-                                <Field name="longitude" label={i18n('form.longitude')}>
-                                    <NumberInput name="longitude" step="any" />
+                                <Field name="parish" label={i18n('form.parish')}>
+                                    <TextInput name="parish" />
+                                </Field>
+                                <Field name="neighborhood" label={i18n('form.neighborhood')}>
+                                    <TextInput name="neighborhood" />
+                                </Field>
+                                <Field name="building" label={i18n('form.building')}>
+                                    <TextInput name="building" />
+                                </Field>
+                                <Field name="urbanization" label={i18n('form.urbanization')}>
+                                    <TextInput name="urbanization" />
+                                </Field>
+                                <Field name="canton" label={i18n('form.canton')}>
+                                    <TextInput name="canton" />
+                                </Field>
+                                <Field name="province" label={i18n('form.province')}>
+                                    <TextInput name="province" />
+                                </Field>
+                                <Field name="coordinateX" label={i18n('form.coordinateX')}>
+                                    <NumberInput name="coordinateX" step="any" />
+                                </Field>
+                                <Field name="coordinateY" label={i18n('form.coordinateY')}>
+                                    <NumberInput name="coordinateY" step="any" />
                                 </Field>
                             </div>
                         )}
@@ -154,32 +183,14 @@ const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps)
                                 <Field name="appliedTariff" label={i18n('form.appliedTariff')}>
                                     <TextInput name="appliedTariff" />
                                 </Field>
+                                <Field name="verifiedTariff" label={i18n('form.verifiedTariff')}>
+                                    <TextInput name="verifiedTariff" />
+                                </Field>
                                 <Field name="transformerNumber" label={i18n('form.transformerNumber')}>
                                     <TextInput name="transformerNumber" />
                                 </Field>
-                                <Field name="distributionNetwork" label={i18n('form.distributionNetwork')}>
-                                    <TextInput name="distributionNetwork" />
-                                </Field>
-                                <Field name="transformerOwnership" label={i18n('form.transformerOwnership')}>
-                                    <TextInput name="transformerOwnership" />
-                                </Field>
-                                <Field name="sharedSubstation" label={i18n('form.sharedSubstation')}>
-                                    <TextInput name="sharedSubstation" />
-                                </Field>
-                                <Field name="normalLoad" label={i18n('form.normalLoad')}>
-                                    <TextInput name="normalLoad" />
-                                </Field>
-                                <Field name="fluctuatingLoad" label={i18n('form.fluctuatingLoad')}>
-                                    <TextInput name="fluctuatingLoad" />
-                                </Field>
-                                <Field name="plannerGroup" label={i18n('form.plannerGroup')}>
-                                    <TextInput name="plannerGroup" />
-                                </Field>
-                                <Field name="workPosition" label={i18n('form.workPosition')}>
-                                    <TextInput name="workPosition" />
-                                </Field>
-                                <Field name="lockerSequence" label={i18n('form.lockerSequence')}>
-                                    <TextInput name="lockerSequence" />
+                                <Field name="transformerProperty" label={i18n('form.transformerProperty')}>
+                                    <TextInput name="transformerProperty" />
                                 </Field>
                                 <div className="s768:col-span-2">
                                     <Field name="observations" label={i18n('form.observations')}>

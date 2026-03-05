@@ -37,36 +37,35 @@ export interface Order {
     jobs?: Array<Job>;
 }
 export interface OrderImportData {
-    id?: string;
-    serviceType: string;
-    meterNumber: string;
+    id: string;
+    type: string;
     orderStatus: string;
     issueDate: string;
-    issueTime: string;
-    accountNumber: string;
-    lastName: string;
-    firstName: string;
-    idNumber: string;
-    email: string;
-    phone: string;
-    orderLocation: string;
-    panelTowerBlock?: string;
+    clientAccount: string;
+    clientName: string;
+    clientLastName?: string;
+    clientId: string;
+    clientPhone?: string;
+    clientEmail?: string;
+    address: string;
+    addressReference?: string;
+    zone?: string;
+    sector?: string;
+    parish?: string;
+    neighborhood?: string;
+    building?: string;
+    urbanization?: string;
+    canton?: string;
+    province?: string;
     coordinateX?: number;
     coordinateY?: number;
-    latitude?: number;
-    longitude?: number;
     appliedTariff?: string;
+    verifiedTariff?: string;
     transformerNumber?: string;
-    distributionNetwork?: string;
-    transformerOwnership?: string;
-    sharedSubstation?: string;
-    normalLoad?: string;
-    fluctuatingLoad?: string;
-    plannerGroup?: string;
-    workPosition?: string;
-    lockerSequence?: string;
+    transformerProperty?: string;
+    meterId?: string;
+    meterType?: string;
     observations?: string;
-    technicianId?: number;
 }
 
 export interface OrderImportPreviewItem {

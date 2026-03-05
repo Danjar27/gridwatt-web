@@ -48,10 +48,8 @@ export const previewOrdersImport = async (files: Array<File>) => {
     return uploadFile<OrdersImportPreviewResponse>('/orders/import/preview', formData);
 };
 
-const toCommitPayload = ({ issueTime: _t, coordinateX: _cx, coordinateY: _cy, technicianId: _tid, ...rest }: OrderImportData) => rest;
-
 export const commitOrdersImport = async (orders: Array<OrderImportData>) =>
     request<OrdersImportCommitResponse>('/orders/import/commit', {
         method: 'POST',
-        body: JSON.stringify({ orders: orders.map(toCommitPayload) }),
+        body: JSON.stringify({ orders }),
     });

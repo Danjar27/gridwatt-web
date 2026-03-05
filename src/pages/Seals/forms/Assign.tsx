@@ -80,7 +80,7 @@ const Assign: FC<AssignProps> = ({ isOpen, onClose }) => {
                         {i18n('pages.seals.form.id')}:{' '}
                         <span className="font-mono font-medium text-neutral-200">{selected.id}</span>
                         {' · '}
-                        <span className="text-neutral-500">{selected.type}</span>
+                        <span className="text-neutral-800">{selected.type}</span>
                     </p>
                 )}
 
