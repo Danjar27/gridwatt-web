@@ -152,7 +152,7 @@ export function JobDetailPage() {
     }
 
     return (
-        <Page id="job-detail" title={`Job #${job.id}`} subtitle={job.jobType} backRoute="/jobs">
+        <Page id="job-detail" title={`Job #${job.id}`} backRoute="/jobs">
             <PendingSyncWrapper pending={!!job._pendingSync}>
                 <div className="space-y-6">
                     {/* Action buttons */}

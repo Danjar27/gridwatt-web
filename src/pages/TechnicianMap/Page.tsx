@@ -10,7 +10,6 @@ const TechnicianMapPage = () => {
         <Page
             id="technician-map"
             title={i18n('pages.technicianMap.title')}
-            subtitle={i18n('pages.technicianMap.subtitle')}
             className="flex-1 min-h-0"
         >
             <Inventory />

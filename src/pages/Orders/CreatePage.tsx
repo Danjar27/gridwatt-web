@@ -39,7 +39,6 @@ const CreateOrderPage = () => {
         <Page
             id="create-order"
             title={i18n('pages.orders.form.create')}
-            subtitle={i18n('pages.orders.form.createSubtitle')}
             backRoute="/orders"
         >
             <Form onSubmit={handleSubmit}>

@@ -9,7 +9,7 @@ const SealsPage = () => {
 
     return (
         <Provider>
-            <Page id="seals" title={i18n('pages.seals.title')} subtitle={i18n('pages.seals.subtitle')}>
+            <Page id="seals" title={i18n('pages.seals.title')}>
                 <Inventory />
             </Page>
         </Provider>

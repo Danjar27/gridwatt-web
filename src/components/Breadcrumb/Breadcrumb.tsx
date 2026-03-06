@@ -12,6 +12,9 @@ const ROUTE_LABEL_KEYS: Record<string, string> = {
     users: 'routes.users',
     tenants: 'routes.tenants',
     profile: 'routes.profile',
+    map: 'routes.map',
+    new: 'routes.new',
+    import: 'routes.import',
 };
 
 function isId(segment: string): boolean {
@@ -24,7 +27,7 @@ const Breadcrumb = () => {
 
     const segments = location.pathname.split('/').filter(Boolean);
 
-    if (segments.length <= 1) {
+    if (segments.length === 0) {
         return null;
     }
 
@@ -49,13 +52,13 @@ const Breadcrumb = () => {
             <ol className="flex items-center gap-1 flex-wrap">
                 {crumbs.map((crumb, index) => (
                     <li key={crumb.path} className="flex items-center gap-1">
-                        {index > 0 && <CaretRightIcon size={11} className="text-neutral-800 shrink-0" />}
+                        {index > 0 && <CaretRightIcon size={10} className="text-neutral-800 shrink-0" />}
                         {crumb.isLast ? (
-                            <span className="text-xs font-medium text-black dark:text-white">{crumb.label}</span>
+                            <span className="text-xs font-medium text-primary-500 dark:text-primary-500">{crumb.label}</span>
                         ) : (
                             <Link
                                 to={crumb.path}
-                                className="text-xs text-neutral-900 hover:text-primary-500 transition-colors duration-200"
+                                className="text-xs text-neutral-900 hover:text-primary-500 transition-colors duration-150"
                             >
                                 {crumb.label}
                             </Link>

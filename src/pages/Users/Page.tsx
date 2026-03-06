@@ -9,7 +9,7 @@ const UsersPage = () => {
 
     return (
         <Provider>
-            <Page id="users" title={i18n('pages.users.title')} subtitle={i18n('pages.users.subtitle')}>
+            <Page id="users" title={i18n('pages.users.title')}>
                 <Inventory />
             </Page>
         </Provider>

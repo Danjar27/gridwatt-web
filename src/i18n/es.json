@@ -67,7 +67,9 @@
         "jobs": "Trabajos",
         "tenants": "Contratos",
         "profile": "Perfil",
-        "map": "Mapa"
+        "map": "Mapa",
+        "new": "Nueva",
+        "import": "Importar"
     },
     "sidebar": {
         "menu": "Menú",
@@ -96,7 +98,6 @@
     "pages": {
         "tenants": {
             "title": "Contratos",
-            "subtitle": "Administra las contratos registrados",
             "action": "Agregar contrato",
             "form": {
                 "create": "Agregar nuevo contrato",
@@ -145,7 +146,6 @@
         },
         "activities": {
             "title": "Actividades",
-            "subtitle": "Administra las actividades y tareas de tu empresa",
             "action": "Agregar actividad",
             "import": "Importar",
             "form": {
@@ -165,7 +165,6 @@
         },
         "materials": {
             "title": "Materiales",
-            "subtitle": "Administra los materiales de inventario y proveedores",
             "action": "Agregar material",
             "import": "Importar",
             "ingress": "Registrar ingreso",
@@ -199,7 +198,6 @@
         },
         "seals": {
             "title": "Sellos",
-            "subtitle": "Administra los tipos de sellos y configuraciones",
             "action": "Agregar sello",
             "range": "Crear rango",
             "assignMultiple": "Asignar rango",
@@ -227,7 +225,6 @@
         },
         "orders": {
             "title": "Órdenes",
-            "subtitle": "Administra todas las órdenes de servicio",
             "action": "Crear orden",
             "import": "Importar órdenes",
             "viewMode": {
@@ -239,7 +236,6 @@
             },
             "form": {
                 "create": "Nueva Orden",
-                "createSubtitle": "Completa la información para registrar una nueva orden de servicio",
                 "section": {
                     "details": "Datos de la orden",
                     "detailsSubtitle": "Información del servicio, medidor y cliente",
@@ -314,8 +310,6 @@
         },
         "jobs": {
             "title": "Trabajos",
-            "subtitle": "Administra los trabajos asignados",
-            "subtitleTechnician": "Tus trabajos asignados",
             "filter": {
                 "allTechnicians": "Todos los técnicos"
             },
@@ -339,7 +333,6 @@
         },
         "users": {
             "title": "Usuarios",
-            "subtitle": "Administra las cuentas de usuario y permisos",
             "action": "Agregar usuario",
             "form": {
                 "create": "Nuevo Usuario",
@@ -380,7 +373,6 @@
         },
         "dashboard": {
             "title": "Tablero",
-            "subtitle": "Bienvenido, {name}! Aquí tienes un resumen de tu trabajo.",
             "recentJobs": {
                 "title": "Trabajos recientes",
                 "subtitle": "Trabajos pendientes por completar"
@@ -517,7 +509,6 @@
         },
         "technicianMap": {
             "title": "Mapa de órdenes",
-            "subtitle": "Visualiza tus órdenes asignadas en el mapa",
             "order": {
                 "title": "Orden #{id}",
                 "customer": "Cliente",
@@ -531,7 +522,6 @@
         },
         "ordersImport": {
             "title": "Importar órdenes",
-            "subtitle": "Sube archivos CSV, Excel, XML o PDF para crear órdenes en lote.",
             "restricted": "No tienes acceso para importar órdenes.",
             "selectFiles": "Seleccionar archivos",
             "supported": "Admitidos: .csv, .xlsx, .xls, .xml, .pdf",

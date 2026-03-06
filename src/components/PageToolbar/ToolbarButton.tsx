@@ -14,11 +14,11 @@ const ToolbarButton: FC<PropsWithChildren<ToolbarButtonProps>> = ({
     to,
 }) => {
     const className = classnames(
-        'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors select-none',
+        'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors select-none',
         'cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed',
         {
             'bg-primary-500 hover:bg-primary-600 text-white': variant === 'primary',
-            'text-primary-500/80 dark:text-white/80 dark:hover:text-white hover:text-primary-500 hover:bg-neutral-700':
+            'border border-neutral-800 dark:border-neutral-700 text-primary-500 dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-700':
                 variant === 'secondary',
         }
     );

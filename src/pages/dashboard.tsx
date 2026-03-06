@@ -193,7 +193,6 @@ const DashboardPage = () => {
         <Page
             id="dashboard"
             title={i18n('pages.dashboard.title')}
-            subtitle={i18n('pages.dashboard.subtitle', { name: user?.name || '' })}
         >
             <div className="flex flex-col gap-4 s768:gap-6 s992:gap-10">
                 {!isAdminRole && (

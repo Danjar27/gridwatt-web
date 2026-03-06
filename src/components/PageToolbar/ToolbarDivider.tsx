@@ -1,3 +1,3 @@
-const ToolbarDivider = () => <div className="w-px bg-neutral-700 self-stretch mx-0.5" />;
+const ToolbarDivider = () => <div className="w-px bg-neutral-800 self-stretch mx-1" />;
 
 export default ToolbarDivider;

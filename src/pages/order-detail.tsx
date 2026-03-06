@@ -4,7 +4,6 @@ import { assignOrder, getOrder } from '@lib/api/orders.ts';
 import { getTechnicians } from '@lib/api/users.ts';
 import { useState } from 'react';
 import {
-    ArrowLeftIcon,
     EnvelopeIcon,
     PhoneIcon,
     IdentificationCardIcon,
@@ -26,6 +25,7 @@ import type { Order } from '@interfaces/order.interface.ts';
 import Dropdown from '@components/Dropdown/Dropdown';
 import { classnames } from '@utils/classnames.ts';
 import Button from '@components/Button/Button';
+import Page from '@layouts/Page';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -211,21 +211,14 @@ export function OrderDetailPage() {
     });
 
     return (
+        <Page id="order-detail" title={i18n('pages.orderDetail.orderTitle', { id: order.id })} backRoute="/orders">
         <div className="space-y-5">
             {/* Hero header */}
             <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 px-5 py-4">
                 <div className="flex flex-col gap-4 s425:flex-row s425:items-center s425:justify-between">
                     <div className="flex items-center gap-3">
-                        <Link
-                            to="/orders"
-                            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-900 transition hover:border-primary-500 hover:text-primary-500"
-                        >
-                            <ArrowLeftIcon size={13} weight="bold" />
-                            {i18n('literal.back')}
-                        </Link>
-                        <div className="h-5 w-px bg-neutral-800" />
                         <div>
-                            <h1 className="text-lg font-bold s768:text-xl">
+                            <h1 className="hidden s992:block text-lg font-bold">
                                 {i18n('pages.orderDetail.orderTitle', { id: order.id })}
                             </h1>
                             <p className="text-xs text-neutral-900">{order.type}</p>
@@ -452,5 +445,6 @@ export function OrderDetailPage() {
                 </div>
             )}
         </div>
+        </Page>
     );
 }
