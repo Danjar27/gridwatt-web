@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useTranslations } from 'use-intl';
 import { useQuery } from '@tanstack/react-query';
-import { MapPinIcon } from '@phosphor-icons/react';
+import { MapPin } from '@phosphor-icons/react';
 
 import { useAuthContext } from '@context/auth/context.ts';
 import { getMyJobs } from '@lib/api/jobs.ts';
@@ -53,7 +53,7 @@ const Inventory = () => {
             >
                 <Window
                     title={i18n('pages.technicianMap.order.title', { id: order?.id ?? '' })}
-                    icon={MapPinIcon}
+                    icon={MapPin}
                     className="w-full max-w-sm px-4"
                 >
                     {selectedJob && order && (

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash } from '@phosphor-icons/react';
 import { addJobMaterial, removeJobMaterial } from '@lib/api/jobs.ts';
-import { getMaterials } from '@lib/api/materials.ts';
+import { getMaterials, getMyMaterials } from '@lib/api/materials.ts';
 import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
@@ -11,8 +11,9 @@ import Dropdown from '@components/Dropdown/Dropdown';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
+import { useAuthContext } from '@context/auth/context.ts';
 import type { Job } from '@interfaces/job.interface.ts';
-import type { WorkMaterial } from '@interfaces/material.interface.ts';
+import type { WorkMaterial, AssignedMaterial, Material } from '@interfaces/material.interface.ts';
 
 interface Props {
     jobId: number;
@@ -22,14 +23,32 @@ interface Props {
 export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     const queryClient = useQueryClient();
     const i18n = useTranslations();
+    const { user } = useAuthContext();
+    const isTechnician = user?.role?.name === 'technician';
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMaterialId, setSelectedMaterialId] = useState('');
     const [quantity, setQuantity] = useState('');
 
-    const { data: materialsData } = useQuery({
+    const { data: allMaterialsData } = useQuery({
         queryKey: ['materials'],
         queryFn: () => getMaterials({ limit: 200 }),
+        enabled: !isTechnician,
     });
+
+    const { data: myMaterialsData } = useQuery({
+        queryKey: ['materials', 'my'],
+        queryFn: getMyMaterials,
+        enabled: isTechnician,
+    });
+
+    const availableForAdd: Array<Material & { assignedQuantity?: number }> = isTechnician
+        ? (myMaterialsData ?? [])
+        : (allMaterialsData?.data ?? []);
+
+    const selectedAssigned = isTechnician
+        ? (myMaterialsData ?? []).find((m: AssignedMaterial) => m.id === selectedMaterialId)
+        : null;
+    const maxQuantity = selectedAssigned ? selectedAssigned.assignedQuantity : undefined;
 
     const jobKey = ['job', String(jobId)];
 
@@ -39,11 +58,10 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
         onMutate: async ({ materialId, qty }) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
-            const material = materialsData?.data.find((m) => m.id === materialId);
+            const material = availableForAdd.find((m) => m.id === materialId);
             const tempWorkMaterial: WorkMaterial = {
-                id: `temp-${Date.now()}`,
+                id: -Date.now(),
                 jobId,
-                materialId,
                 quantity: qty,
                 material: material ?? undefined,
             };
@@ -52,7 +70,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 old
                     ? {
                           ...old,
-                          workMaterials: [...(old.workMaterials ?? []), tempWorkMaterial],
+                          materials: [...(old.materials ?? []), tempWorkMaterial],
                           ...(pendingSync ? { _pendingSync: true } : {}),
                       }
                     : old
@@ -79,8 +97,8 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
     });
 
     const removeMutation = useMutation({
-        mutationFn: (workMaterialId: string) => removeJobMaterial(workMaterialId),
-        onMutate: async (workMaterialId) => {
+        mutationFn: (materialId: string) => removeJobMaterial(jobId, materialId),
+        onMutate: async (materialId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
             const pendingSync = !isOnline();
@@ -88,7 +106,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                 old
                     ? {
                           ...old,
-                          workMaterials: old.workMaterials?.filter((wm) => wm.id !== workMaterialId),
+                          materials: old.materials?.filter((wm) => wm.material?.id !== materialId),
                           ...(pendingSync ? { _pendingSync: true } : {}),
                       }
                     : old
@@ -111,8 +129,8 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
         },
     });
 
-    const addedIds = new Set(workMaterials.map((wm) => wm.materialId));
-    const availableMaterials = materialsData?.data.filter((m) => !addedIds.has(m.id)) ?? [];
+    const addedIds = new Set(workMaterials.map((wm) => wm.material?.id));
+    const availableMaterials = availableForAdd.filter((m) => !addedIds.has(m.id));
 
     const handleMaterialChange = (materialId: string) => {
         setSelectedMaterialId(materialId);
@@ -152,7 +170,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                                 </td>
                                 <td className="py-2 text-right">
                                     <button
-                                        onClick={() => removeMutation.mutate(wm.id)}
+                                        onClick={() => removeMutation.mutate(wm.material!.id)}
                                         disabled={removeMutation.isPending}
                                         className="rounded p-1 text-error-400 hover:bg-error-400/20"
                                     >
@@ -188,6 +206,7 @@ export function JobMaterialsSection({ jobId, workMaterials }: Props) {
                             value={quantity}
                             onChange={(e) => setQuantity(e.target.value)}
                             min="0"
+                            max={maxQuantity}
                             placeholder={i18n('pages.jobDetail.materials.quantity')}
                             className={INPUT_CLASS}
                         />

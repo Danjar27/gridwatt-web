@@ -10,6 +10,11 @@ export interface Material {
     unit: string;
     totalStock?: number;
 }
+
+export interface AssignedMaterial extends Material {
+    assignedQuantity: number;
+}
+
 export interface WorkMaterial {
     id: number;
     jobId: number;

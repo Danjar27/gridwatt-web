@@ -24,6 +24,13 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 icon: HouseIcon,
                 roles: ['manager'],
             },
+            {
+                name: 'map',
+                label: 'routes.map',
+                href: '/map',
+                icon: MapTrifoldIcon,
+                roles: ['technician'],
+            },
         ],
     },
     {
@@ -42,13 +49,6 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 label: 'routes.jobs',
                 href: '/jobs',
                 icon: BagSimpleIcon,
-                roles: ['technician'],
-            },
-            {
-                name: 'map',
-                label: 'routes.map',
-                href: '/map',
-                icon: MapTrifoldIcon,
                 roles: ['technician'],
             },
         ],

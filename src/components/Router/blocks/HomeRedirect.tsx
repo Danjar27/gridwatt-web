@@ -4,7 +4,7 @@ import { useAuthContext } from '@context/auth/context.ts';
 const roleRoutes: Record<string, string> = {
     admin: '/tenants',
     manager: '/dashboard',
-    technician: '/jobs',
+    technician: '/map',
 };
 
 const HomeRedirect = () => {

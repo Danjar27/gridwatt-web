@@ -28,7 +28,7 @@ const TechnicianOrdersMap = ({ jobs, onJobClick }: TechnicianOrdersMapProps) => 
         () =>
             L.divIcon({
                 className: '',
-                html: `<div style="width:14px;height:14px;border-radius:50%;background-color:${DOT_COLOR};box-shadow:0 2px 6px rgba(0,0,0,0.45),inset 0 1px 2px rgba(255,255,255,0.25);"></div>`,
+                html: `<div style="width:14px;height:14px;border-radius:50%;background-color:${DOT_COLOR};border:2px solid rgba(255,255,255,0.55);box-shadow:0 2px 6px rgba(0,0,0,0.45),inset 0 1px 2px rgba(255,255,255,0.25);"></div>`,
                 iconSize: [14, 14],
                 iconAnchor: [7, 7],
             }),

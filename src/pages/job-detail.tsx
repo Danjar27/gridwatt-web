@@ -228,7 +228,7 @@ export function JobDetailPage() {
                 <JobSealsSection jobId={job.id} jobSeals={job.jobSeals ?? []} />
 
                 {/* Materials */}
-                <JobMaterialsSection jobId={job.id} workMaterials={job.workMaterials ?? []} />
+                <JobMaterialsSection jobId={job.id} workMaterials={job.materials ?? []} />
 
                 {/* Location Mini Map */}
                 {job.order?.coordinateX && job.order?.coordinateY && (

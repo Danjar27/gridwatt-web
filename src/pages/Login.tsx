@@ -30,7 +30,7 @@ const LoginPage = () => {
             if (role === 'admin') {
                 destination = '/tenants';
             } else if (role === 'technician') {
-                destination = '/jobs';
+                destination = '/map';
             }
             navigate(destination, { replace: true });
         } catch (err) {

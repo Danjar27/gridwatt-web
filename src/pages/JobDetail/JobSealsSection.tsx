@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, X } from '@phosphor-icons/react';
 import { addJobSeal, removeJobSeal } from '@lib/api/jobs.ts';
-import { getSeals } from '@lib/api/seals.ts';
+import { getSeals, getMySeals } from '@lib/api/seals.ts';
 import { isOnline } from '@lib/offline-store';
 import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
@@ -10,8 +10,9 @@ import Dropdown from '@components/Dropdown/Dropdown';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
+import { useAuthContext } from '@context/auth/context.ts';
 import type { Job } from '@interfaces/job.interface.ts';
-import type { JobSeal } from '@interfaces/seal.interface.ts';
+import type { Seal, AssignedSeal, JobSeal } from '@interfaces/seal.interface.ts';
 
 interface Props {
     jobId: number;
@@ -21,13 +22,26 @@ interface Props {
 export function JobSealsSection({ jobId, jobSeals }: Props) {
     const queryClient = useQueryClient();
     const i18n = useTranslations();
+    const { user } = useAuthContext();
+    const isTechnician = user?.role?.name === 'technician';
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSealId, setSelectedSealId] = useState<string>('');
 
-    const { data: sealsData } = useQuery({
+    const { data: allSealsData } = useQuery({
         queryKey: ['seals'],
         queryFn: () => getSeals({ limit: 200 }),
+        enabled: !isTechnician,
     });
+
+    const { data: mySealsData } = useQuery({
+        queryKey: ['seals', 'my'],
+        queryFn: getMySeals,
+        enabled: isTechnician,
+    });
+
+    const availableForAdd: Array<Seal> = isTechnician
+        ? (mySealsData ?? [])
+        : (allSealsData?.data ?? []);
 
     const jobKey = ['job', String(jobId)];
 
@@ -36,7 +50,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
         onMutate: async (sealId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
-            const seal = sealsData?.data.find((s) => String(s.id) === sealId);
+            const seal = availableForAdd.find((s) => String(s.id) === sealId);
             const tempJobSeal: JobSeal = {
                 id: -Date.now(),
                 jobId,
@@ -106,7 +120,7 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
     });
 
     const addedIds = new Set(jobSeals.map((js) => js.seal.id));
-    const availableSeals = sealsData?.data.filter((s) => !addedIds.has(s.id)) ?? [];
+    const availableSeals = availableForAdd.filter((s) => !addedIds.has(s.id));
 
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
@@ -149,16 +163,21 @@ export function JobSealsSection({ jobId, jobSeals }: Props) {
                     <div className="space-y-4">
                         <Dropdown
                             value={selectedSealId}
-                            onChange={(v) => setSelectedSealId(v === '' ? '' : (v as number))}
+                            onChange={(v) => setSelectedSealId(String(v))}
                             options={[
                                 { label: i18n('pages.jobDetail.seals.select'), value: '' },
-                                ...availableSeals.map((s) => ({ label: `#${s.id} — ${s.type}`, value: s.id })),
+                                ...availableSeals.map((s) => {
+                                    const range = (s as AssignedSeal).fromNumber !== undefined
+                                        ? ` (${(s as AssignedSeal).fromNumber}–${(s as AssignedSeal).toNumber})`
+                                        : '';
+                                    return { label: `#${s.id} — ${s.type}${range}`, value: String(s.id) };
+                                }),
                             ]}
                         />
                         <Button
                             variant="solid"
                             disabled={selectedSealId === '' || addMutation.isPending}
-                            onClick={() => selectedSealId !== '' && addMutation.mutate(Number(selectedSealId))}
+                            onClick={() => selectedSealId !== '' && addMutation.mutate(selectedSealId)}
                         >
                             {i18n('literal.add')}
                         </Button>

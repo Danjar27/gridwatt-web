@@ -75,10 +75,9 @@ export function JobDetailPage() {
             }
         },
         onSettled: () => {
-            if (isOnline()) {
-                queryClient.invalidateQueries({ queryKey: ['job', id] });
-                queryClient.invalidateQueries({ queryKey: ['jobs'] });
-            }
+            queryClient.invalidateQueries({ queryKey: ['job', id] });
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
+            queryClient.invalidateQueries({ queryKey: ['orders', 'map-points'] });
         },
     });
 
@@ -292,7 +291,7 @@ export function JobDetailPage() {
                     <JobPhotosSection jobId={job.id} photos={job.photos ?? []} />
                     <JobActivitiesSection jobId={job.id} jobActivities={job.jobActivities ?? []} />
                     <JobSealsSection jobId={job.id} jobSeals={job.jobSeals ?? []} />
-                    <JobMaterialsSection jobId={job.id} workMaterials={job.workMaterials ?? []} />
+                    <JobMaterialsSection jobId={job.id} workMaterials={job.materials ?? []} />
 
                     {/* Location map */}
                     {job.order?.coordinateX && job.order?.coordinateY && (
