@@ -7,7 +7,7 @@ const JobsPage = () => {
     const i18n = useTranslations();
 
     return (
-        <Page id="jobs" title={i18n('pages.jobs.title')}>
+        <Page id="jobs" breadcrumbs={[{ label: i18n('pages.jobs.title'), href: '/jobs' }]}>
             <Inventory />
         </Page>
     );

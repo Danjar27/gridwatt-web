@@ -535,7 +535,10 @@ export function OrdersImportPage() {
     // ── Render ───────────────────────────────────────────────────────────────────
 
     return (
-        <Page id="orders-import" title={i18n('pages.ordersImport.title')} backRoute="/orders">
+        <Page id="orders-import" breadcrumbs={[
+            { label: i18n('pages.orders.title'), href: '/orders' },
+            { label: i18n('pages.ordersImport.title'), href: '/orders/import' },
+        ]}>
         <div className="space-y-5">
 
             {/* Step indicator */}

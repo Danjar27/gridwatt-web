@@ -38,8 +38,10 @@ const CreateOrderPage = () => {
     return (
         <Page
             id="create-order"
-            title={i18n('pages.orders.form.create')}
-            backRoute="/orders"
+            breadcrumbs={[
+                { label: i18n('pages.orders.title'), href: '/orders' },
+                { label: i18n('pages.orders.form.create'), href: '/orders/new' },
+            ]}
         >
             <Form onSubmit={handleSubmit}>
                 {({ setValue, watch }) => {

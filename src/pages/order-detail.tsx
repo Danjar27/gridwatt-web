@@ -211,16 +211,16 @@ export function OrderDetailPage() {
     });
 
     return (
-        <Page id="order-detail" title={i18n('pages.orderDetail.orderTitle', { id: order.id })} backRoute="/orders">
+        <Page id="order-detail" breadcrumbs={[
+            { label: i18n('pages.orders.title'), href: '/orders' },
+            { label: i18n('pages.orderDetail.orderTitle', { id: order.id }), href: `/orders/${order.id}` },
+        ]}>
         <div className="space-y-5">
             {/* Hero header */}
             <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 px-5 py-4">
                 <div className="flex flex-col gap-4 s425:flex-row s425:items-center s425:justify-between">
                     <div className="flex items-center gap-3">
                         <div>
-                            <h1 className="hidden s992:block text-lg font-bold">
-                                {i18n('pages.orderDetail.orderTitle', { id: order.id })}
-                            </h1>
                             <p className="text-xs text-neutral-900">{order.type}</p>
                         </div>
                     </div>

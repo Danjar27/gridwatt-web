@@ -9,7 +9,7 @@ const TechnicianMapPage = () => {
     return (
         <Page
             id="technician-map"
-            title={i18n('pages.technicianMap.title')}
+            breadcrumbs={[{ label: i18n('pages.technicianMap.title'), href: '/map' }]}
             className="flex-1 min-h-0"
         >
             <Inventory />

@@ -9,7 +9,7 @@ const DashboardPage = () => {
     return (
         <Page
             id="dashboard"
-            title={i18n('pages.dashboard.title')}
+            breadcrumbs={[{ label: i18n('pages.dashboard.title'), href: '/dashboard' }]}
         >
             <Inventory />
         </Page>

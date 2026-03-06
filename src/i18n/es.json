@@ -67,9 +67,7 @@
         "jobs": "Trabajos",
         "tenants": "Contratos",
         "profile": "Perfil",
-        "map": "Mapa",
-        "new": "Nueva",
-        "import": "Importar"
+        "map": "Mapa"
     },
     "sidebar": {
         "menu": "Menú",

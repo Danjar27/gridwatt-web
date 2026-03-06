@@ -1,70 +1,38 @@
-import { Link, useLocation } from 'react-router-dom';
+import type { BreadcrumbProps } from './Breadcrumb.interface';
+import type { FC } from 'react';
+
 import { CaretRightIcon } from '@phosphor-icons/react';
-import { useTranslations } from 'use-intl';
+import { Link } from 'react-router-dom';
 
-const ROUTE_LABEL_KEYS: Record<string, string> = {
-    dashboard: 'routes.dashboard',
-    orders: 'routes.orders',
-    jobs: 'routes.jobs',
-    materials: 'routes.materials',
-    activities: 'routes.activities',
-    seals: 'routes.seals',
-    users: 'routes.users',
-    tenants: 'routes.tenants',
-    profile: 'routes.profile',
-    map: 'routes.map',
-    new: 'routes.new',
-    import: 'routes.import',
-};
-
-function isId(segment: string): boolean {
-    return /^\d+$/.test(segment) || /^[a-f0-9-]{8,}$/.test(segment);
-}
-
-const Breadcrumb = () => {
-    const location = useLocation();
-    const i18n = useTranslations();
-
-    const segments = location.pathname.split('/').filter(Boolean);
-
-    if (segments.length === 0) {
+const Breadcrumb: FC<BreadcrumbProps> = ({ items }) => {
+    if (items.length === 0) {
         return null;
     }
 
-    const crumbs = segments.map((segment, index) => {
-        const path = '/' + segments.slice(0, index + 1).join('/');
-        const isLast = index === segments.length - 1;
-
-        let label: string;
-        if (ROUTE_LABEL_KEYS[segment]) {
-            label = i18n(ROUTE_LABEL_KEYS[segment] as Parameters<typeof i18n>[0]);
-        } else if (isId(segment)) {
-            label = `#${segment}`;
-        } else {
-            label = segment.charAt(0).toUpperCase() + segment.slice(1);
-        }
-
-        return { path, label, isLast };
-    });
-
     return (
         <nav aria-label="Breadcrumb">
-            <ol className="flex items-center gap-1 flex-wrap">
-                {crumbs.map((crumb, index) => (
-                    <li key={crumb.path} className="flex items-center gap-1">
-                        {index > 0 && <CaretRightIcon size={10} className="text-neutral-800 shrink-0" />}
-                        {crumb.isLast ? (
-                            <span className="text-xs font-medium text-primary-500 dark:text-primary-500">{crumb.label}</span>
-                        ) : (
-                            <Link
-                                to={crumb.path}
-                                className="text-xs text-neutral-900 hover:text-primary-500 transition-colors duration-150"
-                            >
-                                {crumb.label}
-                            </Link>
-                        )}
-                    </li>
-                ))}
+            <ol className="inline-flex items-center gap-1 bg-neutral-600 rounded-md px-2.5 py-1">
+                {items.map((item, index) => {
+                    const isLast = index === items.length - 1;
+
+                    return (
+                        <li key={item.href} className="flex items-center gap-1">
+                            {index > 0 && (
+                                <CaretRightIcon size={9} weight="bold" className="text-neutral-800 shrink-0" />
+                            )}
+                            {isLast ? (
+                                <span className="text-xs font-medium text-neutral-900">{item.label}</span>
+                            ) : (
+                                <Link
+                                    to={item.href}
+                                    className="text-xs text-neutral-800 hover:text-neutral-900 transition-colors duration-150"
+                                >
+                                    {item.label}
+                                </Link>
+                            )}
+                        </li>
+                    );
+                })}
             </ol>
         </nav>
     );

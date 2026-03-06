@@ -56,7 +56,7 @@ const ProfilePage = () => {
     };
 
     return (
-        <Page id="profile" title={i18n('pages.profile.title')}>
+        <Page id="profile" breadcrumbs={[{ label: i18n('pages.profile.title'), href: '/profile' }]}>
             <Summary title={i18n('pages.profile.title')} subtitle={i18n('pages.profile.subtitle')} icon={User}>
                 <div className="mb-6 flex items-center gap-4">
                     <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">

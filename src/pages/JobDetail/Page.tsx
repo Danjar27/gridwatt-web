@@ -152,7 +152,10 @@ export function JobDetailPage() {
     }
 
     return (
-        <Page id="job-detail" title={`Job #${job.id}`} backRoute="/jobs">
+        <Page id="job-detail" breadcrumbs={[
+            { label: i18n('pages.jobs.title'), href: '/jobs' },
+            { label: `Job #${job.id}`, href: `/jobs/${job.id}` },
+        ]}>
             <PendingSyncWrapper pending={!!job._pendingSync}>
                 <div className="space-y-6">
                     {/* Action buttons */}
