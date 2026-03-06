@@ -12,7 +12,7 @@ interface Props {
 }
 
 const Page: FC<PropsWithChildren<Props>> = ({ id, children, breadcrumbs, className }) => (
-    <section id={id} className={classnames('flex flex-col gap-6 s992:gap-8', className)}>
+    <section id={id} className={classnames('flex flex-col gap-6', className)}>
         <div className="flex flex-col gap-2">
             <Breadcrumb items={breadcrumbs} />
         </div>

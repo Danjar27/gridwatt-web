@@ -21,7 +21,9 @@ const Breadcrumb: FC<BreadcrumbProps> = ({ items }) => {
                                 <CaretRightIcon size={9} weight="bold" className="text-neutral-800 shrink-0" />
                             )}
                             {isLast ? (
-                                <span className="text-xs font-medium text-neutral-900">{item.label}</span>
+                                <span className="text-xs font-medium text-primary-500 dark:text-white">
+                                    {item.label}
+                                </span>
                             ) : (
                                 <Link
                                     to={item.href}
