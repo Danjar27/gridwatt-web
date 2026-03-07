@@ -22,6 +22,13 @@ export interface WorkMaterial {
     material?: Material;
 }
 
+export interface MaterialTechnicianBreakdown {
+    id: number;
+    name: string;
+    lastName: string;
+    quantity: number;
+}
+
 export interface MaterialStats {
     id: string;
     name: string;
@@ -29,4 +36,5 @@ export interface MaterialStats {
     totalIngressed: number;
     available: number;
     operational: number;
+    technicians: Array<MaterialTechnicianBreakdown>;
 }

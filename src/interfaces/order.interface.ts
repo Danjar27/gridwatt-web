@@ -103,16 +103,8 @@ export interface OrdersImportCommitResponse {
     skippedCount: number;
 }
 
-export interface TechnicianOrderStats {
-    technicianId: number;
-    name: string;
-    lastName: string;
-    assigned: number;
-    resolved: number;
-}
-
 export interface OrderStats {
     total: number;
     completed: number;
-    byTechnician: Array<TechnicianOrderStats>;
+    pending: number;
 }

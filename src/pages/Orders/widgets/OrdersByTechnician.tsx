@@ -1,19 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'use-intl';
 
-import { getOrderStats } from '@lib/api/orders.ts';
+import { getTechnicianStats } from '@lib/api/users.ts';
 
 const OrdersByTechnician = () => {
     const i18n = useTranslations();
 
-    const { data, isLoading } = useQuery({
-        queryKey: ['orders', 'stats'],
-        queryFn: getOrderStats,
+    const { data = [], isLoading } = useQuery({
+        queryKey: ['users', 'technicians', 'stats'],
+        queryFn: getTechnicianStats,
     });
 
-    const rows = (data?.byTechnician ?? [])
-        .filter((tech) => tech.assigned > 0)
-        .sort((a, b) => (b.assigned - b.resolved) - (a.assigned - a.resolved));
+    const rows = data.filter((tech) => tech.totalOrders > 0);
 
     return (
         <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 overflow-hidden flex flex-col">
@@ -35,21 +33,19 @@ const OrdersByTechnician = () => {
 
             {!isLoading && rows.length > 0 && (
                 <div className="max-h-56 overflow-y-auto divide-y divide-neutral-800">
-                    {rows.map((row) => {
-                        const rate = row.assigned > 0 ? Math.round((row.resolved / row.assigned) * 100) : 0;
+                    {rows.map((tech) => {
+                        const rate =
+                            tech.totalOrders > 0 ? Math.round((tech.completedOrders / tech.totalOrders) * 100) : 0;
                         return (
-                            <div key={row.technicianId} className="flex items-center gap-3 px-4 py-2.5">
+                            <div key={tech.id} className="flex items-center gap-3 px-4 py-2.5">
                                 <span className="text-sm min-w-0 flex-1 truncate">
-                                    {row.name} {row.lastName}
+                                    {tech.name} {tech.lastName}
                                 </span>
                                 <div className="w-16 h-1 rounded-full bg-neutral-800 overflow-hidden shrink-0">
-                                    <div
-                                        className="h-full rounded-full bg-primary-500"
-                                        style={{ width: `${rate}%` }}
-                                    />
+                                    <div className="h-full rounded-full bg-primary-500" style={{ width: `${rate}%` }} />
                                 </div>
-                                <span className="text-xs tabular-nums text-neutral-900 shrink-0 w-8 text-right">
-                                    {row.resolved}/{row.assigned}
+                                <span className="text-xs tabular-nums text-neutral-900 shrink-0 w-10 text-right">
+                                    {tech.completedOrders}/{tech.totalOrders}
                                 </span>
                             </div>
                         );

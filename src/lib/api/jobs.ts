@@ -93,3 +93,29 @@ export const uploadJobPhoto = async (file: File, jobId: number, type: string): P
 
     return uploadFile<Photo>(`/jobs/${jobId}/photos/upload`, formData);
 };
+
+export const downloadCompletedJobsReport = async (from: string, to: string): Promise<void> => {
+    const API_URL = import.meta.env.VITE_API_URL || '/api';
+    const accessToken = localStorage.getItem('accessToken');
+
+    const response = await fetch(`${API_URL}/jobs/export?from=${from}&to=${to}`, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Export failed: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+
+    anchor.href = url;
+    anchor.download = `jobs-export-${from}-${to}.csv`;
+    anchor.click();
+
+    URL.revokeObjectURL(url);
+};

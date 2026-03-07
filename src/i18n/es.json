@@ -198,7 +198,9 @@
                 "bodega": "Bodega",
                 "bodegaFisica": "Física",
                 "bodegaTecnicos": "Técnicos",
-                "empty": "Sin materiales registrados"
+                "empty": "Sin materiales registrados",
+                "technicianBreakdown": "Asignación por técnico",
+                "noTechnicianBreakdown": "Sin asignaciones"
             }
         },
         "seals": {
@@ -433,19 +435,28 @@
                 }
             },
             "export": {
+                "title": "Exportar trabajos completados",
+                "dateRange": "Rango de fechas",
+                "selectRange": "Seleccionar rango de fechas",
                 "from": "Desde",
                 "to": "Hasta",
                 "data": "Datos",
                 "startPlaceholder": "Fecha de inicio",
                 "endPlaceholder": "Fecha de fin",
-                "download": "Descargar CSV",
-                "exporting": "Exportando..."
+                "download": "Descargar reporte",
+                "downloading": "Descargando...",
+                "exporting": "Exportando...",
+                "error": "Error al descargar el reporte"
             },
             "technicians": {
                 "stats": "Rendimiento de técnicos",
+                "name": "Técnico",
                 "orders": "Órdenes",
                 "materials": "Materiales",
-                "seals": "Precintos",
+                "seals": "Sellos",
+                "available": "Disponible",
+                "used": "Usado",
+                "assigned": "Asignados",
                 "empty": "Sin técnicos registrados"
             }
         },

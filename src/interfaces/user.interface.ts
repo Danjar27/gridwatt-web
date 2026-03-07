@@ -1,6 +1,14 @@
 import type { Tenant } from '@interfaces/tenant.interface.ts';
 
-export type Role = 'admin' | 'technician' | 'manager';
+export type Role = 'admin' | 'technician' | 'manager' | 'consultant';
+
+export interface TechnicianMaterialStats {
+    id: string;
+    name: string;
+    unit: string;
+    available: number;
+    used: number;
+}
 
 export interface TechnicianStats {
     id: number;
@@ -9,8 +17,7 @@ export interface TechnicianStats {
     totalOrders: number;
     completedOrders: number;
     pendingOrders: number;
-    materialAvailable: number;
-    materialUsed: number;
+    materials: Array<TechnicianMaterialStats>;
     sealsAssigned: number;
     sealsUsed: number;
 }
