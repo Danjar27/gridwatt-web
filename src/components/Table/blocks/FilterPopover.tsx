@@ -99,7 +99,7 @@ const FilterPopover = ({ options: optionsDef, value, onChange }: FilterPopoverPr
                                 type="button"
                                 onClick={() => select(undefined)}
                                 className={classnames(
-                                    'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-700 text-primary-500',
+                                    'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-700 text-primary-500 dark:text-white',
                                     {
                                         'bg-neutral-700/50 font-medium ': !value,
                                     }
@@ -123,7 +123,7 @@ const FilterPopover = ({ options: optionsDef, value, onChange }: FilterPopoverPr
                                         type="button"
                                         onClick={() => select(opt.value)}
                                         className={classnames(
-                                            'flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-neutral-700',
+                                            'flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-medium transition-colors hover:bg-neutral-700 dark:text-white',
                                             {
                                                 'bg-primary-500/10 font-medium text-primary-500': value === opt.value,
                                                 'text-primary-500': value !== opt.value,

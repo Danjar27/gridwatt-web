@@ -10,11 +10,7 @@ function CardView<T>({ table }: CardViewProps<T>) {
     const rows = table.getRowModel().rows;
 
     if (rows.length === 0) {
-        return (
-            <div className="px-6 py-12 text-center text-sm text-neutral-900">
-                No results found
-            </div>
-        );
+        return <div className="px-6 py-12 text-center text-sm text-neutral-900">No results found</div>;
     }
 
     return (
@@ -55,10 +51,7 @@ function CardView<T>({ table }: CardViewProps<T>) {
                                         >
                                             <span className="shrink-0 text-xs text-neutral-900">
                                                 {header && !header.isPlaceholder
-                                                    ? flexRender(
-                                                          header.column.columnDef.header,
-                                                          header.getContext()
-                                                      )
+                                                    ? flexRender(header.column.columnDef.header, header.getContext())
                                                     : null}
                                             </span>
                                             <span className="text-right">

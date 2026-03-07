@@ -1,3 +1,4 @@
+import type { Tenant } from '@interfaces/tenant.interface.ts';
 import type { ColumnDef } from '@tanstack/react-table';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination';
@@ -8,7 +9,6 @@ import { getTenants } from '@lib/api/tenants.ts';
 import { useTranslations } from 'use-intl';
 
 import Table from '@components/Table/Table';
-import type {Tenant} from "@interfaces/tenant.interface.ts";
 
 const ViewTable = () => {
     const i18n = useTranslations();

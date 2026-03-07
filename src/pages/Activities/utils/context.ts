@@ -1,5 +1,5 @@
 import { createInventoryContext } from '@context/Inventory/context';
-import type {Activity} from "@interfaces/activity.interface.ts";
+import type { Activity } from '@interfaces/activity.interface.ts';
 
 export const {
     Provider,

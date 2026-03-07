@@ -102,3 +102,9 @@ export interface OrdersImportCommitResponse {
     createdCount: number;
     skippedCount: number;
 }
+
+export interface OrderStats {
+    total: number;
+    completed: number;
+    pending: number;
+}

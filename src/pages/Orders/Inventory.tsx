@@ -32,7 +32,7 @@ const Inventory = () => {
 
     const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
     const [filterTechnicianId, setFilterTechnicianId] = useState<number | null>(null);
-    const [pendingCoords, setPendingCoords] = useState<AreaCoordinate[] | null>(null);
+    const [pendingCoords, setPendingCoords] = useState<Array<AreaCoordinate> | null>(null);
     const [editingArea, setEditingArea] = useState<MapArea | null>(null);
 
     const { data: myOrders = [], isLoading: myLoading } = useQuery({
@@ -69,11 +69,12 @@ const Inventory = () => {
     });
 
     const updateAreaShapeMutation = useMutation({
-        mutationFn: ({ id, coords }: { id: number; coords: AreaCoordinate[] }) =>
+        mutationFn: ({ id, coords }: { id: number; coords: Array<AreaCoordinate> }) =>
             updateArea(id, { coordinates: coords }),
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['areas'] });
-            queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
+            queryClient.invalidateQueries({ queryKey: ['orders', 'map-points'] });
+            queryClient.invalidateQueries({ queryKey: ['jobs'] });
         },
     });
 
@@ -96,7 +97,7 @@ const Inventory = () => {
     return (
         <>
             <div className={`space-y-6 ${viewMode === 'map' ? 'flex flex-col flex-1 min-h-0' : ''}`}>
-                <PageToolbar>
+                <PageToolbar className="flex-wrap">
                     {!isTechnician && (
                         <>
                             <ToolbarButton as="a" icon={PlusCircleIcon} variant="primary" to="/orders/new">
@@ -151,7 +152,24 @@ const Inventory = () => {
                         </Summary>
                     )
                 ) : (
-                    <div className="flex-1 min-h-0">
+                    <div
+                        className="rounded-lg border border-neutral-800 overflow-hidden flex flex-col flex-1 min-h-0"
+                        style={{ minHeight: 320 }}
+                    >
+                        <div className="flex flex-col s425:flex-row justify-between items-start s425:items-center gap-2 s425:gap-5 border-b border-neutral-800 bg-primary-500 text-white px-3 py-2 s768:px-6 shrink-0">
+                            <div className="flex items-center gap-3">
+                                <TruckIcon
+                                    width={32}
+                                    height={32}
+                                    weight="duotone"
+                                    className="rounded-lg border border-white p-1"
+                                />
+                                <div className="flex flex-col">
+                                    <h3 className="font-semibold">{i18n('pages.orders.summary.title')}</h3>
+                                    <span className="text-xs">{i18n('pages.orders.summary.subtitle')}</span>
+                                </div>
+                            </div>
+                        </div>
                         <OrdersMap
                             orders={isTechnician ? orders : allOrders}
                             technicians={technicians}
@@ -174,6 +192,7 @@ const Inventory = () => {
                 }}
                 pendingCoords={pendingCoords}
                 editingArea={editingArea}
+                orders={allOrders}
             />
         </>
     );

@@ -14,7 +14,7 @@ import { queryClient } from '@lib/query-client';
 import { deleteActivity } from '@lib/api/activities.ts';
 import { useTranslations } from 'use-intl';
 import { useState } from 'react';
-import type {Activity} from "@interfaces/activity.interface.ts";
+import type { Activity } from '@interfaces/activity.interface.ts';
 
 const Delete: FC<MutationForm> = ({ onSubmit, onCancel }) => {
     const i18n = useTranslations();

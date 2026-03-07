@@ -144,7 +144,10 @@ const SimpleImportModal: FC<SimpleImportModalProps> = ({ isOpen, onClose, title,
                         {result.errors.length > 0 && (
                             <ul className="max-h-40 overflow-y-auto rounded border border-neutral-700 text-sm">
                                 {result.errors.map((err, idx) => (
-                                    <li key={idx} className="border-b border-neutral-700 px-3 py-2 text-red-400 last:border-0">
+                                    <li
+                                        key={idx}
+                                        className="border-b border-neutral-700 px-3 py-2 text-red-400 last:border-0"
+                                    >
                                         Fila {err.row}: {err.reason}
                                     </li>
                                 ))}

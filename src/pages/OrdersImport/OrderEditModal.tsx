@@ -43,7 +43,9 @@ const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps)
     }, [order, methods]);
 
     const onSubmit = (formData: OrderImportData) => {
-        if (!order) return;
+        if (!order) {
+            return;
+        }
 
         const cleaned: OrderImportData = {
             ...formData,
@@ -64,12 +66,7 @@ const OrderEditModal = ({ order, isOpen, onClose, onSave }: OrderEditModalProps)
 
     return (
         <Modal id="order-edit-modal" isOpen={isOpen} onClose={onClose} onOpen={() => {}}>
-            <Window
-                title={i18n('editOrderTitle')}
-                icon={PencilSimpleIcon}
-                className="w-full s768:w-[640px]"
-                scrollable
-            >
+            <Window title={i18n('editOrderTitle')} icon={PencilSimpleIcon} className="w-full s768:w-160" scrollable>
                 <div className="flex gap-1 border-b border-neutral-800 pb-0 mb-4 -mx-4 s768:-mx-6 px-4 s768:px-6">
                     {tabs.map((tab) => (
                         <button

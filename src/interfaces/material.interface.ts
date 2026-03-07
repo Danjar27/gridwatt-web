@@ -10,10 +10,31 @@ export interface Material {
     unit: string;
     totalStock?: number;
 }
+
+export interface AssignedMaterial extends Material {
+    assignedQuantity: number;
+}
+
 export interface WorkMaterial {
-    id: string;
+    id: number;
     jobId: number;
-    materialId: string;
     quantity: number;
     material?: Material;
+}
+
+export interface MaterialTechnicianBreakdown {
+    id: number;
+    name: string;
+    lastName: string;
+    quantity: number;
+}
+
+export interface MaterialStats {
+    id: string;
+    name: string;
+    unit: string;
+    totalIngressed: number;
+    available: number;
+    operational: number;
+    technicians: Array<MaterialTechnicianBreakdown>;
 }

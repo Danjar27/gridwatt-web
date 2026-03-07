@@ -26,7 +26,12 @@ const LoginPage = () => {
         try {
             const user = await login(email, password);
             const role = user?.role?.name;
-            const destination = role === 'admin' ? '/tenants' : role === 'technician' ? '/jobs' : '/dashboard';
+            let destination = '/dashboard';
+            if (role === 'admin') {
+                destination = '/tenants';
+            } else if (role === 'technician') {
+                destination = '/map';
+            }
             navigate(destination, { replace: true });
         } catch (err) {
             setError(err instanceof Error ? err.message : i18n('errors.common'));
@@ -60,7 +65,7 @@ const LoginPage = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
-                                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-black"
                                 placeholder={i18n('auth.email.placeholder')}
                             />
                         </div>
@@ -77,7 +82,7 @@ const LoginPage = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
-                                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2"
+                                className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-black"
                                 placeholder={i18n('auth.password.placeholder')}
                             />
                         </div>

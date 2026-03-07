@@ -1,5 +1,5 @@
 import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
-import type { Seal } from '@interfaces/seal.interface.ts';
+import type { Seal, AssignedSeal } from '@interfaces/seal.interface.ts';
 
 import { buildQueryParameters } from '@utils/common/parameters.ts';
 import { request, mutationRequest } from '../http-client';
@@ -47,3 +47,5 @@ export const assignSeal = async (id: number, data: { technicianId: number; fromN
         method: 'POST',
         body: JSON.stringify(data),
     });
+
+export const getMySeals = async () => request<Array<AssignedSeal>>('/seals/my');

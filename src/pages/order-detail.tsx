@@ -4,7 +4,6 @@ import { assignOrder, getOrder } from '@lib/api/orders.ts';
 import { getTechnicians } from '@lib/api/users.ts';
 import { useState } from 'react';
 import {
-    ArrowLeftIcon,
     EnvelopeIcon,
     PhoneIcon,
     IdentificationCardIcon,
@@ -26,6 +25,7 @@ import type { Order } from '@interfaces/order.interface.ts';
 import Dropdown from '@components/Dropdown/Dropdown';
 import { classnames } from '@utils/classnames.ts';
 import Button from '@components/Button/Button';
+import Page from '@layouts/Page';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -67,7 +67,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label:
             </div>
             <div className="min-w-0">
                 <p className="text-xs text-neutral-900">{label}</p>
-                <p className="break-words text-sm font-medium">{value || '—'}</p>
+                <p className="wrap-break-word text-sm font-medium">{value || '—'}</p>
             </div>
         </div>
     );
@@ -161,7 +161,7 @@ export function OrderDetailPage() {
 
     const { data: order, isLoading } = useQuery({
         queryKey: ['order', id],
-        queryFn: () => getOrder(id!),  
+        queryFn: () => getOrder(id!),
         enabled: !!id,
     });
 
@@ -211,23 +211,16 @@ export function OrderDetailPage() {
     });
 
     return (
+        <Page id="order-detail" breadcrumbs={[
+            { label: i18n('pages.orders.title'), href: '/orders' },
+            { label: i18n('pages.orderDetail.orderTitle', { id: order.id }), href: `/orders/${order.id}` },
+        ]}>
         <div className="space-y-5">
             {/* Hero header */}
             <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 px-5 py-4">
                 <div className="flex flex-col gap-4 s425:flex-row s425:items-center s425:justify-between">
                     <div className="flex items-center gap-3">
-                        <Link
-                            to="/orders"
-                            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-neutral-800 px-3 py-1.5 text-xs font-medium text-neutral-900 transition hover:border-primary-500 hover:text-primary-500"
-                        >
-                            <ArrowLeftIcon size={13} weight="bold" />
-                            {i18n('literal.back')}
-                        </Link>
-                        <div className="h-5 w-px bg-neutral-800" />
                         <div>
-                            <h1 className="text-lg font-bold s768:text-xl">
-                                {i18n('pages.orderDetail.orderTitle', { id: order.id })}
-                            </h1>
                             <p className="text-xs text-neutral-900">{order.type}</p>
                         </div>
                     </div>
@@ -262,8 +255,16 @@ export function OrderDetailPage() {
                             </div>
                         </div>
                         <div className="space-y-2.5 pt-1">
-                            <InfoRow icon={EnvelopeIcon} label={i18n('pages.orderDetail.email')} value={order.clientEmail} />
-                            <InfoRow icon={PhoneIcon} label={i18n('pages.orderDetail.phone')} value={order.clientPhone} />
+                            <InfoRow
+                                icon={EnvelopeIcon}
+                                label={i18n('pages.orderDetail.email')}
+                                value={order.clientEmail}
+                            />
+                            <InfoRow
+                                icon={PhoneIcon}
+                                label={i18n('pages.orderDetail.phone')}
+                                value={order.clientPhone}
+                            />
                             <InfoRow
                                 icon={IdentificationCardIcon}
                                 label={i18n('pages.orderDetail.idNumber')}
@@ -290,11 +291,11 @@ export function OrderDetailPage() {
                                 {order.addressReference && (
                                     <p className="text-xs text-neutral-900">{order.addressReference}</p>
                                 )}
-                                {[order.neighborhood, order.building, order.urbanization]
-                                    .filter(Boolean)
-                                    .map((v) => (
-                                        <p key={v} className="text-xs text-neutral-900">{v}</p>
-                                    ))}
+                                {[order.neighborhood, order.building, order.urbanization].filter(Boolean).map((v) => (
+                                    <p key={v} className="text-xs text-neutral-900">
+                                        {v}
+                                    </p>
+                                ))}
                                 {[order.zone, order.sector, order.parish, order.canton, order.province]
                                     .filter(Boolean)
                                     .join(' · ') && (
@@ -323,11 +324,7 @@ export function OrderDetailPage() {
                 {/* Order Details */}
                 <SectionCard title={i18n('pages.orderDetail.orderDetails')} accentColor="border-l-secondary-500">
                     <div className="space-y-2.5">
-                        <InfoRow
-                            icon={WrenchIcon}
-                            label={i18n('pages.orderDetail.serviceType')}
-                            value={order.type}
-                        />
+                        <InfoRow icon={WrenchIcon} label={i18n('pages.orderDetail.serviceType')} value={order.type} />
                         <InfoRow icon={PlugIcon} label={i18n('pages.orderDetail.meterNumber')} value={order.meterId} />
                         {order.meterType && (
                             <InfoRow
@@ -374,7 +371,7 @@ export function OrderDetailPage() {
                             <div className="flex-1">
                                 <Dropdown
                                     value={selectedTechnician ?? ''}
-                                    onChange={(v) => setSelectedTechnician(v === '' ? null : v as number)}
+                                    onChange={(v) => setSelectedTechnician(v === '' ? null : (v as number))}
                                     options={[
                                         { label: i18n('pages.orderDetail.selectTechnician'), value: '' },
                                         ...technicians.map((tech: UserType) => ({
@@ -448,5 +445,6 @@ export function OrderDetailPage() {
                 </div>
             )}
         </div>
+        </Page>
     );
 }

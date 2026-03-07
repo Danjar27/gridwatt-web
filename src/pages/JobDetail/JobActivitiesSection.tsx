@@ -10,7 +10,7 @@ import Dropdown from '@components/Dropdown/Dropdown';
 import Button from '@components/Button/Button';
 import { markJobPendingInLists } from './utils';
 import { useTranslations } from 'use-intl';
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 import type { JobActivity } from '@interfaces/activity.interface.ts';
 
 interface Props {
@@ -38,10 +38,9 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
             const previous = queryClient.getQueryData<Job>(jobKey);
             const activity = activitiesData?.data.find((a) => a.id === activityId);
             const tempJobActivity: JobActivity = {
-                id: `temp-${Date.now()}`,
+                id: -Date.now(),
                 jobId,
-                activityId,
-                activity: activity ?? undefined,
+                activity: activity ?? { id: activityId, name: '' },
             };
             const pendingSync = !isOnline();
             queryClient.setQueryData<Job>(jobKey, (old) =>
@@ -53,23 +52,29 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                       }
                     : old
             );
-            if (pendingSync) {markJobPendingInLists(queryClient, jobId);}
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
             setSelectedActivityId('');
             setModalOpen(false);
 
             return { previous };
         },
         onError: (_err, _data, context) => {
-            if (context?.previous) {queryClient.setQueryData(jobKey, context.previous);}
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
         },
         onSettled: () => {
-            if (isOnline()) {queryClient.invalidateQueries({ queryKey: jobKey });}
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
     const removeMutation = useMutation({
-        mutationFn: (jobActivityId: string) => removeJobActivity(jobActivityId),
-        onMutate: async (jobActivityId) => {
+        mutationFn: (activityId: string) => removeJobActivity(jobId, activityId),
+        onMutate: async (activityId) => {
             await queryClient.cancelQueries({ queryKey: jobKey });
             const previous = queryClient.getQueryData<Job>(jobKey);
             const pendingSync = !isOnline();
@@ -77,24 +82,30 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 old
                     ? {
                           ...old,
-                          jobActivities: old.jobActivities?.filter((ja) => ja.id !== jobActivityId),
+                          jobActivities: old.jobActivities?.filter((ja) => ja.activity.id !== activityId),
                           ...(pendingSync ? { _pendingSync: true } : {}),
                       }
                     : old
             );
-            if (pendingSync) {markJobPendingInLists(queryClient, jobId);}
+            if (pendingSync) {
+                markJobPendingInLists(queryClient, jobId);
+            }
 
             return { previous };
         },
         onError: (_err, _data, context) => {
-            if (context?.previous) {queryClient.setQueryData(jobKey, context.previous);}
+            if (context?.previous) {
+                queryClient.setQueryData(jobKey, context.previous);
+            }
         },
         onSettled: () => {
-            if (isOnline()) {queryClient.invalidateQueries({ queryKey: jobKey });}
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: jobKey });
+            }
         },
     });
 
-    const addedIds = new Set(jobActivities.map((ja) => ja.activityId));
+    const addedIds = new Set(jobActivities.map((ja) => ja.activity.id));
     const availableActivities = activitiesData?.data.filter((a) => !addedIds.has(a.id)) ?? [];
 
     return (
@@ -113,9 +124,9 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                             key={ja.id}
                             className="flex items-center gap-1 rounded-full bg-primary-500/20 px-3 py-1 text-sm text-primary-500"
                         >
-                            {ja.activity?.name}
+                            {ja.activity.name}
                             <button
-                                onClick={() => removeMutation.mutate(ja.id)}
+                                onClick={() => removeMutation.mutate(ja.activity.id)}
                                 disabled={removeMutation.isPending}
                                 className="ml-1 rounded-full p-0.5 hover:bg-primary-500/30"
                             >
@@ -128,25 +139,30 @@ export function JobActivitiesSection({ jobId, jobActivities }: Props) {
                 <p className="text-center text-neutral-900">{i18n('pages.jobDetail.activities.empty')}</p>
             )}
 
-            <Modal id="job-activities-modal" isOpen={modalOpen} onOpen={() => setModalOpen(true)} onClose={() => setModalOpen(false)}>
+            <Modal
+                id="job-activities-modal"
+                isOpen={modalOpen}
+                onOpen={() => setModalOpen(true)}
+                onClose={() => setModalOpen(false)}
+            >
                 <Window title={i18n('pages.jobDetail.activities.modal')} className="w-full max-w-sm px-4">
-                <div className="space-y-4">
-                    <Dropdown
-                        value={selectedActivityId}
-                        onChange={(v) => setSelectedActivityId(v as string)}
-                        options={[
-                            { label: i18n('pages.jobDetail.activities.select'), value: '' },
-                            ...availableActivities.map((a) => ({ label: a.name, value: a.id })),
-                        ]}
-                    />
-                    <Button
-                        variant="solid"
-                        disabled={!selectedActivityId || addMutation.isPending}
-                        onClick={() => selectedActivityId && addMutation.mutate(selectedActivityId)}
-                    >
-                        {i18n('literal.add')}
-                    </Button>
-                </div>
+                    <div className="space-y-4">
+                        <Dropdown
+                            value={selectedActivityId}
+                            onChange={(v) => setSelectedActivityId(v as string)}
+                            options={[
+                                { label: i18n('pages.jobDetail.activities.select'), value: '' },
+                                ...availableActivities.map((a) => ({ label: a.name, value: a.id })),
+                            ]}
+                        />
+                        <Button
+                            variant="solid"
+                            disabled={!selectedActivityId || addMutation.isPending}
+                            onClick={() => selectedActivityId && addMutation.mutate(selectedActivityId)}
+                        >
+                            {i18n('literal.add')}
+                        </Button>
+                    </div>
                 </Window>
             </Modal>
         </div>

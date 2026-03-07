@@ -10,11 +10,14 @@ import Visible from '@components/atoms/Visible';
 import Portal from '@components/atoms/Portal';
 
 const Modal: FC<PropsWithChildren<ModalProps>> = ({ children, className, isOpen, onClose, onOpen }) => {
-    const handleKeyDown = useCallback((event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-            onClose();
-        }
-    }, [onClose]);
+    const handleKeyDown = useCallback(
+        (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        },
+        [onClose]
+    );
 
     useEffect(() => {
         if (isOpen) {

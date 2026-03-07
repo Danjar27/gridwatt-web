@@ -101,7 +101,9 @@ const Dropdown: FC<DropdownProps> = ({ value, onChange, options, disabled, class
                                 className={classnames(
                                     'w-full flex items-center px-3 py-2 text-sm text-left transition-colors cursor-pointer',
                                     'hover:bg-neutral-700',
-                                    option.value === value ? 'text-primary-500 font-medium' : 'text-neutral-900'
+                                    option.value === value
+                                        ? 'text-primary-500 dark:text-white font-medium'
+                                        : 'text-neutral-900'
                                 )}
                             >
                                 {option.label}

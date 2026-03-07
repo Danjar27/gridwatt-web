@@ -22,7 +22,9 @@ function getStorageKey(userId: number) {
 function getStoredData(userId: number): { orderCount: number; notifications: Array<LocalNotification> } {
     try {
         const raw = localStorage.getItem(getStorageKey(userId));
-        if (raw) {return JSON.parse(raw);}
+        if (raw) {
+            return JSON.parse(raw);
+        }
     } catch {
         // ignore parse errors
     }
@@ -51,7 +53,9 @@ const Notifications = () => {
 
     // Check for new assignments by comparing order count
     useEffect(() => {
-        if (!user || !isTechnician) {return;}
+        if (!user || !isTechnician) {
+            return;
+        }
 
         const stored = getStoredData(user.id);
         const currentCount = myOrders.length;
@@ -94,14 +98,18 @@ const Notifications = () => {
                 setOpen(false);
             }
         };
-        if (open) {document.addEventListener('mousedown', handler);}
+        if (open) {
+            document.addEventListener('mousedown', handler);
+        }
 
         return () => document.removeEventListener('mousedown', handler);
     }, [open]);
 
     const dismissNotification = useCallback(
         (id: string) => {
-            if (!user) {return;}
+            if (!user) {
+                return;
+            }
             const updated = notifications.filter((n) => n.id !== id);
             setNotifications(updated);
             const stored = getStoredData(user.id);
@@ -111,7 +119,9 @@ const Notifications = () => {
     );
 
     const clearAll = useCallback(() => {
-        if (!user) {return;}
+        if (!user) {
+            return;
+        }
         setNotifications([]);
         const stored = getStoredData(user.id);
         setStoredData(user.id, { ...stored, notifications: [] });

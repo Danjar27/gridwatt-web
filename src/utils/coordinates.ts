@@ -12,10 +12,7 @@ const WGS84 = '+proj=longlat +datum=WGS84 +no_defs';
  * Convert UTM Zone 17S easting/northing to WGS84 [latitude, longitude].
  * Returns null if the inputs are not valid UTM values.
  */
-export function utmToLatLng(
-    easting: number,
-    northing: number
-): [number, number] | null {
+export function utmToLatLng(easting: number, northing: number): [number, number] | null {
     // Basic sanity check – UTM 17S valid range
     if (easting < 100_000 || easting > 900_000 || northing < 0 || northing > 10_000_000) {
         return null;

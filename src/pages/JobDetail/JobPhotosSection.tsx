@@ -6,7 +6,7 @@ import { addPendingPhoto, getPendingPhotos, removePhoto, isOnline, type PendingP
 import { useOfflineContext } from '@context/offline/context.ts';
 import { PendingSyncWrapper } from '@components/atoms/PendingSyncWrapper';
 import { useTranslations } from 'use-intl';
-import type {Photo} from "@interfaces/photo.interface.ts";
+import type { Photo } from '@interfaces/photo.interface.ts';
 
 interface Props {
     jobId: number;
@@ -27,7 +27,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
     useEffect(() => {
         let cancelled = false;
         getPendingPhotos(jobId).then((pending: Array<PendingPhoto>) => {
-            if (cancelled) {return;}
+            if (cancelled) {
+                return;
+            }
             const map: Record<string, Blob> = {};
             for (const p of pending) {
                 map[p.type] = p.blob;
@@ -63,9 +65,13 @@ export function JobPhotosSection({ jobId, photos }: Props) {
         try {
             await removeJobPhoto(photoId);
         } catch {
-            if (previous) {queryClient.setQueryData(['job', String(jobId)], previous);}
+            if (previous) {
+                queryClient.setQueryData(['job', String(jobId)], previous);
+            }
         } finally {
-            if (isOnline()) {queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });}
+            if (isOnline()) {
+                queryClient.invalidateQueries({ queryKey: ['job', String(jobId)] });
+            }
         }
     };
 
@@ -77,7 +83,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
     const handleRemovePending = async (type: SlotType) => {
         const db = await getPendingPhotos(jobId);
         const entry = db.find((p) => p.type === type);
-        if (entry) {await removePhoto(entry.id);}
+        if (entry) {
+            await removePhoto(entry.id);
+        }
         setPendingPhotos((prev) => {
             const next = { ...prev };
             delete next[type];
@@ -107,7 +115,11 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                 ) : pendingBlob ? (
                     <PendingSyncWrapper pending={true}>
                         <div className="relative aspect-square overflow-hidden rounded-lg">
-                            <img src={objectUrls[type]} alt={`${label} (pending)`} className="h-full w-full object-cover" />
+                            <img
+                                src={objectUrls[type]}
+                                alt={`${label} (pending)`}
+                                className="h-full w-full object-cover"
+                            />
                             <button
                                 onClick={() => handleRemovePending(type)}
                                 className="absolute right-1 top-1 rounded-full bg-error-500 p-1 text-white hover:bg-error-400"
@@ -129,7 +141,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
                         >
                             <Camera width={16} height={16} />
-                            {online ? i18n('pages.jobDetail.photos.capture') : i18n('pages.jobDetail.photos.selectLibrary')}
+                            {online
+                                ? i18n('pages.jobDetail.photos.capture')
+                                : i18n('pages.jobDetail.photos.selectLibrary')}
                         </button>
                         <input
                             ref={fileInputRef}
@@ -138,7 +152,9 @@ export function JobPhotosSection({ jobId, photos }: Props) {
                             className="hidden"
                             onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file) {handleCapture(file, type);}
+                                if (file) {
+                                    handleCapture(file, type);
+                                }
                                 e.target.value = '';
                             }}
                         />

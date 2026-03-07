@@ -12,7 +12,7 @@ const Dashboard = () => (
                 <Sidebar />
                 <div className="w-full flex flex-col gap-2">
                     <Topbar />
-                    <main className="no-scrollbar flex flex-col flex-1 overflow-y-auto overscroll-none bg-neutral-500 rounded-lg p-4 pt-8 s768:p-6 s992:p-10 border border-neutral-800">
+                    <main className="no-scrollbar flex flex-col flex-1 overflow-y-auto overscroll-none bg-neutral-500 rounded-lg p-4 s992:p-6 border border-neutral-800">
                         <Outlet />
                     </main>
                 </div>

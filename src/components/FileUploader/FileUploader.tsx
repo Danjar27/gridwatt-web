@@ -19,15 +19,7 @@ const FileTypeIcon = ({ filename }: { filename: string }) => {
     return <FileXlsIcon size={13} weight="fill" className="shrink-0 text-secondary-500" />;
 };
 
-const FileUploader = ({
-    files,
-    isDragging,
-    onAdd,
-    onRemove,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-}: FileUploaderProps) => {
+const FileUploader = ({ files, isDragging, onAdd, onRemove, onDragOver, onDragLeave, onDrop }: FileUploaderProps) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const i18n = useTranslations();
     const hasFiles = files.length > 0;
@@ -185,7 +177,6 @@ const FileUploader = ({
                     </label>
                 </div>
             </div>
-
         </div>
     );
 };

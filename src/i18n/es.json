@@ -66,7 +66,8 @@
         "users": "Usuarios",
         "jobs": "Trabajos",
         "tenants": "Contratos",
-        "profile": "Perfil"
+        "profile": "Perfil",
+        "map": "Mapa"
     },
     "sidebar": {
         "menu": "Menú",
@@ -95,7 +96,6 @@
     "pages": {
         "tenants": {
             "title": "Contratos",
-            "subtitle": "Administra las contratos registrados",
             "action": "Agregar contrato",
             "form": {
                 "create": "Agregar nuevo contrato",
@@ -144,7 +144,6 @@
         },
         "activities": {
             "title": "Actividades",
-            "subtitle": "Administra las actividades y tareas de tu empresa",
             "action": "Agregar actividad",
             "import": "Importar",
             "form": {
@@ -164,7 +163,6 @@
         },
         "materials": {
             "title": "Materiales",
-            "subtitle": "Administra los materiales de inventario y proveedores",
             "action": "Agregar material",
             "import": "Importar",
             "ingress": "Registrar ingreso",
@@ -194,11 +192,19 @@
                 "title": "Todos los materiales",
                 "subtitle": "Lista de materiales disponibles",
                 "total": "Total de materiales: {count}"
+            },
+            "widgets": {
+                "stats": "Inventario de materiales",
+                "bodega": "Bodega",
+                "bodegaFisica": "Física",
+                "bodegaTecnicos": "Técnicos",
+                "empty": "Sin materiales registrados",
+                "technicianBreakdown": "Asignación por técnico",
+                "noTechnicianBreakdown": "Sin asignaciones"
             }
         },
         "seals": {
             "title": "Sellos",
-            "subtitle": "Administra los tipos de sellos y configuraciones",
             "action": "Agregar sello",
             "range": "Crear rango",
             "assignMultiple": "Asignar rango",
@@ -226,7 +232,6 @@
         },
         "orders": {
             "title": "Órdenes",
-            "subtitle": "Administra todas las órdenes de servicio",
             "action": "Crear orden",
             "import": "Importar órdenes",
             "viewMode": {
@@ -234,11 +239,14 @@
                 "map": "Mapa"
             },
             "filter": {
-                "allTechnicians": "Todos los técnicos"
+                "allTechnicians": "Todos los técnicos",
+                "status": {
+                    "pending": "Pendientes",
+                    "completed": "Atendidas"
+                }
             },
             "form": {
                 "create": "Nueva Orden",
-                "createSubtitle": "Completa la información para registrar una nueva orden de servicio",
                 "section": {
                     "details": "Datos de la orden",
                     "detailsSubtitle": "Información del servicio, medidor y cliente",
@@ -284,6 +292,7 @@
                 "hasLocation": "Con ubicación",
                 "view": "Ver"
             },
+            "deleteConfirm": "¿Eliminar esta orden? Esta acción no se puede deshacer.",
             "empty": "No se encontraron órdenes",
             "summary": {
                 "title": "Todas las órdenes",
@@ -309,12 +318,19 @@
                 "deleteConfirm": "¿Eliminar esta área? Las órdenes asignadas a través de ella serán desasignadas.",
                 "editShape": "Editar forma",
                 "delete": "Eliminar área"
+            },
+            "widgets": {
+                "stats": "Resumen de órdenes",
+                "completed": "Atendidas",
+                "pending": "Pendientes",
+                "total": "Total",
+                "byTechnician": "Órdenes pendientes por técnico",
+                "noOrders": "Sin órdenes pendientes asignadas",
+                "pendingCount": "{count} pendientes"
             }
         },
         "jobs": {
             "title": "Trabajos",
-            "subtitle": "Administra los trabajos asignados",
-            "subtitleTechnician": "Tus trabajos asignados",
             "filter": {
                 "allTechnicians": "Todos los técnicos"
             },
@@ -338,7 +354,6 @@
         },
         "users": {
             "title": "Usuarios",
-            "subtitle": "Administra las cuentas de usuario y permisos",
             "action": "Agregar usuario",
             "form": {
                 "create": "Nuevo Usuario",
@@ -379,7 +394,6 @@
         },
         "dashboard": {
             "title": "Tablero",
-            "subtitle": "Bienvenido, {name}! Aquí tienes un resumen de tu trabajo.",
             "recentJobs": {
                 "title": "Trabajos recientes",
                 "subtitle": "Trabajos pendientes por completar"
@@ -421,19 +435,40 @@
                 }
             },
             "export": {
+                "title": "Exportar trabajos completados",
+                "dateRange": "Rango de fechas",
+                "selectRange": "Seleccionar rango de fechas",
                 "from": "Desde",
                 "to": "Hasta",
                 "data": "Datos",
                 "startPlaceholder": "Fecha de inicio",
                 "endPlaceholder": "Fecha de fin",
-                "download": "Descargar CSV",
-                "exporting": "Exportando..."
+                "download": "Descargar reporte",
+                "downloading": "Descargando...",
+                "exporting": "Exportando...",
+                "error": "Error al descargar el reporte"
+            },
+            "technicians": {
+                "stats": "Rendimiento de técnicos",
+                "name": "Técnico",
+                "orders": "Órdenes",
+                "materials": "Materiales",
+                "seals": "Sellos",
+                "available": "Disponible",
+                "used": "Usado",
+                "assigned": "Asignados",
+                "empty": "Sin técnicos registrados"
             }
         },
         "jobDetail": {
             "notFound": "Trabajo no encontrado",
             "save": "Guardar",
             "complete": "Completar trabajo",
+            "reopen": "Reabrir trabajo",
+            "completedBadge": "Trabajo completado",
+            "confirmComplete": "¿Deseas marcar este trabajo como completado? Ya no podrás editar este trabajo.",
+            "confirmReopen": "¿Deseas reabrir este trabajo? La orden volverá a estado pendiente.",
+            "confirmAction": "Confirmar",
             "offline": "Estás sin conexión",
             "offlineCamera": "La cámara no está disponible sin conexión. Por favor selecciona imágenes de tu galería.",
             "orderDetails": "Detalles de la orden",
@@ -509,9 +544,21 @@
             "transformerNumber": "Número de transformador",
             "transformerProperty": "Propiedad del transformador"
         },
+        "technicianMap": {
+            "title": "Mapa de órdenes",
+            "order": {
+                "title": "Orden #{id}",
+                "customer": "Cliente",
+                "type": "Tipo",
+                "address": "Dirección",
+                "meter": "Medidor",
+                "account": "Cuenta",
+                "review": "Revisar",
+                "noJob": "Sin trabajo asociado"
+            }
+        },
         "ordersImport": {
             "title": "Importar órdenes",
-            "subtitle": "Sube archivos CSV, Excel, XML o PDF para crear órdenes en lote.",
             "restricted": "No tienes acceso para importar órdenes.",
             "selectFiles": "Seleccionar archivos",
             "supported": "Admitidos: .csv, .xlsx, .xls, .xml, .pdf",

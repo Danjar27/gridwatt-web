@@ -26,6 +26,10 @@ dist-ssr
 .claude
 docs
 
+# AI
+.agents
+skills-lock.json
+
 # Environment
 .env
 .env.local

@@ -14,8 +14,11 @@ import Form from '@components/Form/Form';
 
 import { getTechnicians } from '@lib/api/users.ts';
 import { createArea, updateArea } from '@lib/api/areas.ts';
+import { bulkAssignOrders } from '@lib/api/orders.ts';
 import { queryClient } from '@lib/query-client';
+import { getOrderIdsInPolygon } from '@utils/map.ts';
 import type { MapArea, AreaCoordinate, CreateAreaPayload } from '@interfaces/area.interface.ts';
+import type { OrderMapPoint } from '@interfaces/order.interface.ts';
 
 interface AreaFormProps {
     isOpen: boolean;
@@ -24,13 +27,23 @@ interface AreaFormProps {
     pendingCoords?: Array<AreaCoordinate> | null;
     /** Filled when editing — the existing area */
     editingArea?: MapArea | null;
+    /** All visible orders on the map — used to find which ones fall inside the polygon */
+    orders: Array<OrderMapPoint>;
 }
 
 interface AreaFormData {
     technicianId: string;
 }
 
-const AreaForm: FC<AreaFormProps> = ({ isOpen, onClose, pendingCoords, editingArea }) => {
+const invalidateAfterAreaChange = async () => {
+    await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['areas'] }),
+        queryClient.invalidateQueries({ queryKey: ['orders', 'map-points'] }),
+        queryClient.invalidateQueries({ queryKey: ['jobs'] }),
+    ]);
+};
+
+const AreaForm: FC<AreaFormProps> = ({ isOpen, onClose, pendingCoords, editingArea, orders }) => {
     const i18n = useTranslations();
     const [error, setError] = useState<string | null>(null);
 
@@ -44,38 +57,47 @@ const AreaForm: FC<AreaFormProps> = ({ isOpen, onClose, pendingCoords, editingAr
     });
 
     const createMutation = useMutation({
-        mutationFn: (data: AreaFormData) => {
+        mutationFn: async (data: AreaFormData) => {
             if (!pendingCoords || pendingCoords.length < 3) {
                 throw new Error('Coordenadas inválidas');
             }
-            const payload: CreateAreaPayload = {
-                coordinates: pendingCoords,
-                technicianId: data.technicianId ? Number(data.technicianId) : null,
-            };
+            const technicianId = data.technicianId ? Number(data.technicianId) : null;
+            const payload: CreateAreaPayload = { coordinates: pendingCoords, technicianId };
 
-            return createArea(payload);
+            await createArea(payload);
+
+            if (technicianId !== null && orders.length > 0) {
+                const orderIds = getOrderIdsInPolygon(orders, pendingCoords);
+                if (orderIds.length > 0) {
+                    await bulkAssignOrders(orderIds, technicianId);
+                }
+            }
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['areas'] });
-            await queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
+            await invalidateAfterAreaChange();
             handleClose();
         },
         onError: (err: Error) => setError(err.message || i18n('errors.common')),
     });
 
     const updateMutation = useMutation({
-        mutationFn: (data: AreaFormData) => {
+        mutationFn: async (data: AreaFormData) => {
             if (!editingArea) {
                 throw new Error(i18n('errors.common'));
             }
+            const technicianId = data.technicianId ? Number(data.technicianId) : null;
 
-            return updateArea(editingArea.id, {
-                technicianId: data.technicianId ? Number(data.technicianId) : null,
-            });
+            await updateArea(editingArea.id, { technicianId });
+
+            if (technicianId !== null && orders.length > 0) {
+                const orderIds = getOrderIdsInPolygon(orders, editingArea.coordinates);
+                if (orderIds.length > 0) {
+                    await bulkAssignOrders(orderIds, technicianId);
+                }
+            }
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ['areas'] });
-            await queryClient.invalidateQueries({ queryKey: ['orders', 'all-map'] });
+            await invalidateAfterAreaChange();
             handleClose();
         },
         onError: (err: Error) => setError(err.message || i18n('errors.common')),

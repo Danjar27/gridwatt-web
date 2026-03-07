@@ -80,7 +80,11 @@ const AssignMultiple: FC<AssignMultipleProps> = ({ isOpen, onClose }) => {
                 icon={UsersThreeIcon}
             >
                 <FormError message={error} />
-                <Form key="assign-seal-multiple" onSubmit={handleSubmit} defaultValues={{ fromNumber: 1, toNumber: SLIDER_MAX }}>
+                <Form
+                    key="assign-seal-multiple"
+                    onSubmit={handleSubmit}
+                    defaultValues={{ fromNumber: 1, toNumber: SLIDER_MAX }}
+                >
                     <Field name="technicianId" label={i18n('pages.seals.form.technician')} required>
                         <Select
                             name="technicianId"
@@ -100,13 +104,7 @@ const AssignMultiple: FC<AssignMultipleProps> = ({ isOpen, onClose }) => {
 
                     <div className="mt-2">
                         <p className="mb-3 block text-sm font-medium">{i18n('pages.seals.form.rangeLabel')}</p>
-                        <SliderRange
-                            fromName="fromNumber"
-                            toName="toNumber"
-                            min={1}
-                            max={SLIDER_MAX}
-                            step={1}
-                        />
+                        <SliderRange fromName="fromNumber" toName="toNumber" min={1} max={SLIDER_MAX} step={1} />
                     </div>
 
                     <div className="mt-3 grid grid-cols-2 gap-4">

@@ -14,7 +14,7 @@ import { JobPhotosSection } from './job-detail/JobPhotosSection';
 import { useTranslations } from 'use-intl';
 import * as leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 
 export function JobDetailPage() {
     const { id } = useParams<{ id: string }>();
@@ -42,19 +42,17 @@ export function JobDetailPage() {
             const pendingSync = !isOnline();
             const patchedData = { ...data, ...(pendingSync ? { _pendingSync: true } : {}) };
 
-            queryClient.setQueryData<Job>(['job', id], (old) =>
-                old ? { ...old, ...patchedData } : old
-            );
+            queryClient.setQueryData<Job>(['job', id], (old) => (old ? { ...old, ...patchedData } : old));
 
             // Update ALL jobs list caches so navigation back shows the change
             // (covers ['jobs', 'my'], ['jobs', 'all', ...], etc.)
             const previousJobsCache = queryClient.getQueriesData<Array<Job>>({ queryKey: ['jobs'] });
             for (const [queryKey, cachedJobs] of previousJobsCache) {
-                if (!Array.isArray(cachedJobs)) {continue;}
+                if (!Array.isArray(cachedJobs)) {
+                    continue;
+                }
                 queryClient.setQueryData<Array<Job>>(queryKey, (jobs) =>
-                    jobs?.map((j) =>
-                        j.id === Number(id) ? { ...j, ...patchedData } : j
-                    )
+                    jobs?.map((j) => (j.id === Number(id) ? { ...j, ...patchedData } : j))
                 );
             }
 
@@ -114,140 +112,145 @@ export function JobDetailPage() {
 
     return (
         <PendingSyncWrapper pending={hasPendingSync}>
-        <div className="space-y-6">
-            <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-3">
-                <div>
-                    <h1 className="text-xl s768:text-2xl font-bold">Job #{job.id}</h1>
-                    <p className="text-neutral-900">{job.jobType}</p>
-                </div>
-                <div className="flex flex-col s425:flex-row gap-2">
-                    <button
-                        onClick={handleSave}
-                        disabled={updateMutation.isPending}
-                        className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
-                    >
-                        <Save className="h-4 w-4" />
-                        {i18n('pages.jobDetail.save')}
-                    </button>
-                    {job.jobStatus !== 'completed' && (
-                        <button
-                            onClick={handleComplete}
-                            disabled={updateMutation.isPending}
-                            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                        >
-                            {i18n('pages.jobDetail.complete')}
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {!online && (
-                <div className="flex items-center gap-2 rounded-lg bg-secondary-500/10 p-4 text-secondary-500">
-                    <AlertCircle className="h-5 w-5" />
+            <div className="space-y-6">
+                <div className="flex flex-col s425:flex-row items-start s425:items-center justify-between gap-3">
                     <div>
-                        <p className="font-medium">{i18n('pages.jobDetail.offline')}</p>
-                        <p className="text-sm">
-                            {i18n('pages.jobDetail.offlineCamera')}
-                        </p>
+                        <h1 className="text-xl s768:text-2xl font-bold">Job #{job.id}</h1>
+                        <p className="text-neutral-900">{job.jobType}</p>
+                    </div>
+                    <div className="flex flex-col s425:flex-row gap-2">
+                        <button
+                            onClick={handleSave}
+                            disabled={updateMutation.isPending}
+                            className="flex items-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 disabled:opacity-50"
+                        >
+                            <Save className="h-4 w-4" />
+                            {i18n('pages.jobDetail.save')}
+                        </button>
+                        {job.jobStatus !== 'completed' && (
+                            <button
+                                onClick={handleComplete}
+                                disabled={updateMutation.isPending}
+                                className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                            >
+                                {i18n('pages.jobDetail.complete')}
+                            </button>
+                        )}
                     </div>
                 </div>
-            )}
 
-            <div className="grid gap-6 grid-cols-1 s992:grid-cols-2">
-                {/* Order Info */}
-                {job.order && (
-                    <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                        <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.orderDetails')}</h2>
-                        <div className="space-y-2 text-sm">
-                            <p>
-                                <span className="text-neutral-900">{i18n('pages.jobDetail.customer')}:</span> {job.order.clientName}{' '}
-                                {job.order.clientLastName}
-                            </p>
-                            <p>
-                                <span className="text-neutral-900">{i18n('pages.jobDetail.serviceType')}:</span> {job.order.type}
-                            </p>
-                            <p>
-                                <span className="text-neutral-900">{i18n('pages.jobDetail.meterNumber')}:</span> {job.order.meterId}
-                            </p>
-                            <p>
-                                <span className="text-neutral-900">{i18n('pages.jobDetail.location')}:</span> {job.order.address}
-                            </p>
-                            {job.order.coordinateX && job.order.coordinateY && (
-                                <a
-                                    href={`https://maps.google.com/?q=${job.order.coordinateY},${job.order.coordinateX}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1 text-primary-500 hover:underline"
-                                >
-                                    <MapPin className="h-4 w-4" />
-                                    {i18n('pages.jobDetail.openInMaps')}
-                                </a>
-                            )}
+                {!online && (
+                    <div className="flex items-center gap-2 rounded-lg bg-secondary-500/10 p-4 text-secondary-500">
+                        <AlertCircle className="h-5 w-5" />
+                        <div>
+                            <p className="font-medium">{i18n('pages.jobDetail.offline')}</p>
+                            <p className="text-sm">{i18n('pages.jobDetail.offlineCamera')}</p>
                         </div>
                     </div>
                 )}
 
-                {/* Job Summary */}
-                <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                    <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.jobInfo')}</h2>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-900">{i18n('pages.jobDetail.meterReading')}</label>
-                            <input
-                                type="text"
-                                value={meterReading || job.meterReading || ''}
-                                onChange={(e) => setMeterReading(e.target.value)}
-                                className={`mt-1 ${INPUT_CLASS}`}
-                                placeholder={i18n('pages.jobDetail.meterReadingPlaceholder')}
-                            />
+                <div className="grid gap-6 grid-cols-1 s992:grid-cols-2">
+                    {/* Order Info */}
+                    {job.order && (
+                        <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
+                            <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.orderDetails')}</h2>
+                            <div className="space-y-2 text-sm">
+                                <p>
+                                    <span className="text-neutral-900">{i18n('pages.jobDetail.customer')}:</span>{' '}
+                                    {job.order.clientName} {job.order.clientLastName}
+                                </p>
+                                <p>
+                                    <span className="text-neutral-900">{i18n('pages.jobDetail.serviceType')}:</span>{' '}
+                                    {job.order.type}
+                                </p>
+                                <p>
+                                    <span className="text-neutral-900">{i18n('pages.jobDetail.meterNumber')}:</span>{' '}
+                                    {job.order.meterId}
+                                </p>
+                                <p>
+                                    <span className="text-neutral-900">{i18n('pages.jobDetail.location')}:</span>{' '}
+                                    {job.order.address}
+                                </p>
+                                {job.order.coordinateX && job.order.coordinateY && (
+                                    <a
+                                        href={`https://maps.google.com/?q=${job.order.coordinateY},${job.order.coordinateX}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-1 text-primary-500 hover:underline"
+                                    >
+                                        <MapPin className="h-4 w-4" />
+                                        {i18n('pages.jobDetail.openInMaps')}
+                                    </a>
+                                )}
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium text-neutral-900">{i18n('pages.jobDetail.notes')}</label>
-                            <textarea
-                                value={notes || job.notes || ''}
-                                onChange={(e) => setNotes(e.target.value)}
-                                rows={4}
-                                className={`mt-1 ${INPUT_CLASS}`}
-                                placeholder={i18n('pages.jobDetail.notesPlaceholder')}
-                            />
+                    )}
+
+                    {/* Job Summary */}
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
+                        <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.jobInfo')}</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-neutral-900">
+                                    {i18n('pages.jobDetail.meterReading')}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={meterReading || job.meterReading || ''}
+                                    onChange={(e) => setMeterReading(e.target.value)}
+                                    className={`mt-1 ${INPUT_CLASS}`}
+                                    placeholder={i18n('pages.jobDetail.meterReadingPlaceholder')}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-neutral-900">
+                                    {i18n('pages.jobDetail.notes')}
+                                </label>
+                                <textarea
+                                    value={notes || job.notes || ''}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    rows={4}
+                                    className={`mt-1 ${INPUT_CLASS}`}
+                                    placeholder={i18n('pages.jobDetail.notesPlaceholder')}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Photos */}
+                <JobPhotosSection jobId={job.id} photos={job.photos ?? []} />
+
+                {/* Activities */}
+                <JobActivitiesSection jobId={job.id} jobActivities={job.jobActivities ?? []} />
+
+                {/* Seals */}
+                <JobSealsSection jobId={job.id} jobSeals={job.jobSeals ?? []} />
+
+                {/* Materials */}
+                <JobMaterialsSection jobId={job.id} workMaterials={job.materials ?? []} />
+
+                {/* Location Mini Map */}
+                {job.order?.coordinateX && job.order?.coordinateY && (
+                    <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
+                        <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.location')}</h2>
+                        <JobLocationMap lat={job.order.coordinateY} lng={job.order.coordinateX} />
+                        <a
+                            href={
+                                /iPhone|iPad|iPod/i.test(navigator.userAgent)
+                                    ? `maps://maps.apple.com/?q=${job.order.coordinateY},${job.order.coordinateX}`
+                                    : `https://maps.google.com/?q=${job.order.coordinateY},${job.order.coordinateX}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                            {i18n('pages.jobDetail.openInMaps')}
+                        </a>
+                    </div>
+                )}
             </div>
-
-            {/* Photos */}
-            <JobPhotosSection jobId={job.id} photos={job.photos ?? []} />
-
-            {/* Activities */}
-            <JobActivitiesSection jobId={job.id} jobActivities={job.jobActivities ?? []} />
-
-            {/* Seals */}
-            <JobSealsSection jobId={job.id} jobSeals={job.jobSeals ?? []} />
-
-            {/* Materials */}
-            <JobMaterialsSection jobId={job.id} workMaterials={job.workMaterials ?? []} />
-
-            {/* Location Mini Map */}
-            {job.order?.coordinateX && job.order?.coordinateY && (
-                <div className="rounded-lg border border-neutral-800 bg-neutral-600/60 p-6">
-                    <h2 className="mb-4 text-lg font-semibold">{i18n('pages.jobDetail.location')}</h2>
-                    <JobLocationMap lat={job.order.coordinateY} lng={job.order.coordinateX} />
-                    <a
-                        href={
-                            /iPhone|iPad|iPod/i.test(navigator.userAgent)
-                                ? `maps://maps.apple.com/?q=${job.order.coordinateY},${job.order.coordinateX}`
-                                : `https://maps.google.com/?q=${job.order.coordinateY},${job.order.coordinateX}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600"
-                    >
-                        <ExternalLink className="h-4 w-4" />
-                        {i18n('pages.jobDetail.openInMaps')}
-                    </a>
-                </div>
-            )}
-        </div>
         </PendingSyncWrapper>
     );
 }
@@ -257,7 +260,9 @@ function JobLocationMap({ lat, lng }: { lat: number; lng: number }) {
     const mapInstanceRef = useRef<leaflet.Map | null>(null);
 
     useEffect(() => {
-        if (!mapRef.current || mapInstanceRef.current) {return;}
+        if (!mapRef.current || mapInstanceRef.current) {
+            return;
+        }
         const map = leaflet.map(mapRef.current).setView([lat, lng], 15);
         leaflet
             .tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {

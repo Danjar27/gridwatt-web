@@ -9,6 +9,7 @@ import {
     UsersIcon,
     AddressBookIcon,
     SealIcon,
+    MapTrifoldIcon,
 } from '@phosphor-icons/react';
 
 export const NAVIGATION_ITEMS: Array<Section> = [
@@ -22,6 +23,13 @@ export const NAVIGATION_ITEMS: Array<Section> = [
                 href: '/dashboard',
                 icon: HouseIcon,
                 roles: ['manager'],
+            },
+            {
+                name: 'map',
+                label: 'routes.map',
+                href: '/map',
+                icon: MapTrifoldIcon,
+                roles: ['technician'],
             },
         ],
     },

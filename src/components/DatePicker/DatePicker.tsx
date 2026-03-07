@@ -15,7 +15,17 @@ interface DatePickerProps {
     id?: string;
 }
 
-const DatePicker: FC<DatePickerProps> = ({ value, onChange, label, placeholder, min, max, disabled, className, id }) => (
+const DatePicker: FC<DatePickerProps> = ({
+    value,
+    onChange,
+    label,
+    placeholder,
+    min,
+    max,
+    disabled,
+    className,
+    id,
+}) => (
     <div className={classnames('flex flex-col', className)}>
         {label && (
             <label htmlFor={id} className={LABEL_CLASS}>

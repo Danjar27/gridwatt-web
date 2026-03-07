@@ -11,7 +11,7 @@ import { useState } from 'react';
 import PageToolbar from '@components/PageToolbar/PageToolbar';
 import ToolbarSelect from '@components/PageToolbar/ToolbarSelect';
 import Summary from '@components/Summary/Summary';
-import type { Job } from "@interfaces/job.interface.ts";
+import type { Job } from '@interfaces/job.interface.ts';
 import type { User } from '@interfaces/user.interface.ts';
 
 const getStatusColor = (status?: string) => {
@@ -39,7 +39,9 @@ const Inventory = () => {
         queryFn: () => getTechnicians(),
         enabled: !isTechnician,
     });
-    const technicians = Array.isArray(technicianResponse) ? technicianResponse : ((technicianResponse as any)?.data ?? []);
+    const technicians = Array.isArray(technicianResponse)
+        ? technicianResponse
+        : ((technicianResponse as any)?.data ?? []);
 
     const { data: jobs = [], isLoading } = useQuery<Array<Job>, Error>({
         queryKey: ['jobs', isTechnician ? 'my' : 'all', filterTechnicianId],

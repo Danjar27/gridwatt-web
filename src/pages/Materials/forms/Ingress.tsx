@@ -127,10 +127,7 @@ const Ingress: FC<IngressProps> = ({ isOpen, onClose }) => {
                                 {i18n('pages.materials.form.newBatchLabel')}
                             </p>
                             <Field name="newBatchId" label={i18n('pages.materials.form.stockBatchId')} required>
-                                <TextInput
-                                    name="newBatchId"
-                                    rules={{ required: i18n('errors.required') }}
-                                />
+                                <TextInput name="newBatchId" rules={{ required: i18n('errors.required') }} />
                             </Field>
                             <Field name="minimumStock" label={i18n('pages.materials.form.minimumStock')}>
                                 <NumberInput name="minimumStock" step="any" min={0} />

@@ -69,10 +69,18 @@ const ViewTable: FC<ViewTableProps> = ({ onAssign, onIngress }) => {
             header: i18n('literal.actions'),
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    <button onClick={() => handleIngress(row.original)} className="cursor-pointer" title={i18n('pages.materials.form.ingress')}>
+                    <button
+                        onClick={() => handleIngress(row.original)}
+                        className="cursor-pointer"
+                        title={i18n('pages.materials.form.ingress')}
+                    >
                         <ArrowLineDownIcon weight="duotone" className="text-blue-400" width={20} height={20} />
                     </button>
-                    <button onClick={() => handleAssign(row.original)} className="cursor-pointer" title={i18n('pages.materials.form.assign')}>
+                    <button
+                        onClick={() => handleAssign(row.original)}
+                        className="cursor-pointer"
+                        title={i18n('pages.materials.form.assign')}
+                    >
                         <UserPlusIcon weight="duotone" className="text-green-500" width={20} height={20} />
                     </button>
                     <button onClick={() => handleEdit(row.original)} className="cursor-pointer">

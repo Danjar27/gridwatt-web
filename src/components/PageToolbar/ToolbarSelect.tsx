@@ -52,9 +52,9 @@ const ToolbarSelect = <T extends string | number | null>({ value, onChange, opti
                 type="button"
                 onClick={() => (isOpen ? setIsOpen(false) : open())}
                 className={classnames(
-                    'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors select-none cursor-pointer',
-                    'text-primary-500/80 dark:text-white/80 dark:hover:text-white hover:text-primary-500 hover:bg-neutral-700',
-                    isOpen && 'bg-neutral-700 text-primary-500'
+                    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors select-none cursor-pointer',
+                    'border border-neutral-800 dark:border-neutral-700 text-primary-500 dark:text-neutral-900 hover:bg-neutral-700 dark:hover:bg-neutral-700',
+                    isOpen && 'bg-neutral-700 border-neutral-800'
                 )}
             >
                 {selected?.label}

@@ -9,7 +9,7 @@ const TenantsPage = () => {
 
     return (
         <Provider>
-            <Page id="tenants" title={i18n('pages.tenants.title')} subtitle={i18n('pages.tenants.subtitle')}>
+            <Page id="tenants" breadcrumbs={[{ label: i18n('pages.tenants.title'), href: '/tenants' }]}>
                 <Inventory />
             </Page>
         </Provider>

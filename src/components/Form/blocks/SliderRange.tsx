@@ -16,25 +16,26 @@ interface SliderRangeProps {
  * Dual-thumb range slider that registers two form values (fromName / toName)
  * with react-hook-form. Styled to match the rest of the application.
  */
-const SliderRange: FC<SliderRangeProps> = ({
-    fromName,
-    toName,
-    min = 1,
-    max = 10000,
-    step = 1,
-    rules,
-}) => {
+const SliderRange: FC<SliderRangeProps> = ({ fromName, toName, min = 1, max = 10000, step = 1, rules }) => {
     const { register, setValue, control } = useFormContext();
     const fromValue = (useWatch({ control, name: fromName }) as number) ?? min;
     const toValue = (useWatch({ control, name: toName }) as number) ?? max;
 
     // Register both fields so react-hook-form tracks them
     // Discard onChange from register since we handle value updates with setValue
-    const { ref: fromRef, onChange: _fromOnChange, ...fromRest } = register(fromName, {
+    const {
+        ref: fromRef,
+        onChange: _fromOnChange,
+        ...fromRest
+    } = register(fromName, {
         valueAsNumber: true,
         ...rules,
     });
-    const { ref: toRef, onChange: _toOnChange, ...toRest } = register(toName, {
+    const {
+        ref: toRef,
+        onChange: _toOnChange,
+        ...toRest
+    } = register(toName, {
         valueAsNumber: true,
         ...rules,
     });

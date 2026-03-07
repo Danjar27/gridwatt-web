@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import * as L from 'leaflet';
 import { utmToLatLng } from '@utils/coordinates.ts';
+import { isPointInPolygon } from '@utils/map.ts';
 import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
@@ -15,22 +16,6 @@ import Modal from '@components/Modal/Modal';
 import Window from '@components/Modal/blocks/Window';
 import Form from '@components/Form/Form';
 import Actions from '@components/Form/blocks/Actions';
-
-function isOrderInArea(lat: number, lng: number, coords: Array<AreaCoordinate>): boolean {
-    if (coords.length < 3) { return false; }
-    let inside = false;
-    const n = coords.length;
-    for (let i = 0, j = n - 1; i < n; j = i++) {
-        const xi = coords[i].lng;
-        const yi = coords[i].lat;
-        const xj = coords[j].lng;
-        const yj = coords[j].lat;
-        const intersect = (yi > lat) !== (yj > lat) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi;
-        if (intersect) { inside = !inside; }
-    }
-
-    return inside;
-}
 
 const LEAFLET_DARK_CSS = `
 .leaflet-popup-content-wrapper {
@@ -106,9 +91,7 @@ const LEAFLET_DARK_CSS = `
 `;
 
 function buildOrderPopupHtml(order: OrderMapPoint): string {
-    const techName = order.technician
-        ? `${order.technician.name} ${order.technician.lastName}`
-        : null;
+    const techName = order.technician ? `${order.technician.name} ${order.technician.lastName}` : null;
     const rows: Array<[string, string]> = [
         ['Técnico', techName ?? 'Sin asignar'],
         ['Cédula', order.clientId ?? ''],
@@ -116,14 +99,15 @@ function buildOrderPopupHtml(order: OrderMapPoint): string {
         ['Dirección', order.address ?? ''],
         ['Cuenta', order.clientAccount ?? ''],
         ['Medidor', order.meterId ?? ''],
-        ...(order.coordinateX != null ? [['Coord X', String(order.coordinateX)] as [string, string]] : []),
-        ...(order.coordinateY != null ? [['Coord Y', String(order.coordinateY)] as [string, string]] : []),
+        ...(order.coordinateX !== null ? [['Coord X', String(order.coordinateX)] as [string, string]] : []),
+        ...(order.coordinateY !== null ? [['Coord Y', String(order.coordinateY)] as [string, string]] : []),
         ['Orden', order.id ?? ''],
     ];
     const rowsHtml = rows
         .filter(([, v]) => v)
         .map(([l, v]) => `<tr><td class="ow-lbl">${l}</td><td class="ow-val">${v}</td></tr>`)
         .join('');
+
     return `<div class="ow-order-popup"><div class="ow-popup-header"><span class="ow-popup-name">${order.clientName ?? ''} ${order.clientLastName ?? ''}</span></div><table class="ow-popup-table">${rowsHtml}</table></div>`;
 }
 
@@ -152,7 +136,8 @@ export function OrdersMap({
 
     const mapRef = useRef<HTMLDivElement>(null);
     const leafletMapRef = useRef<L.Map | null>(null);
-    const markersRef = useRef<Map<string, L.Marker>>(new Map());
+    const canvasRendererRef = useRef<L.Canvas | null>(null);
+    const markersRef = useRef<Map<string, L.CircleMarker>>(new Map());
     const hasFittedRef = useRef(false);
     const prevDataLenRef = useRef(0);
     // ─── Area layers and shape-editing state ──────────────────────────────────
@@ -206,9 +191,12 @@ export function OrdersMap({
         const orderAreaColor = new Map<string, string>();
         areas.forEach((area) => {
             orders.forEach((order) => {
-                if (order.coordinateX == null || order.coordinateY == null) return;
+                if (order.coordinateX === null || order.coordinateX === undefined || order.coordinateY === null || order.coordinateY === undefined) {
+                    return;
+                }
+
                 const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
-                if (wgs && isOrderInArea(wgs[0], wgs[1], area.coordinates)) {
+                if (wgs && isPointInPolygon(wgs[0], wgs[1], area.coordinates)) {
                     orderAreaColor.set(order.id, area.color);
                 }
             });
@@ -216,9 +204,15 @@ export function OrdersMap({
 
         return orders
             .map((order) => {
-                if (order.coordinateX == null || order.coordinateY == null) return null;
+                if (order.coordinateX === null || order.coordinateX === undefined || order.coordinateY === null || order.coordinateY === undefined) {
+                    return null;
+                }
+
                 const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
-                if (!wgs) return null;
+                if (!wgs) {
+                    return null;
+                }
+
                 return {
                     id: order.id,
                     position: wgs,
@@ -230,37 +224,43 @@ export function OrdersMap({
     }, [orders, areas]);
 
     const markersDataRef = useRef<typeof markersData>([]);
-    useEffect(() => { markersDataRef.current = markersData; }, [markersData]);
+    useEffect(() => {
+        markersDataRef.current = markersData;
+    }, [markersData]);
 
     // Count orders per area (and unassigned)
     const areaStats = useMemo(() => {
         const counts = new Map<number, number>();
         let unassigned = 0;
         orders.forEach((order) => {
-            if (order.coordinateX == null || order.coordinateY == null) { unassigned++; return; }
+            if (order.coordinateX === null || order.coordinateX === undefined || order.coordinateY === null || order.coordinateY === undefined) {
+                unassigned++;
+
+                return;
+            }
+
             const wgs = utmToLatLng(order.coordinateX, order.coordinateY);
-            if (!wgs) { unassigned++; return; }
+            if (!wgs) {
+                unassigned++;
+
+                return;
+            }
+
             let matched = false;
             areas.forEach((area) => {
-                if (isOrderInArea(wgs[0], wgs[1], area.coordinates)) {
+                if (isPointInPolygon(wgs[0], wgs[1], area.coordinates)) {
                     counts.set(area.id, (counts.get(area.id) ?? 0) + 1);
                     matched = true;
                 }
             });
-            if (!matched) unassigned++;
+            if (!matched) {
+                unassigned++;
+            }
         });
+
         return { counts, unassigned };
     }, [orders, areas]);
 
-    const createIcon = useCallback((color: string) => {
-        return L.divIcon({
-            className: '',
-            html: `<div style="width:16px;height:16px;border-radius:50%;background-color:${color};border:2.5px solid rgba(255,255,255,0.9);box-sizing:border-box;"></div>`,
-            iconSize: [16, 16],
-            iconAnchor: [8, 8],
-            popupAnchor: [0, -10],
-        });
-    }, []);
 
     // ─── Map initialisation (runs once) ───────────────────────────────────────
     useEffect(() => {
@@ -272,6 +272,8 @@ export function OrdersMap({
             [-0.039568, -78.442251],
             13
         );
+
+        canvasRendererRef.current = L.canvas({ padding: 0.5 });
 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             maxZoom: 19,
@@ -315,14 +317,18 @@ export function OrdersMap({
 
         const updatePreviewPolyline = (cursorLatLng?: L.LatLng) => {
             const verts = drawingVerticesRef.current;
-            if (verts.length === 0) return;
+            if (verts.length === 0) {
+                return;
+            }
             const pts = cursorLatLng ? [...verts, cursorLatLng] : verts;
 
             // Dashed edge line
             if (drawingPolylineRef.current) {
                 drawingPolylineRef.current.setLatLngs(pts);
             } else {
-                drawingPolylineRef.current = L.polyline(pts, { color: '#6366f1', weight: 2, dashArray: '6 3' }).addTo(map);
+                drawingPolylineRef.current = L.polyline(pts, { color: '#6366f1', weight: 2, dashArray: '6 3' }).addTo(
+                    map
+                );
             }
 
             // Live shaded polygon — shown once ≥3 points are on screen
@@ -343,7 +349,9 @@ export function OrdersMap({
                 const poly = pts.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                 let count = 0;
                 markersDataRef.current.forEach((md) => {
-                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                        count++;
+                    }
                 });
                 setLiveDrawCount(count);
             } else if (drawingPreviewPolygonRef.current) {
@@ -444,6 +452,7 @@ export function OrdersMap({
                     clearDrawingPreview();
                     map.dragging.enable();
                     finishDrawingRef.current(final);
+
                     return;
                 }
             }
@@ -464,7 +473,9 @@ export function OrdersMap({
                 const poly = verts.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                 let count = 0;
                 markersDataRef.current.forEach((md) => {
-                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                        count++;
+                    }
                 });
                 setLiveDrawCount(count);
             }
@@ -533,11 +544,18 @@ export function OrdersMap({
 
         markersData.forEach((md) => {
             const color = md.color ?? '#f59e0b';
-            const marker = L.marker(md.position, { icon: createIcon(color) }).addTo(map);
-            marker.bindPopup(buildOrderPopupHtml(md.order), { maxWidth: 310 });
+            const marker = L.circleMarker(md.position, {
+                renderer: canvasRendererRef.current ?? undefined,
+                radius: 7,
+                fillColor: color,
+                color: 'rgba(255,255,255,0.55)',
+                fillOpacity: 1,
+                weight: 2,
+            }).addTo(map);
+            marker.bindPopup(buildOrderPopupHtml(md.order), { maxWidth: 310, offset: L.point(0, -7) });
             markersRef.current.set(md.id, marker);
         });
-    }, [markersData, createIcon]);
+    }, [markersData]);
 
     // ─── Render area polygons ─────────────────────────────────────────────────
     useEffect(() => {
@@ -615,11 +633,16 @@ export function OrdersMap({
                             // Live count while dragging vertices
                             polygon.on('pm:change', () => {
                                 const lls = (polygon.getLatLngs() as Array<Array<L.LatLng>>)[0];
-                                if (!lls || lls.length < 3) return;
+                                if (!lls || lls.length < 3) {
+                                    return;
+                                }
+
                                 const poly = lls.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                                 let count = 0;
                                 markersDataRef.current.forEach((md) => {
-                                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                                        count++;
+                                    }
                                 });
                                 setLiveDrawCount(count);
                             });
@@ -630,7 +653,9 @@ export function OrdersMap({
                                 const poly = initLls.map((ll) => ({ lat: ll.lat, lng: ll.lng }));
                                 let count = 0;
                                 markersDataRef.current.forEach((md) => {
-                                    if (isOrderInArea(md.position[0], md.position[1], poly)) count++;
+                                    if (isPointInPolygon(md.position[0], md.position[1], poly)) {
+                                        count++;
+                                    }
                                 });
                                 setLiveDrawCount(count);
                             }
@@ -647,11 +672,13 @@ export function OrdersMap({
         });
     }, [areas]);
 
-
     // ─── Cursor for draw mode ─────────────────────────────────────────────────
     useEffect(() => {
         const container = mapRef.current;
-        if (!container) return;
+        if (!container) {
+            return;
+        }
+
         container.classList.toggle('ow-drawing', drawMode);
         if (!drawMode) {
             setLiveDrawCount(null);
@@ -708,10 +735,7 @@ export function OrdersMap({
     }, []);
 
     return (
-        <div
-            className="w-full h-full rounded-lg border border-neutral-800 flex flex-col overflow-hidden isolate"
-            style={{ minHeight: 320 }}
-        >
+        <div className="w-full h-full flex flex-col overflow-hidden isolate">
             {/* Toolbar */}
             <div className="shrink-0 flex items-center gap-2 px-3 py-2 border-b border-neutral-800 bg-neutral-600/40 flex-wrap">
                 {isEditingShape ? (
@@ -735,7 +759,7 @@ export function OrdersMap({
                     <>
                         <button
                             onClick={handleToggleDrawMode}
-                            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${drawMode ? 'bg-indigo-500 text-white' : 'border border-neutral-800 hover:bg-neutral-600'}`}
+                            className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${drawMode ? 'bg-primary-500 text-white' : 'border border-neutral-800 hover:bg-neutral-600'}`}
                         >
                             {drawMode ? i18n('pages.orders.map.cancelDraw') : i18n('pages.orders.map.drawArea')}
                         </button>
@@ -755,17 +779,21 @@ export function OrdersMap({
             <div className="flex-1 min-h-0 flex">
                 <div ref={mapRef} className="flex-1 min-h-0" />
 
-                {/* Stats sidebar */}
-                <div className="w-44 shrink-0 flex flex-col border-l border-neutral-800 bg-neutral-600/40 overflow-hidden">
+                {/* Stats sidebar — hidden on mobile */}
+                <div className="hidden s768:flex flex-col w-44 shrink-0 border-l border-neutral-800 bg-neutral-600/40 overflow-hidden">
                     <div className="px-3 py-2 border-b border-neutral-800">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-900">{i18n('pages.orders.map.areas')}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-neutral-900">
+                            {i18n('pages.orders.map.areas')}
+                        </p>
                     </div>
                     <div className="flex-1 overflow-y-auto">
                         {/* Unassigned row */}
                         <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60">
                             <span className="shrink-0 w-2.5 h-2.5 rounded-full bg-amber-500 border border-white/40" />
-                            <span className="flex-1 text-xs text-neutral-900 truncate">{i18n('pages.orders.map.unassigned')}</span>
-                            <span className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-neutral-700 text-neutral-900">
+                            <span className="flex-1 text-xs text-neutral-900 truncate">
+                                {i18n('pages.orders.map.unassigned')}
+                            </span>
+                            <span className="shrink-0 min-w-5 text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold bg-neutral-700 text-neutral-900">
                                 {areaStats.unassigned}
                             </span>
                         </div>
@@ -775,15 +803,21 @@ export function OrdersMap({
                             const tech = area.technician
                                 ? `${area.technician.name} ${area.technician.lastName}`
                                 : 'Sin asignar';
+
                             return (
-                                <div key={area.id} className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60 last:border-b-0">
+                                <div
+                                    key={area.id}
+                                    className="flex items-center gap-2 px-3 py-2 border-b border-neutral-800/60 last:border-b-0"
+                                >
                                     <span
                                         className="shrink-0 w-2.5 h-2.5 rounded border border-white/30"
                                         style={{ backgroundColor: area.color }}
                                     />
-                                    <span className="flex-1 text-xs truncate" title={tech}>{tech}</span>
+                                    <span className="flex-1 text-xs truncate" title={tech}>
+                                        {tech}
+                                    </span>
                                     <span
-                                        className="shrink-0 min-w-[20px] text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                                        className="shrink-0 min-w-5 text-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
                                         style={{ backgroundColor: area.color }}
                                     >
                                         {count}

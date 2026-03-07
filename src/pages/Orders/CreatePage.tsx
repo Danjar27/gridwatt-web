@@ -17,7 +17,7 @@ import Page from '@layouts/Page';
 
 import { queryClient } from '@lib/query-client';
 import { createOrder } from '@lib/api/orders.ts';
-import type {Order} from "@interfaces/order.interface.ts";
+import type { Order } from '@interfaces/order.interface.ts';
 
 const CreateOrderPage = () => {
     const i18n = useTranslations();
@@ -38,9 +38,10 @@ const CreateOrderPage = () => {
     return (
         <Page
             id="create-order"
-            title={i18n('pages.orders.form.create')}
-            subtitle={i18n('pages.orders.form.createSubtitle')}
-            backRoute="/orders"
+            breadcrumbs={[
+                { label: i18n('pages.orders.title'), href: '/orders' },
+                { label: i18n('pages.orders.form.create'), href: '/orders/new' },
+            ]}
         >
             <Form onSubmit={handleSubmit}>
                 {({ setValue, watch }) => {
@@ -61,10 +62,21 @@ const CreateOrderPage = () => {
                                             <Field name="id" label={i18n('pages.orders.form.fields.id')} required>
                                                 <TextInput name="id" rules={{ required: i18n('errors.required') }} />
                                             </Field>
-                                            <Field name="serviceType" label={i18n('pages.orders.form.fields.serviceType')} required>
-                                                <TextInput name="serviceType" rules={{ required: i18n('errors.required') }} />
+                                            <Field
+                                                name="serviceType"
+                                                label={i18n('pages.orders.form.fields.serviceType')}
+                                                required
+                                            >
+                                                <TextInput
+                                                    name="serviceType"
+                                                    rules={{ required: i18n('errors.required') }}
+                                                />
                                             </Field>
-                                            <Field name="accountNumber" label={i18n('pages.orders.form.fields.accountNumber')} required>
+                                            <Field
+                                                name="accountNumber"
+                                                label={i18n('pages.orders.form.fields.accountNumber')}
+                                                required
+                                            >
                                                 <TextInput
                                                     name="accountNumber"
                                                     rules={{ required: i18n('errors.required') }}
@@ -73,31 +85,69 @@ const CreateOrderPage = () => {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="meterNumber" label={i18n('pages.orders.form.fields.meterNumber')} required>
-                                                <TextInput name="meterNumber" rules={{ required: i18n('errors.required') }} />
+                                            <Field
+                                                name="meterNumber"
+                                                label={i18n('pages.orders.form.fields.meterNumber')}
+                                                required
+                                            >
+                                                <TextInput
+                                                    name="meterNumber"
+                                                    rules={{ required: i18n('errors.required') }}
+                                                />
                                             </Field>
-                                            <Field name="issueDate" label={i18n('pages.orders.form.fields.issueDate')} required>
-                                                <DateInput name="issueDate" rules={{ required: i18n('errors.required') }} />
+                                            <Field
+                                                name="issueDate"
+                                                label={i18n('pages.orders.form.fields.issueDate')}
+                                                required
+                                            >
+                                                <DateInput
+                                                    name="issueDate"
+                                                    rules={{ required: i18n('errors.required') }}
+                                                />
                                             </Field>
                                         </div>
 
                                         <hr className="my-8 text-neutral-700" />
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="firstName" label={i18n('pages.orders.form.fields.firstName')} required>
-                                                <TextInput name="firstName" rules={{ required: i18n('errors.required') }} />
+                                            <Field
+                                                name="firstName"
+                                                label={i18n('pages.orders.form.fields.firstName')}
+                                                required
+                                            >
+                                                <TextInput
+                                                    name="firstName"
+                                                    rules={{ required: i18n('errors.required') }}
+                                                />
                                             </Field>
-                                            <Field name="lastName" label={i18n('pages.orders.form.fields.lastName')} required>
-                                                <TextInput name="lastName" rules={{ required: i18n('errors.required') }} />
+                                            <Field
+                                                name="lastName"
+                                                label={i18n('pages.orders.form.fields.lastName')}
+                                                required
+                                            >
+                                                <TextInput
+                                                    name="lastName"
+                                                    rules={{ required: i18n('errors.required') }}
+                                                />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="idNumber" label={i18n('pages.orders.form.fields.idNumber')} required>
-                                                <TextInput name="idNumber" rules={{ required: i18n('errors.required') }} />
+                                            <Field
+                                                name="idNumber"
+                                                label={i18n('pages.orders.form.fields.idNumber')}
+                                                required
+                                            >
+                                                <TextInput
+                                                    name="idNumber"
+                                                    rules={{ required: i18n('errors.required') }}
+                                                />
                                             </Field>
                                             <Field name="phone" label={i18n('pages.orders.form.fields.phone')} required>
-                                                <PhoneInput name="phone" rules={{ required: i18n('errors.required') }} />
+                                                <PhoneInput
+                                                    name="phone"
+                                                    rules={{ required: i18n('errors.required') }}
+                                                />
                                             </Field>
                                         </div>
 
@@ -105,62 +155,105 @@ const CreateOrderPage = () => {
                                             <EmailInput name="email" rules={{ required: i18n('errors.required') }} />
                                         </Field>
 
-                                        <Field name="orderLocation" label={i18n('pages.orders.form.fields.orderLocation')} required>
-                                            <TextInput name="orderLocation" rules={{ required: i18n('errors.required') }} />
+                                        <Field
+                                            name="orderLocation"
+                                            label={i18n('pages.orders.form.fields.orderLocation')}
+                                            required
+                                        >
+                                            <TextInput
+                                                name="orderLocation"
+                                                rules={{ required: i18n('errors.required') }}
+                                            />
                                         </Field>
 
                                         <hr className="my-8 text-neutral-700" />
 
-                                        <Field name="panelTowerBlock" label={i18n('pages.orders.form.fields.panelTowerBlock')}>
+                                        <Field
+                                            name="panelTowerBlock"
+                                            label={i18n('pages.orders.form.fields.panelTowerBlock')}
+                                        >
                                             <TextInput name="panelTowerBlock" />
                                         </Field>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="appliedTariff" label={i18n('pages.orders.form.fields.appliedTariff')}>
+                                            <Field
+                                                name="appliedTariff"
+                                                label={i18n('pages.orders.form.fields.appliedTariff')}
+                                            >
                                                 <TextInput name="appliedTariff" />
                                             </Field>
-                                            <Field name="transformerNumber" label={i18n('pages.orders.form.fields.transformerNumber')}>
+                                            <Field
+                                                name="transformerNumber"
+                                                label={i18n('pages.orders.form.fields.transformerNumber')}
+                                            >
                                                 <TextInput name="transformerNumber" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="distributionNetwork" label={i18n('pages.orders.form.fields.distributionNetwork')}>
+                                            <Field
+                                                name="distributionNetwork"
+                                                label={i18n('pages.orders.form.fields.distributionNetwork')}
+                                            >
                                                 <TextInput name="distributionNetwork" />
                                             </Field>
-                                            <Field name="transformerOwnership" label={i18n('pages.orders.form.fields.transformerOwnership')}>
+                                            <Field
+                                                name="transformerOwnership"
+                                                label={i18n('pages.orders.form.fields.transformerOwnership')}
+                                            >
                                                 <TextInput name="transformerOwnership" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="sharedSubstation" label={i18n('pages.orders.form.fields.sharedSubstation')}>
+                                            <Field
+                                                name="sharedSubstation"
+                                                label={i18n('pages.orders.form.fields.sharedSubstation')}
+                                            >
                                                 <TextInput name="sharedSubstation" />
                                             </Field>
-                                            <Field name="normalLoad" label={i18n('pages.orders.form.fields.normalLoad')}>
+                                            <Field
+                                                name="normalLoad"
+                                                label={i18n('pages.orders.form.fields.normalLoad')}
+                                            >
                                                 <TextInput name="normalLoad" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="fluctuatingLoad" label={i18n('pages.orders.form.fields.fluctuatingLoad')}>
+                                            <Field
+                                                name="fluctuatingLoad"
+                                                label={i18n('pages.orders.form.fields.fluctuatingLoad')}
+                                            >
                                                 <TextInput name="fluctuatingLoad" />
                                             </Field>
-                                            <Field name="plannerGroup" label={i18n('pages.orders.form.fields.plannerGroup')}>
+                                            <Field
+                                                name="plannerGroup"
+                                                label={i18n('pages.orders.form.fields.plannerGroup')}
+                                            >
                                                 <TextInput name="plannerGroup" />
                                             </Field>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Field name="workPosition" label={i18n('pages.orders.form.fields.workPosition')}>
+                                            <Field
+                                                name="workPosition"
+                                                label={i18n('pages.orders.form.fields.workPosition')}
+                                            >
                                                 <TextInput name="workPosition" />
                                             </Field>
-                                            <Field name="lockerSequence" label={i18n('pages.orders.form.fields.lockerSequence')}>
+                                            <Field
+                                                name="lockerSequence"
+                                                label={i18n('pages.orders.form.fields.lockerSequence')}
+                                            >
                                                 <TextInput name="lockerSequence" />
                                             </Field>
                                         </div>
 
-                                        <Field name="observations" label={i18n('pages.orders.form.fields.observations')}>
+                                        <Field
+                                            name="observations"
+                                            label={i18n('pages.orders.form.fields.observations')}
+                                        >
                                             <TextInput name="observations" />
                                         </Field>
                                     </div>
@@ -184,15 +277,19 @@ const CreateOrderPage = () => {
                                             />
 
                                             <div className="grid grid-cols-2 gap-4">
-                                                <Field name="coordinateX" label={i18n('pages.orders.form.fields.coordinateX')}>
+                                                <Field
+                                                    name="coordinateX"
+                                                    label={i18n('pages.orders.form.fields.coordinateX')}
+                                                >
                                                     <NumberInput name="coordinateX" step="any" placeholder="0.000000" />
                                                 </Field>
-                                                <Field name="coordinateY" label={i18n('pages.orders.form.fields.coordinateY')}>
+                                                <Field
+                                                    name="coordinateY"
+                                                    label={i18n('pages.orders.form.fields.coordinateY')}
+                                                >
                                                     <NumberInput name="coordinateY" step="any" placeholder="0.000000" />
                                                 </Field>
                                             </div>
-
-
                                         </div>
                                     </Summary>
                                 </div>

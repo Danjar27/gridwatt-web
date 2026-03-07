@@ -3,9 +3,13 @@ export interface Seal {
     type: string;
 }
 
+export interface AssignedSeal extends Seal {
+    fromNumber: number;
+    toNumber: number;
+}
+
 export interface JobSeal {
-    id: string;
+    id: number;
     jobId: number;
-    sealId: number;
-    seal?: Seal;
+    seal: Seal;
 }

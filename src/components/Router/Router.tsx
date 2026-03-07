@@ -19,6 +19,7 @@ import CreateOrderPage from '@pages/Orders/CreatePage';
 import OrdersPage from '@pages/Orders/Page';
 import JobsPage from '@pages/Jobs/Page';
 import TenantsPage from '@pages/Tenants/Page';
+import TechnicianMapPage from '@pages/TechnicianMap/Page';
 
 const Router = createBrowserRouter([
     {
@@ -86,6 +87,10 @@ const Router = createBrowserRouter([
                             {
                                 path: 'tenants',
                                 element: <TenantsPage />,
+                            },
+                            {
+                                path: 'map',
+                                element: <TechnicianMapPage />,
                             },
                             {
                                 path: 'profile',

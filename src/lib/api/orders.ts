@@ -1,20 +1,26 @@
-import type { Order, OrderMapPoint, OrderImportData, OrdersImportCommitResponse, OrdersImportPreviewResponse } from '@interfaces/order.interface.ts';
+import type {
+    Order,
+    OrderMapPoint,
+    OrderImportData,
+    OrderStats,
+    OrdersImportCommitResponse,
+    OrdersImportPreviewResponse,
+} from '@interfaces/order.interface.ts';
 import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
 
 import { buildQueryParameters } from '@utils/common/parameters.ts';
 import { request, mutationRequest, uploadFile } from '../http-client';
 
-export const getOrders = async (params?: PaginatedQuery & { technicianId?: number }) =>
+export const getOrders = async (params?: PaginatedQuery & { technicianId?: number; status?: string }) =>
     request<PaginatedResponse<Order>>(`/orders${buildQueryParameters(params)}`);
 
-export const getOrderMapPoints = async () =>
-    request<Array<OrderMapPoint>>('/orders/map-points');
+export const getOrderStats = async () => request<OrderStats>('/orders/stats');
 
-export const getMyOrders = async () =>
-    request<Array<Order>>('/orders/my');
+export const getOrderMapPoints = async () => request<Array<OrderMapPoint>>('/orders/map-points');
 
-export const getOrder = async (id: string) =>
-    request<Order>(`/orders/${id}`);
+export const getMyOrders = async () => request<Array<Order>>('/orders/my');
+
+export const getOrder = async (id: string) => request<Order>(`/orders/${id}`);
 
 export const createOrder = async (data: Partial<Order>) =>
     mutationRequest<Order>(
@@ -36,6 +42,8 @@ export const assignOrder = async (id: string, technicianId: number | null) =>
         { method: 'PUT', body: JSON.stringify({ technicianId }) },
         { type: 'order', action: 'update', optimisticData: { id, technicianId } }
     );
+
+export const deleteOrder = async (id: string) => request<void>(`/orders/${id}`, { method: 'DELETE' });
 
 export const bulkAssignOrders = async (orderIds: Array<string>, technicianId: number) =>
     mutationRequest<Array<Order>>(

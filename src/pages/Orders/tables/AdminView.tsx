@@ -2,24 +2,24 @@ import type { ColumnDef } from '@tanstack/react-table';
 import type { FilterConfig } from '@components/Table/Table.interface';
 
 import { useServerPagination } from '@components/Table/hooks/useServerPagination.ts';
-import { EyeIcon, MapPinIcon, UserIcon } from '@phosphor-icons/react';
-import { getOrders } from '@lib/api/orders.ts';
+import { EyeIcon, TrashIcon, UserIcon } from '@phosphor-icons/react';
+import { deleteOrder, getOrders } from '@lib/api/orders.ts';
 import { getTechnicians } from '@lib/api/users.ts';
 import { useTranslations } from 'use-intl';
 import { Link } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import Table from '@components/Table/Table';
-import type {User} from "@interfaces/user.interface.ts";
+import type { User } from '@interfaces/user.interface.ts';
 import type { Order } from '@interfaces/order.interface.ts';
 
 const getStatusColor = (status: string) => {
     switch (status) {
+        case 'atendida':
         case 'completed':
             return 'bg-success-500/20 text-success-500';
-        case 'in_progress':
-        case 'assigned':
-            return 'bg-primary-500/20 text-primary-500';
+        case 'pendiente':
         default:
             return 'bg-secondary-500/20 text-secondary-500';
     }
@@ -27,6 +27,12 @@ const getStatusColor = (status: string) => {
 
 const AdminView = () => {
     const i18n = useTranslations();
+    const queryClient = useQueryClient();
+
+    const deleteMutation = useMutation({
+        mutationFn: deleteOrder,
+        onSettled: () => queryClient.invalidateQueries({ queryKey: ['orders'] }),
+    });
 
     const columns = useMemo<Array<ColumnDef<Order, any>>>(
         () => [
@@ -37,33 +43,6 @@ const AdminView = () => {
                     <div>
                         <div className="font-medium">#{row.original.id}</div>
                         <div className="text-sm text-neutral-900">{row.original.meterId}</div>
-                    </div>
-                ),
-            },
-            {
-                id: 'customer',
-                header: i18n('pages.orders.table.customer'),
-                cell: ({ row }) => (
-                    <div>
-                        <div>
-                            {row.original.clientName} {row.original.clientLastName}
-                        </div>
-                        <div className="text-sm text-neutral-900">{row.original.clientEmail}</div>
-                    </div>
-                ),
-            },
-            {
-                accessorKey: 'type',
-                header: i18n('pages.orders.table.service'),
-                cell: ({ row }) => (
-                    <div>
-                        <div>{row.original.type}</div>
-                        {row.original.coordinateX != null && row.original.coordinateY != null && (
-                            <div className="flex items-center gap-1 text-sm text-neutral-900">
-                                <MapPinIcon weight="duotone" width={12} height={12} />
-                                {i18n('pages.orders.table.hasLocation')}
-                            </div>
-                        )}
                     </div>
                 ),
             },
@@ -92,33 +71,42 @@ const AdminView = () => {
                     ),
             },
             {
-                accessorKey: 'issueDate',
-                header: i18n('pages.orders.table.date'),
-                cell: ({ row }) => (
-                    <div className="text-sm text-neutral-900">
-                        {new Date(row.original.issueDate).toLocaleDateString()}
-                    </div>
-                ),
-            },
-            {
                 id: 'actions',
                 header: i18n('literal.actions'),
                 cell: ({ row }) => (
-                    <Link
-                        to={`/orders/${row.original.id}`}
-                        className="inline-flex items-center gap-1 text-sm text-primary-500 hover:underline"
-                    >
-                        <EyeIcon weight="duotone" width={16} height={16} />
-                        {i18n('pages.orders.table.view')}
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <Link to={`/orders/${row.original.id}`} aria-label={i18n('pages.orders.table.view')}>
+                            <EyeIcon weight="duotone" width={20} height={20} className="text-primary-500" />
+                        </Link>
+                        <button
+                            type="button"
+                            aria-label={i18n('literal.delete')}
+                            onClick={() => {
+                                if (!window.confirm(i18n('pages.orders.deleteConfirm'))) {
+                                    return;
+                                }
+                                deleteMutation.mutate(row.original.id);
+                            }}
+                            className="cursor-pointer"
+                        >
+                            <TrashIcon weight="duotone" width={20} height={20} className="text-secondary-500" />
+                        </button>
+                    </div>
                 ),
             },
         ],
-        [i18n]
+        [i18n, deleteMutation]
     );
 
     const filterConfig = useMemo<FilterConfig>(
         () => ({
+            status: {
+                paramKey: 'status',
+                options: [
+                    { label: i18n('pages.orders.filter.status.pending'), value: 'pendiente' },
+                    { label: i18n('pages.orders.filter.status.completed'), value: 'atendida' },
+                ],
+            },
             technician: {
                 paramKey: 'technicianId',
                 options: async () => {
@@ -134,7 +122,7 @@ const AdminView = () => {
                 },
             },
         }),
-        []
+        [i18n]
     );
 
     const { table, isLoading, total } = useServerPagination<Order>({
@@ -142,6 +130,7 @@ const AdminView = () => {
         fetchFn: (params) => getOrders(params),
         columns,
         filterConfig,
+        initialColumnFilters: [{ id: 'status', value: 'pendiente' }],
     });
 
     return <Table table={table} isLoading={isLoading} total={total} filterConfig={filterConfig} />;

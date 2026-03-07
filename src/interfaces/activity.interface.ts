@@ -6,8 +6,7 @@ export interface Activity {
 }
 
 export interface JobActivity {
-    id: string;
+    id: number;
     jobId: number;
-    activityId: string;
-    activity?: Activity;
+    activity: Activity;
 }

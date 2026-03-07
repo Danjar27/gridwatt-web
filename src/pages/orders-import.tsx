@@ -28,6 +28,7 @@ import { useTranslations } from 'use-intl';
 import Button from '@components/Button/Button';
 import FileUploader from '@components/FileUploader/FileUploader';
 import Table from '@components/Table/Table';
+import Page from '@layouts/Page';
 import Checkbox from '@components/atoms/Checkbox';
 import Stepper from '@components/Stepper/Stepper.tsx';
 import { useStepper } from '@hooks/useStepper.ts';
@@ -534,12 +535,11 @@ export function OrdersImportPage() {
     // ── Render ───────────────────────────────────────────────────────────────────
 
     return (
+        <Page id="orders-import" breadcrumbs={[
+            { label: i18n('pages.orders.title'), href: '/orders' },
+            { label: i18n('pages.ordersImport.title'), href: '/orders/import' },
+        ]}>
         <div className="space-y-5">
-            {/* Page header */}
-            <div>
-                <h1 className="text-2xl font-bold">{i18n('pages.ordersImport.title')}</h1>
-                <p className="mt-0.5 text-sm text-neutral-900">{i18n('pages.ordersImport.subtitle')}</p>
-            </div>
 
             {/* Step indicator */}
             <Stepper steps={stepperSteps} currentStep={currentIndex} />
@@ -812,5 +812,6 @@ export function OrdersImportPage() {
                 </div>
             )}
         </div>
+        </Page>
     );
 }

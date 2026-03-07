@@ -20,7 +20,7 @@ export interface Job {
     order?: Order;
     technician?: User;
     photos?: Array<Photo>;
-    workMaterials?: Array<WorkMaterial>;
+    materials?: Array<WorkMaterial>;
     jobActivities?: Array<JobActivity>;
     jobSeals?: Array<JobSeal>;
     /** Client-side flag: true when changes are queued for sync */
