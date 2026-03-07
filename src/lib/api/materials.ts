@@ -1,5 +1,5 @@
 import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
-import type { Material, AssignedMaterial, Stock } from '@interfaces/material.interface.ts';
+import type { Material, AssignedMaterial, MaterialStats, Stock } from '@interfaces/material.interface.ts';
 
 import { buildQueryParameters } from '@utils/common/parameters.ts';
 import { request, mutationRequest, uploadFile } from '../http-client';
@@ -89,3 +89,5 @@ export const ingressMaterialStock = async (
     request<Stock>(`/materials/${materialId}/stock/${stockId}/ingress`, { method: 'POST', body: JSON.stringify(data) });
 
 export const getMyMaterials = async () => request<Array<AssignedMaterial>>('/materials/my');
+
+export const getMaterialStats = async () => request<Array<MaterialStats>>('/materials/stats');

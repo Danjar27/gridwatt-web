@@ -192,6 +192,13 @@
                 "title": "Todos los materiales",
                 "subtitle": "Lista de materiales disponibles",
                 "total": "Total de materiales: {count}"
+            },
+            "widgets": {
+                "stats": "Inventario de materiales",
+                "bodega": "Bodega",
+                "bodegaFisica": "Física",
+                "bodegaTecnicos": "Técnicos",
+                "empty": "Sin materiales registrados"
             }
         },
         "seals": {
@@ -230,7 +237,11 @@
                 "map": "Mapa"
             },
             "filter": {
-                "allTechnicians": "Todos los técnicos"
+                "allTechnicians": "Todos los técnicos",
+                "status": {
+                    "pending": "Pendientes",
+                    "completed": "Atendidas"
+                }
             },
             "form": {
                 "create": "Nueva Orden",
@@ -279,6 +290,7 @@
                 "hasLocation": "Con ubicación",
                 "view": "Ver"
             },
+            "deleteConfirm": "¿Eliminar esta orden? Esta acción no se puede deshacer.",
             "empty": "No se encontraron órdenes",
             "summary": {
                 "title": "Todas las órdenes",
@@ -304,6 +316,15 @@
                 "deleteConfirm": "¿Eliminar esta área? Las órdenes asignadas a través de ella serán desasignadas.",
                 "editShape": "Editar forma",
                 "delete": "Eliminar área"
+            },
+            "widgets": {
+                "stats": "Resumen de órdenes",
+                "completed": "Atendidas",
+                "pending": "Pendientes",
+                "total": "Total",
+                "byTechnician": "Órdenes pendientes por técnico",
+                "noOrders": "Sin órdenes pendientes asignadas",
+                "pendingCount": "{count} pendientes"
             }
         },
         "jobs": {
@@ -419,6 +440,13 @@
                 "endPlaceholder": "Fecha de fin",
                 "download": "Descargar CSV",
                 "exporting": "Exportando..."
+            },
+            "technicians": {
+                "stats": "Rendimiento de técnicos",
+                "orders": "Órdenes",
+                "materials": "Materiales",
+                "seals": "Precintos",
+                "empty": "Sin técnicos registrados"
             }
         },
         "jobDetail": {

@@ -8,6 +8,7 @@ import { useState, useMemo } from 'react';
 
 interface UseServerPaginationOptions<T> {
     initialState?: InitialTableState;
+    initialColumnFilters?: ColumnFiltersState;
     queryKey: Array<string>;
     fetchFn: (params: { limit: number; offset: number } & Record<string, any>) => Promise<PaginatedResponse<T>>;
     columns: Array<ColumnDef<T, any>>;
@@ -25,6 +26,7 @@ export function useServerPagination<T>({
     enabled = true,
     extraParams,
     initialState,
+    initialColumnFilters,
     filterConfig,
 }: UseServerPaginationOptions<T>) {
     const [pagination, setPagination] = useState<PaginationState>({
@@ -32,7 +34,7 @@ export function useServerPagination<T>({
         pageSize: defaultPageSize,
     });
 
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(initialColumnFilters ?? []);
 
     const handleColumnFiltersChange = (updater: Updater<ColumnFiltersState>) => {
         const next = typeof updater === 'function' ? updater(columnFilters) : updater;

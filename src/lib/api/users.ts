@@ -1,5 +1,5 @@
 import type { PaginatedQuery, PaginatedResponse } from '@interfaces/api.interface.ts';
-import type { User } from '@interfaces/user.interface.ts';
+import type { TechnicianStats, User } from '@interfaces/user.interface.ts';
 
 import { buildQueryParameters } from '@utils/common/parameters.ts';
 import { request, mutationRequest } from '../http-client';
@@ -24,6 +24,8 @@ export const updateUser = async (id: number, data: Partial<User> & { password?: 
     );
 
 export const getTechnicians = async () => request<PaginatedResponse<User>>('/users/technicians');
+
+export const getTechnicianStats = async () => request<Array<TechnicianStats>>('/users/technicians/stats');
 
 export const getProfile = async () => request<User>('/users/profile');
 

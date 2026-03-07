@@ -32,7 +32,7 @@ const Inventory = () => {
 
     const [viewMode, setViewMode] = useState<'table' | 'map'>('table');
     const [filterTechnicianId, setFilterTechnicianId] = useState<number | null>(null);
-    const [pendingCoords, setPendingCoords] = useState<AreaCoordinate[] | null>(null);
+    const [pendingCoords, setPendingCoords] = useState<Array<AreaCoordinate> | null>(null);
     const [editingArea, setEditingArea] = useState<MapArea | null>(null);
 
     const { data: myOrders = [], isLoading: myLoading } = useQuery({
@@ -69,7 +69,7 @@ const Inventory = () => {
     });
 
     const updateAreaShapeMutation = useMutation({
-        mutationFn: ({ id, coords }: { id: number; coords: AreaCoordinate[] }) =>
+        mutationFn: ({ id, coords }: { id: number; coords: Array<AreaCoordinate> }) =>
             updateArea(id, { coordinates: coords }),
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['areas'] });

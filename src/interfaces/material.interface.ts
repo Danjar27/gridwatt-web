@@ -21,3 +21,12 @@ export interface WorkMaterial {
     quantity: number;
     material?: Material;
 }
+
+export interface MaterialStats {
+    id: string;
+    name: string;
+    unit: string;
+    totalIngressed: number;
+    available: number;
+    operational: number;
+}
